@@ -1,0 +1,42 @@
+.menu {
+    background-color: rgb(255, 255, 251);
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 40px;
+    display: flex;
+    padding: 10px 0 10px 0;
+    justify-content: space-between;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+}
+
+.menu button {
+    background-color: rgb(255, 255, 251);
+    padding: 1rem;
+    border: none;
+    border-radius: 5px;
+    font-size: 15px;
+    font-weight: 500;
+    transition: background-color 0.5s ease;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    height: 100%
+}
+
+.menu button:hover {
+    background-color: #9cdaf3;
+    cursor: pointer;
+}
+
+.draw, .file, .about {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 5px 0 5px;
+}
+
+.menu-icon {
+    width: 15px;
+}
