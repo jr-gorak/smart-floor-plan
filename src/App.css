@@ -1,6 +1,5 @@
 html, body {
     background-color: #9cdaf3;
-    
 }
 
 header {
@@ -17,3 +16,6 @@ header {
   transition: transform 0.1s ease;
 }
 
+.canvas-container {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}

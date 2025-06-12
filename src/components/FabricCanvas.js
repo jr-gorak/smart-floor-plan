@@ -6,10 +6,9 @@ function FabricCanvas() {
 
 useEffect(() => {
     const fabricCanvas = new fabric.Canvas(canvasRef.current, {
-        height: 500,
-        width: 800,
+        height: 800,
+        width: 1200,
     })
-
 
     return () =>
     {
