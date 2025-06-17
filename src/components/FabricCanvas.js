@@ -1,13 +1,13 @@
 import {useEffect, useRef} from "react";
 import * as fabric from "fabric";
 
-function FabricCanvas() {
-    const canvasRef = useRef(null);
+function FabricCanvas({canvasWidth, canvasHeight}) {
+    const canvasRef = useRef(null)
 
 useEffect(() => {
     const fabricCanvas = new fabric.Canvas(canvasRef.current, {
-        height: 800,
-        width: 1200,
+        width: canvasWidth,
+        height: canvasHeight,
     })
 
     return () =>
@@ -15,10 +15,10 @@ useEffect(() => {
         fabricCanvas.dispose();
     }
 
-    }, [])
+    }, [canvasWidth, canvasHeight])
 
     return (
-        <canvas ref={canvasRef} style={{backgroundColor: "white"}}/>
+        <canvas ref={canvasRef} style={{backgroundColor: "white"}}></canvas>
     )
 };
 

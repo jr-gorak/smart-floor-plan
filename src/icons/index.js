@@ -7,6 +7,14 @@ import Export from './file-export-outline.svg';
 import Account from './account.svg';
 import Guide from './information.svg';
 import About from './help.svg';
+import DrawLine from './vector-line.svg';
+import Square from './square-outline.svg';
+import DoorOpen from './door-open.svg';
+import DoorClose from './door-closed.svg';
+import Upstairs from './stairs-up.svg';
+import Downstairs from './stairs-down.svg';
+import WindowClosed from './window-closed-variant.svg';
+import WindowOpen from './window-open-variant.svg';
 
 export {
     Draw,
@@ -17,5 +25,13 @@ export {
     Export,
     Account,
     Guide,
-    About
+    About,
+    DrawLine,
+    Square,
+    DoorOpen,
+    DoorClose,
+    Upstairs,
+    Downstairs,
+    WindowClosed,
+    WindowOpen
 };
