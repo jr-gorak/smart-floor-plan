@@ -1,7 +1,7 @@
 import '../../css/Tools.css';
 import {Sensor} from '../../../icons/index'
 
-function SensorPage() {
+function SensorTool() {
   return (
     <div className="box">
         <div className='head-container'>
@@ -20,4 +20,4 @@ function SensorPage() {
   );
 }
 
-export default SensorPage;
+export default SensorTool;

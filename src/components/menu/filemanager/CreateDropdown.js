@@ -2,7 +2,7 @@ import { useState } from 'react';
 import '../../css/Dropdown.css';
 import '../../css/Popup.css'
 
-function CreateNewBox({activeDropdown, onCanvasWidth, onCanvasHeight, onActiveDropdown}) {
+function CreateDropdown({activeDropdown, onCanvasWidth, onCanvasHeight, onActiveDropdown}) {
 
   const [activePopup, setActivePopup] = useState(false);
   const [width, setWidth] = useState(null);
@@ -66,4 +66,4 @@ function CreateNewBox({activeDropdown, onCanvasWidth, onCanvasHeight, onActiveDr
   );
 }
 
-export default CreateNewBox;
+export default CreateDropdown;

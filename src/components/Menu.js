@@ -2,8 +2,8 @@ import {useState} from 'react'
 import './css/Menu.css';
 import './css/Dropdown.css';
 import {Draw, Sensor, Component, Create, Save, Account, Guide, About, Export} from '../icons/index'
-import CreateNewBox from './menu/filemanager/CreateDropdown';
-import ExportBox from './menu/filemanager/ExportDropdown';
+import CreateDropdown from './menu/filemanager/CreateDropdown';
+import ExportDropdown from './menu/filemanager/ExportDropdown';
 
 function Menu( {onOpenPopup, onCanvasWidth, onCanvasHeight} ) {
 
@@ -64,11 +64,11 @@ function Menu( {onOpenPopup, onCanvasWidth, onCanvasHeight} ) {
 
             <div className='file'>
                 <div className='dropdown'> <button className={activeDropdown === 'create' ? 'button-on' : 'button-off'} onClick={() => toggleDropdown('create')}><img src={Create} className="menu-icon" alt="logo"/>Create New</button>
-                <CreateNewBox activeDropdown={activeDropdown} onActiveDropdown={(value) => setActiveDropdown(value)} onCanvasWidth={onCanvasWidth} onCanvasHeight={onCanvasHeight} />
+                <CreateDropdown activeDropdown={activeDropdown} onActiveDropdown={(value) => setActiveDropdown(value)} onCanvasWidth={onCanvasWidth} onCanvasHeight={onCanvasHeight} />
                 </div>
                 <button className={saveIndicator} onClick={() => checkSave()}><img src={Save} className="menu-icon" alt="logo"/> Save</button>
                 <div className='dropdown'> <button className={activeDropdown === 'export' ? 'button-on' : 'button-off'} onClick={() => toggleDropdown('export')}><img src={Export} className="menu-icon" alt="logo"/>Export</button>
-                <ExportBox activeDropdown={activeDropdown} />
+                <ExportDropdown activeDropdown={activeDropdown} />
                 </div>
             </div>
 

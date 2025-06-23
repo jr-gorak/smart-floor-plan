@@ -15,6 +15,8 @@ import Upstairs from './stairs-up.svg';
 import Downstairs from './stairs-down.svg';
 import WindowClosed from './window-closed-variant.svg';
 import WindowOpen from './window-open-variant.svg';
+import Delete from './delete-circle.png';
+import Copy from './content-copy.svg';
 
 export {
     Draw,
@@ -33,5 +35,7 @@ export {
     Upstairs,
     Downstairs,
     WindowClosed,
-    WindowOpen
+    WindowOpen,
+    Delete,
+    Copy
 };

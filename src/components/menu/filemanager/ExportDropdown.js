@@ -1,6 +1,6 @@
 import '../../css/Dropdown.css';
 
-function ExportBox({activeDropdown}) {
+function ExportDropdown({activeDropdown}) {
 
   return (
     <div>
@@ -16,4 +16,4 @@ function ExportBox({activeDropdown}) {
   );
 }
 
-export default ExportBox;
+export default ExportDropdown;

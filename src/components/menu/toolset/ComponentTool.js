@@ -1,7 +1,7 @@
 import '../../css/Tools.css';
 import {Component, DoorClose, Upstairs, Downstairs, WindowClosed} from '../../../icons/index'
 
-function ComponentPage() {
+function ComponentTool() {
   return (
     <div className="box">
         <div className='head-container'>
@@ -21,4 +21,4 @@ function ComponentPage() {
   );
 }
 
-export default ComponentPage;
+export default ComponentTool;

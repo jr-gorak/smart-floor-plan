@@ -2,12 +2,12 @@ import {useEffect, useState} from 'react';
 import Menu from './components/Menu';
 import './App.css';
 import FabricCanvas from './components/FabricCanvas';
-import About from './components/menu/information/AboutPopup';
-import Guide from './components/menu/information/GuidePopup';
-import Account from './components/menu/information/AccountPopup';
-import DrawPage from './components/menu/toolset/DrawTool';
-import SensorPage from './components/menu/toolset/SensorTool';
-import ComponentPage from './components/menu/toolset/ComponentTool';
+import AboutPopup from './components/menu/information/AboutPopup';
+import GuidePopup from './components/menu/information/GuidePopup';
+import AccountPopup from './components/menu/information/AccountPopup';
+import DrawTool from './components/menu/toolset/DrawTool';
+import SensorTool from './components/menu/toolset/SensorTool';
+import ComponentTool from './components/menu/toolset/ComponentTool';
 
 function App() {
 
@@ -17,12 +17,14 @@ function App() {
 
   const [canvasWidth, setCanvasWidth] = useState(() => sessionStorage.getItem('canvasWidth'));
   const [canvasHeight, setCanvasHeight] = useState(() => sessionStorage.getItem('canvasHeight'));
+  const [canvasAction, setCanvasAction] = useState('select');
 
   const openPopup = (value) => setActivePopup(value);
-  const closePopup = () => setActivePopup(null)
+  const closePopup = () => setActivePopup(null);
 
-  const retrieveWidth = (width) => setCanvasWidth(width)
-  const retrieveHeight = (height) => setCanvasHeight(height)
+  const retrieveWidth = (width) => setCanvasWidth(width);
+  const retrieveHeight = (height) => setCanvasHeight(height);
+  const retrieveAction = (action) => setCanvasAction(action);
 
   useEffect(() => {
     sessionStorage.setItem('canvasWidth', canvasWidth)
@@ -74,26 +76,26 @@ function App() {
        
        {canvasHeight > 0 &&
       <div className='Canvas' style={{transform: `scale(${zoom}) translate(${transl}%, ${transl}%)` , transformOrigin: 'top left'}} onWheel={zoomScroll}>
-        <FabricCanvas canvasWidth={canvasWidth} canvasHeight={canvasHeight}/>
+        <FabricCanvas canvasWidth={canvasWidth} canvasHeight={canvasHeight} canvasAction={canvasAction}/>
       </div>
       }
 
       {activePopup === 'draw' && (
-      <DrawPage/>
+      <DrawTool onCanvasAction={retrieveAction} canvasAction={canvasAction}/>
       )} {activePopup === 'sensor' && (
-      <SensorPage/>
+      <SensorTool/>
       )} {activePopup === 'component' && (
-      <ComponentPage/>
+      <ComponentTool/>
       )}
 
       {activePopup === 'about' && (
-        <About onClose={closePopup}/>
+        <AboutPopup onClose={closePopup}/>
       )} {activePopup === 'guide' && (
-        <Guide onClose={closePopup}/>
+        <GuidePopup onClose={closePopup}/>
       )} {activePopup === 'account' && (
-        <Account onClose={closePopup}/>
+        <AccountPopup onClose={closePopup}/>
       )}
-
+      
     </div>
   );
 }
