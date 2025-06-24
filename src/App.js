@@ -18,6 +18,7 @@ function App() {
   const [canvasWidth, setCanvasWidth] = useState(() => sessionStorage.getItem('canvasWidth'));
   const [canvasHeight, setCanvasHeight] = useState(() => sessionStorage.getItem('canvasHeight'));
   const [canvasAction, setCanvasAction] = useState('select');
+  const [canvasImage, setCanvasImage] = useState(null);
 
   const openPopup = (value) => setActivePopup(value);
   const closePopup = () => setActivePopup(null);
@@ -25,6 +26,7 @@ function App() {
   const retrieveWidth = (width) => setCanvasWidth(width);
   const retrieveHeight = (height) => setCanvasHeight(height);
   const retrieveAction = (action) => setCanvasAction(action);
+  const retrieveImage = (image) => setCanvasImage(image)
 
   useEffect(() => {
     sessionStorage.setItem('canvasWidth', canvasWidth)
@@ -71,12 +73,12 @@ function App() {
     <div className="App">
 
       <header>
-        <Menu onOpenPopup={openPopup} onCanvasWidth={retrieveWidth} onCanvasHeight={retrieveHeight}/>
+        <Menu onOpenPopup={openPopup} onCanvasWidth={retrieveWidth} onCanvasHeight={retrieveHeight} onCanvasImage={retrieveImage}/>
       </header>
        
        {canvasHeight > 0 &&
       <div className='Canvas' style={{transform: `scale(${zoom}) translate(${transl}%, ${transl}%)` , transformOrigin: 'top left'}} onWheel={zoomScroll}>
-        <FabricCanvas canvasWidth={canvasWidth} canvasHeight={canvasHeight} canvasAction={canvasAction}/>
+        <FabricCanvas canvasWidth={canvasWidth} canvasHeight={canvasHeight} canvasAction={canvasAction} canvasImage={canvasImage}/>
       </div>
       }
 

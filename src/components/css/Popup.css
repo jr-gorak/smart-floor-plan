@@ -104,6 +104,11 @@ input[type=number]::-webkit-outer-spin-button {
   padding-right: 10px;
 }
 
+.create-button button:disabled {
+  background-color: rgb(255, 255, 251);
+  cursor: default;
+}
+
 .floor-plan-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));

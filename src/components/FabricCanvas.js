@@ -8,7 +8,7 @@ deleteImg.src = Delete;
 var copyImg = document.createElement('img');
 copyImg.src = Copy;
 
-function FabricCanvas({canvasWidth, canvasHeight, canvasAction}) {
+function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage}) {
     const canvasRef = useRef(null)
     const fabricCanvas = useRef(null)
     const [isDrawing, setIsDrawing] = useState(false);
@@ -19,7 +19,6 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction}) {
 
     function sessionSave(canvas) {
         const file = canvas.toJSON();
-        console.log(file);
         sessionStorage.setItem('fabricCanvas', JSON.stringify(file));
     }
 
@@ -33,7 +32,6 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction}) {
                     });
                     }
                 }
-
 
     //Active Canvas
     useEffect(() => {
@@ -56,8 +54,6 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction}) {
             sessionSave(fabricCanvas.current)
         };
 
-        fabricCanvas.current.renderAll();
-
         window.addEventListener("beforeunload", triggerSave);
 
         return () =>
@@ -66,6 +62,17 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction}) {
             fabricCanvas.current?.dispose();
             fabricCanvas.current = null;
         }}, [canvasWidth, canvasHeight]);
+
+    // Setting Background Image
+    useEffect(()=> {
+        
+        if(canvasImage) {
+            fabric.FabricImage.fromURL(canvasImage).then((img) => {
+                fabricCanvas.current.backgroundImage = img;
+                fabricCanvas.current.renderAll();
+            })
+        }
+    }, [canvasImage])
 
     // Drawing Shapes
     useEffect(()=> {

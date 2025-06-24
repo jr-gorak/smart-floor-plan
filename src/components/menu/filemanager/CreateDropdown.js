@@ -1,62 +1,123 @@
-import { useState } from 'react';
+import {useState} from 'react';
 import '../../css/Dropdown.css';
 import '../../css/Popup.css'
 
-function CreateDropdown({activeDropdown, onCanvasWidth, onCanvasHeight, onActiveDropdown}) {
+function CreateDropdown({activeDropdown, onCanvasWidth, onCanvasHeight, onActiveDropdown, onCanvasImage}) {
 
-  const [activePopup, setActivePopup] = useState(false);
-  const [width, setWidth] = useState(null);
-  const [height, setHeight] = useState(null);
+  const [activeValue, setActiveValue] = useState(null);
+  const [width, setWidth] = useState(1000);
+  const [height, setHeight] = useState(800);
   const [error, setError] = useState(null);
+  const [image, setImage] = useState(null);
+  const [buttonToggle, setButtonToggle] = useState(false);
 
-  function testCreate() {
+  function canvasCreate() {
 
     if (height === null || width === null) {
       setError("please ensure there is a width and height")
-    } else if (width > 1000) {
-      setError("The width must be less than 1000")
-    } else if (height > 1000) {
-      setError("The height must be less than 1000")
+    } else if (width > 2500) {
+      setError("The width must be less than 2500")
+    } else if (height > 2500) {
+      setError("The height must be less than 2500")
     } else {
     setError(null)
     onCanvasWidth(width)
     onCanvasHeight(height)
     setWidth(null)
     setHeight(null)
-    setActivePopup(!activePopup)
+    setActiveValue(null)
     onActiveDropdown(null)
     }
   }
 
+    const imageUpload = (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          setImage(reader.result);
+          setButtonToggle(!buttonToggle);
+        }
+        reader.readAsDataURL(file)
+      }
+    }
+
+  function canvasImageCreate() {
+    const img = new Image();
+    img.src = image;
+    img.onload = () => {
+      onCanvasWidth(img.width)
+      onCanvasHeight(img.height)
+      onCanvasImage(image)
+      setActiveValue(null)
+      onActiveDropdown(null)
+      setButtonToggle(!buttonToggle);
+    }
+  }
+
+  function togglePopup(value) {
+
+      if (activeValue === null) {
+          setActiveValue(value)
+      } else if (activeValue !== value) {
+          setActiveValue(value)
+      }  else if (activeValue === value) {
+          setActiveValue(null)
+      }  
+  }
 
   return (
     <div>
       {activeDropdown === 'create' &&
       <div className="dropdown-container">
           <div className='dropdown-content'>
-            <button onClick={() => setActivePopup(!activePopup)}>Create new canvas</button>
-            <button>Create canvas from upload</button>
+            <button onClick={() => togglePopup('new')}>Create new canvas</button>
+            <button onClick={() => togglePopup('upload')}>Create canvas from upload</button>
           </div>
       </div>
       }
-      {activePopup === true &&
-        <div className="filter" onClick={() => setActivePopup(!activePopup)}>
+      {activeValue === 'new' &&
+        <div className="filter" onClick={() => setActiveValue(null)}>
           <div className="small-frame" onClick={e => e.stopPropagation()}>
             <div className='exit'>
-            <button onClick={() => setActivePopup(!activePopup)}>X</button>
+            <button onClick={() => setActiveValue(null)}>X</button>
             </div>
             <h2>Create New Canvas</h2>
             <div className='create-content'><p>Please choose the dimensions of your canvas below</p>
               <div className='dimensions'>
+                <p>w:</p>
                 <input type='number' value={width} onChange={(e) => setWidth(e.target.value)} placeholder='width'/>
-                <p>x</p>
+                <p>h:</p>
                 <input type='number' value={height} onChange={(e) => setHeight(e.target.value)} placeholder='height'/>
               </div>
               {error && (
                 <p style={{color: 'red', margin: '0 0 0 0'}}>{error}</p>
               )}
               <div className='create-button'>
-                <button onClick={() => testCreate()}>Create Canvas</button>
+                <button onClick={() => canvasCreate()}>Create Canvas</button>
+              </div>
+            </div> 
+          </div>
+        </div>
+      }
+
+      {activeValue === 'upload' &&
+        <div className="filter" onClick={() => setActiveValue(null)}>
+          <div className="small-frame" onClick={e => e.stopPropagation()}>
+            <div className='exit'>
+            <button onClick={() => setActiveValue(null)}>X</button>
+            </div>
+            <h2>Upload Image for Canvas Background</h2>
+            <div className='create-content'><p>Please select an image to upload as the background of the canvas</p>
+              <div className='dimensions'>
+                <p>Upload floor plan:</p>
+                <input type='file' accept='image/*' onChange={imageUpload} />
+              </div>
+              {error && (
+                <p style={{color: 'red', margin: '0 0 0 0'}}>{error}</p>
+              )}
+              <div className='create-button'>
+                <button onClick={() => canvasImageCreate()} disabled={!buttonToggle}>Upload Image</button>
               </div>
             </div> 
           </div>
