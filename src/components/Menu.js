@@ -41,6 +41,7 @@ function Menu( {onOpenPopup, onCanvasWidth, onCanvasHeight, onCanvasImage} ) {
     }
 
     function checkSave() {
+        setSaveSuccess(false);
         if (saveSuccess === true) {
             setSaveIndicator('save-success')
             setTimeout(() => {

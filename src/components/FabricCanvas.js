@@ -94,6 +94,34 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage}) {
                 });
         }
 
+         function setControls(object) {
+            object.controls.deleteControl = new fabric.Control({
+                    x: 0.5,
+                    y: -0.5,
+                    offsetY: 16,
+                    offsetX: 16,
+                    cursorStyle: 'pointer',
+                    mouseUpHandler: deleteObject,
+                    render: renderIcon(deleteImg),
+                    cornersize: 24,
+                });
+
+            object.controls.copyControl = new fabric.Control({
+                x: -0.5,
+                y: -0.5,
+                offsetY: -16,
+                offsetX: 16,
+                cursorStyle: 'pointer',
+                mouseUpHandler: copyObject,
+                render: renderIcon(copyImg),
+                cornersize: 24,
+            });
+        }
+        
+        if (shape) {
+            setControls(shape)
+        };
+
         const mouseDownLine = (event) => {
             const pointer = fabricCanvas.current.getPointer(event.e)
             setX1(pointer.x);
@@ -241,34 +269,6 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage}) {
 
     }, [isDrawing, shape, actionType, canvasAction, x1, y1]);
 
-    // Object Controls
-    function setControls(object) {
-        object.controls.deleteControl = new fabric.Control({
-                x: 0.5,
-                y: -0.5,
-                offsetY: 16,
-                offsetX: 16,
-                cursorStyle: 'pointer',
-                mouseUpHandler: deleteObject,
-                render: renderIcon(deleteImg),
-                cornersize: 24,
-            });
-
-        object.controls.copyControl = new fabric.Control({
-            x: -0.5,
-            y: -0.5,
-            offsetY: -16,
-            offsetX: 16,
-            cursorStyle: 'pointer',
-            mouseUpHandler: copyObject,
-            render: renderIcon(copyImg),
-            cornersize: 24,
-        });
-    }
-    
-    if (shape) {
-        setControls(shape)
-    };
     
     function renderIcon(icon) {
             return function (ctx, left, top, _styleOverride, fabricObject) {

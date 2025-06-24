@@ -12,27 +12,27 @@ const Account = ({ onClose }) => (
     <div className='floor-plan-grid'>
 
       <div className='floor-plan-container'>
-        <img src="empty.png" alt="Image goes here"></img>
+        <img src="empty.png" alt="floorplan"></img>
         <p>File Name Here</p>
       </div>
 
       <div className='floor-plan-container'>
-        <img src="empty.png" alt="Image goes here"></img>
+        <img src="empty.png" alt="floorplan"></img>
         <p>File Name Here</p>
       </div>
 
       <div className='floor-plan-container'>
-        <img src="empty.png" alt="Image goes here"></img>
+        <img src="empty.png" alt="floorplan"></img>
         <p>File Name Here</p>
       </div>
 
       <div className='floor-plan-container'>
-        <img src="empty.png" alt="Image goes here"></img>
+        <img src="empty.png" alt="floorplan"></img>
         <p>File Name Here</p>
       </div>
 
       <div className='floor-plan-container'>
-        <img src="empty.png" alt="Image goes here"></img>
+        <img src="empty.png" alt="floorplan"></img>
         <p>File Name Here</p>
       </div>
 
