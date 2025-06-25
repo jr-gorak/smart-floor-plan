@@ -9,8 +9,8 @@ var copyImg = document.createElement('img');
 copyImg.src = Copy;
 
 function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage}) {
-    const canvasRef = useRef(null)
-    const fabricCanvas = useRef(null)
+    const canvasRef = useRef(null);
+    const fabricCanvas = useRef(null);
     const [isDrawing, setIsDrawing] = useState(false);
     const [shape, setShape] = useState(null);
     const [actionType, setActionType] = useState(null);
@@ -23,15 +23,15 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage}) {
     }
 
     function sessionLoad() {
-                const retrieve = sessionStorage.getItem('fabricCanvas');
-                if (retrieve) {
-                    fabricCanvas.current.loadFromJSON(retrieve, () => {
-                        requestAnimationFrame(() => {
-                        fabricCanvas.current.renderAll();
-                        });
-                    });
-                    }
-                }
+        const retrieve = sessionStorage.getItem('fabricCanvas');
+        if (retrieve) {
+            fabricCanvas.current.loadFromJSON(retrieve, () => {
+                requestAnimationFrame(() => {
+                    fabricCanvas.current.renderAll();
+                });
+            });
+        }
+    }
 
     //Active Canvas
     useEffect(() => {
@@ -44,7 +44,7 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage}) {
 
         setTimeout(() => {
             sessionLoad();
-        }, 0)
+        }, 0);
 
         requestAnimationFrame(() => {
             fabricCanvas.current.renderAll();
@@ -72,7 +72,7 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage}) {
                 fabricCanvas.current.renderAll();
             })
         }
-    }, [canvasImage])
+    }, [canvasImage]);
 
     // Drawing Shapes
     useEffect(()=> {
@@ -85,26 +85,26 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage}) {
                 o.selectable = true;
                 o.perPixelTargetFind = true;
                 setControls(o)
-                });
+            });
 
         } else {
             fabricCanvas.current.selection = false;
             fabricCanvas.current.getObjects().forEach(o => {
                 o.selectable = false;
-                });
+            });
         }
 
-         function setControls(object) {
+        function setControls(object) {
             object.controls.deleteControl = new fabric.Control({
-                    x: 0.5,
-                    y: -0.5,
-                    offsetY: 16,
-                    offsetX: 16,
-                    cursorStyle: 'pointer',
-                    mouseUpHandler: deleteObject,
-                    render: renderIcon(deleteImg),
-                    cornersize: 24,
-                });
+                x: 0.5,
+                y: -0.5,
+                offsetY: 16,
+                offsetX: 16,
+                cursorStyle: 'pointer',
+                mouseUpHandler: deleteObject,
+                render: renderIcon(deleteImg),
+                cornersize: 24,
+            });
 
             object.controls.copyControl = new fabric.Control({
                 x: -0.5,
@@ -116,10 +116,10 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage}) {
                 render: renderIcon(copyImg),
                 cornersize: 24,
             });
-        }
+        };
         
         if (shape) {
-            setControls(shape)
+            setControls(shape);
         };
 
         const mouseDownLine = (event) => {
@@ -151,7 +151,7 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage}) {
                 stroke: 'black',
                 strokwWidth: 10,
                 objectCaching: false,
-            })
+            });
             fabricCanvas.current.add(newRect);
             setShape(newRect);
             setIsDrawing(true);
@@ -165,14 +165,17 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage}) {
                 const dy = (pointer.y - y1);
                 const rad = Math.atan2(dy, dx);
                 const deg = rad * (180/Math.PI);
+
                 if ((deg < 2 && deg > -2) || (deg > 178 || deg < -178))  {
                     shape.set({x2: pointer.x, y2: y1});
-                }
+                };
+
                 if ((deg < -88 && deg > -92) || (deg > 88 && deg < 92)) {
                     shape.set({x2: x1, y2: pointer.y});
-                }
+                };
+
                 fabricCanvas.current.renderAll();
-            }
+            };
         };
 
         const drawRect = (event) => {
@@ -182,12 +185,15 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage}) {
                     width: Math.abs(x1 - pointer.x),
                     height: Math.abs(y1 - pointer.y)
                 });
+
                 if (x1 > pointer.x) {
                     shape.set({left: pointer.x});
                 }
+
                 if (y1 > pointer.y) {
                     shape.set({top: pointer.y});
                 }
+                
                 fabricCanvas.current.renderAll();
             }
         }

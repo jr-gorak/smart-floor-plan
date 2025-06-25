@@ -5,7 +5,7 @@ function SensorTool() {
   return (
     <div className="box">
         <div className='head-container'>
-        <img src={Sensor} className="menu-icon" alt="logo"/><p><b>Sensors</b></p>
+          <img src={Sensor} className="menu-icon" alt="logo"/><p><b>Sensors</b></p>
         </div>
 
         <div className='content-grid'>

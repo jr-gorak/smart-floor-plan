@@ -1,4 +1,5 @@
 import {useEffect, useState} from 'react';
+import {auth} from './firebase';
 import Menu from './components/Menu';
 import './App.css';
 import FabricCanvas from './components/FabricCanvas';
@@ -10,6 +11,14 @@ import SensorTool from './components/menu/toolset/SensorTool';
 import ComponentTool from './components/menu/toolset/ComponentTool';
 
 function App() {
+
+  const user = auth.currentUser;
+  
+  if (user) {
+    console.log("User is in!")
+  } else {
+    console.log("No user is in!")
+  }
 
   const [zoom, setZoom] = useState(1);
   const [transl, setTransl] = useState(0);
@@ -31,7 +40,7 @@ function App() {
   useEffect(() => {
     sessionStorage.setItem('canvasWidth', canvasWidth)
     sessionStorage.setItem('canvasHeight', canvasHeight)
-  }, [canvasWidth, canvasHeight])
+  }, [canvasWidth, canvasHeight]);
 
   const centerZoom = () => {
     window.scrollTo({
@@ -73,7 +82,7 @@ function App() {
     <div className="App">
 
       <header>
-        <Menu onOpenPopup={openPopup} onCanvasWidth={retrieveWidth} onCanvasHeight={retrieveHeight} onCanvasImage={retrieveImage}/>
+        <Menu onOpenPopup={openPopup} onCanvasWidth={retrieveWidth} onCanvasHeight={retrieveHeight} onCanvasImage={retrieveImage} user={user}/>
       </header>
        
        {canvasHeight > 0 &&
@@ -95,7 +104,7 @@ function App() {
       )} {activePopup === 'guide' && (
         <GuidePopup onClose={closePopup}/>
       )} {activePopup === 'account' && (
-        <AccountPopup onClose={closePopup}/>
+        <AccountPopup onClose={closePopup} user={user}/>
       )}
       
     </div>

@@ -24,7 +24,6 @@
 
 .small-frame {
   width: 40%;
-  height: 40%;
   max-width: 90vw;
   background: rgb(255, 255, 251);
   border-radius: 6px;
@@ -128,5 +127,25 @@ input[type=number]::-webkit-outer-spin-button {
   cursor: pointer;
 }
 
+.form-container {
+  display: flex;
+  justify-content: center;
+}
+
+form {
+  display: flex;
+  justify-content: left;
+  align-items: left;
+  flex-direction: column;
+}
+
+label {
+  padding: 5px 0 5px 0;
+}
+
+input {
+  width: 200px;
+  border-radius: 2px;
+}
 
 

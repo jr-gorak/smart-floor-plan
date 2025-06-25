@@ -5,7 +5,7 @@ function ComponentTool() {
   return (
     <div className="box">
         <div className='head-container'>
-        <img src={Component} className="menu-icon" alt="logo"/><p><b>Components</b></p>
+          <img src={Component} className="menu-icon" alt="logo"/><p><b>Components</b></p>
         </div>
 
         <div className='content-grid'>

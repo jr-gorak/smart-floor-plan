@@ -26,7 +26,7 @@ function DrawTool({onCanvasAction, canvasAction}) {
   return (
     <div className="box">
         <div className='head-container'>
-        <img src={Draw} className="menu-icon" alt="logo"/><p><b>Draw</b></p>
+            <img src={Draw} className="menu-icon" alt="logo"/><p><b>Draw</b></p>
         </div>
 
         <div className='content-grid'>

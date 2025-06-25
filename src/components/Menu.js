@@ -5,7 +5,7 @@ import {Draw, Sensor, Component, Create, Save, Account, Guide, About, Export} fr
 import CreateDropdown from './menu/filemanager/CreateDropdown';
 import ExportDropdown from './menu/filemanager/ExportDropdown';
 
-function Menu( {onOpenPopup, onCanvasWidth, onCanvasHeight, onCanvasImage} ) {
+function Menu( {onOpenPopup, onCanvasWidth, onCanvasHeight, onCanvasImage, user} ) {
 
     const [isActive, setIsActive] = useState(false);
     const [activeValue, setActiveValue] = useState(null);
@@ -41,17 +41,22 @@ function Menu( {onOpenPopup, onCanvasWidth, onCanvasHeight, onCanvasImage} ) {
     }
 
     function checkSave() {
-        setSaveSuccess(false);
-        if (saveSuccess === true) {
-            setSaveIndicator('save-success')
-            setTimeout(() => {
-                setSaveIndicator('button-off')
-            }, 500);
+
+        if (!user) {
+            onOpenPopup('account')
         } else {
-            setSaveIndicator('save-failure')
-            setTimeout(() => {
-                setSaveIndicator('button-off')
-            }, 500);
+            setSaveSuccess(false);
+            if (saveSuccess === true) {
+                setSaveIndicator('save-success')
+                setTimeout(() => {
+                    setSaveIndicator('button-off')
+                }, 500);
+            } else {
+                setSaveIndicator('save-failure')
+                setTimeout(() => {
+                    setSaveIndicator('button-off')
+                }, 500);
+            }
         }
     }
 
@@ -78,6 +83,7 @@ function Menu( {onOpenPopup, onCanvasWidth, onCanvasHeight, onCanvasImage} ) {
                 <button onClick={() => onOpenPopup('guide')}><img src={Guide} className="menu-icon" alt="logo"/> How to Use</button>
                 <button onClick={() => onOpenPopup('about')}><img src={About} className="menu-icon" alt="logo"/> About</button>
             </div>
+            
         </div>
     );
 };

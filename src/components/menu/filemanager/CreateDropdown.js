@@ -91,7 +91,7 @@ function CreateDropdown({activeDropdown, onCanvasWidth, onCanvasHeight, onActive
                 <input type='number' value={height} onChange={(e) => setHeight(e.target.value)} placeholder='height'/>
               </div>
               {error && (
-                <p style={{color: 'red', margin: '0 0 0 0'}}>{error}</p>
+                <p style={{color: 'red'}}>{error}</p>
               )}
               <div className='create-button'>
                 <button onClick={() => canvasCreate()}>Create Canvas</button>
@@ -114,7 +114,7 @@ function CreateDropdown({activeDropdown, onCanvasWidth, onCanvasHeight, onActive
                 <input type='file' accept='image/*' onChange={imageUpload} />
               </div>
               {error && (
-                <p style={{color: 'red', margin: '0 0 0 0'}}>{error}</p>
+                <p style={{color: 'red'}}>{error}</p>
               )}
               <div className='create-button'>
                 <button onClick={() => canvasImageCreate()} disabled={!buttonToggle}>Upload Image</button>
