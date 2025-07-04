@@ -1,16 +1,15 @@
-import {useState} from 'react'
+import {useState, useEffect} from 'react'
 import './css/Menu.css';
 import './css/Dropdown.css';
 import {Draw, Sensor, Component, Create, Save, Account, Guide, About, Export} from '../icons/index'
 import CreateDropdown from './menu/filemanager/CreateDropdown';
 import ExportDropdown from './menu/filemanager/ExportDropdown';
 
-function Menu( {onOpenPopup, onCanvasWidth, onCanvasHeight, onCanvasImage, user} ) {
+function Menu( {onOpenPopup, onCanvasWidth, onCanvasHeight, onCanvasImage, onCanvasName, onActive, onCanvasID, onSaveToggle, onRefreshToggle, onSaveResult, saveResult, user} ) {
 
     const [isActive, setIsActive] = useState(false);
     const [activeValue, setActiveValue] = useState(null);
     const [activeDropdown, setActiveDropdown] = useState(null);
-    const [saveSuccess, setSaveSuccess] = useState(false);
     const [saveIndicator, setSaveIndicator] = useState(null);
 
     function togglePopup(value) {
@@ -45,20 +44,27 @@ function Menu( {onOpenPopup, onCanvasWidth, onCanvasHeight, onCanvasImage, user}
         if (!user) {
             onOpenPopup('account')
         } else {
-            setSaveSuccess(false);
-            if (saveSuccess === true) {
+
+            onSaveToggle();
+        }
+    }
+
+    useEffect(() => {
+        if (saveResult === 'success') {
                 setSaveIndicator('save-success')
                 setTimeout(() => {
                     setSaveIndicator('button-off')
+                    onSaveResult(null);
                 }, 500);
-            } else {
+                
+            } else if (saveResult === 'failure') {
                 setSaveIndicator('save-failure')
                 setTimeout(() => {
                     setSaveIndicator('button-off')
+                    onSaveResult(null);
                 }, 500);
             }
-        }
-    }
+    }, [saveResult, onSaveResult])
 
     return (
         <div className='menu'>
@@ -70,7 +76,7 @@ function Menu( {onOpenPopup, onCanvasWidth, onCanvasHeight, onCanvasImage, user}
 
             <div className='file'>
                 <div className='dropdown'> <button className={activeDropdown === 'create' ? 'button-on' : 'button-off'} onClick={() => toggleDropdown('create')}><img src={Create} className="menu-icon" alt="logo"/>Create New</button>
-                <CreateDropdown activeDropdown={activeDropdown} onActiveDropdown={(value) => setActiveDropdown(value)} onCanvasWidth={onCanvasWidth} onCanvasHeight={onCanvasHeight} onCanvasImage={onCanvasImage}/>
+                <CreateDropdown activeDropdown={activeDropdown} onActiveDropdown={(value) => setActiveDropdown(value)} onCanvasWidth={onCanvasWidth} onCanvasHeight={onCanvasHeight} onCanvasImage={onCanvasImage} onCanvasName={onCanvasName} onCanvasID={onCanvasID} onActive={onActive} onRefreshToggle={onRefreshToggle}/>
                 </div>
                 <button className={saveIndicator} onClick={() => checkSave()}><img src={Save} className="menu-icon" alt="logo"/> Save</button>
                 <div className='dropdown'> <button className={activeDropdown === 'export' ? 'button-on' : 'button-off'} onClick={() => toggleDropdown('export')}><img src={Export} className="menu-icon" alt="logo"/>Export</button>

@@ -1,6 +1,8 @@
 import {useEffect, useRef, useState} from "react";
 import * as fabric from "fabric";
 import {Delete, Copy} from '../icons/index';
+import { db } from "../firebase";
+import { addDoc, collection, doc, updateDoc, query, getDoc } from "firebase/firestore";
 
 var deleteImg = document.createElement('img');
 deleteImg.src = Delete;
@@ -8,7 +10,7 @@ deleteImg.src = Delete;
 var copyImg = document.createElement('img');
 copyImg.src = Copy;
 
-function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage}) {
+function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, canvasName, canvasID, onCanvasID, saveToggle, onSaveToggle, onSaveResult, loadToggle, onLoadToggle, refreshToggle, onRefreshToggle, user}) {
     const canvasRef = useRef(null);
     const fabricCanvas = useRef(null);
     const [isDrawing, setIsDrawing] = useState(false);
@@ -16,6 +18,7 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage}) {
     const [actionType, setActionType] = useState(null);
     const [x1, setX1] = useState(0);
     const [y1, setY1] = useState(0);
+
 
     function sessionSave(canvas) {
         const file = canvas.toJSON();
@@ -63,6 +66,100 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage}) {
             fabricCanvas.current = null;
         }}, [canvasWidth, canvasHeight]);
 
+    //file
+    useEffect(() => {
+
+    async function saveCanvas(canvas) {
+        
+        if (!user) return;
+
+        const file = canvas.toJSON();
+        file.height = canvas.getHeight();
+        file.width = canvas.getWidth();
+        try{
+        const docRef = await addDoc(collection(db, "canvases"), {
+            owner: user.uid,
+            canvasName: canvasName,
+            canvasData: file,
+            shared: [],
+            created: new Date(),
+            updated: new Date()
+            });
+
+            onCanvasID(docRef.id);
+            onSaveResult('success')
+        } catch (error) {
+            onSaveResult('failure')
+            console.log(error);
+        }
+    }
+
+    async function updateCanvas(canvas) {
+        const file = canvas.toJSON();
+        file.height = canvas.getHeight();
+        file.width = canvas.getWidth();
+
+        try{
+        await updateDoc(doc(db, "canvases", canvasID), {
+            canvasData: file,
+            updated: new Date()
+            });
+            onSaveResult('success')
+        } catch (error) {
+            onSaveResult('failure')
+            console.log(error);
+        }
+    }
+
+    async function loadCanvas() {
+
+        const q = query(
+        doc(db, "canvases", canvasID)
+        );
+
+      try{ 
+        
+        const querySnapshot = await getDoc(q);
+        const retrieve = querySnapshot.data();
+        const json = retrieve.canvasData;
+        
+        if (retrieve) {
+            fabricCanvas.current.loadFromJSON(json, () => {
+                requestAnimationFrame(() => {
+                fabricCanvas.current.renderAll();
+                setActionType(null);
+                });
+            });
+        }
+
+    } catch(error) {
+      console.log(error);
+    }}
+
+    function refreshCanvas() {
+        fabricCanvas.current.clear();
+        fabricCanvas.current.backgroundColor = "white";
+        sessionSave(fabricCanvas.current)
+        fabricCanvas.current.renderAll();
+    }
+
+
+    if (saveToggle && (canvasID === null || canvasID ==='null' || canvasID === 'load')) {
+        saveCanvas(fabricCanvas.current);
+        onSaveToggle();
+    } if (saveToggle && canvasID) {
+        updateCanvas(fabricCanvas.current);
+        onSaveToggle();
+    } if (loadToggle && canvasID) {
+        loadCanvas();
+        onLoadToggle();
+    } if (refreshToggle) {
+        refreshCanvas();
+        onRefreshToggle()
+     }
+        
+    }, [ canvasName, saveToggle, onSaveToggle, loadToggle, onLoadToggle, user, canvasID, onCanvasID, refreshToggle, onRefreshToggle, canvasAction, onSaveResult])
+
     // Setting Background Image
     useEffect(()=> {
         
@@ -76,7 +173,7 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage}) {
 
     // Drawing Shapes
     useEffect(()=> {
-    
+
         setActionType(canvasAction)
 
         if (actionType === 'select') {
@@ -348,7 +445,16 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage}) {
     }, []);
 
     return (
-        <canvas ref={canvasRef}></canvas>
+        <div>
+            <canvas ref={canvasRef}></canvas>
+            {canvasName && (
+            <div className="canvas-info" style={{display: "flex", justifyContent: "flex-end"}}>
+                {canvasName} 
+                {" ("}{canvasWidth} x {canvasHeight}{")"}
+            </div>
+            )}
+
+        </div>
     )
 };
 

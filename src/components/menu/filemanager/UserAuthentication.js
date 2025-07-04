@@ -2,6 +2,8 @@ import { useState } from 'react';
 import '../../css/Popup.css';
 import {auth} from '../../../firebase';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { db } from '../../../firebase';
+import { doc, setDoc } from "firebase/firestore";
 
 function UserAuthentication({ onClose }) {
 
@@ -11,15 +13,21 @@ function UserAuthentication({ onClose }) {
     const [passValidate, setPassValidate] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
 
-    function createAccount(e) {
+    async function createAccount(e) {
         e.preventDefault();
         if (pass === passValidate) {
-            createUserWithEmailAndPassword(auth, email, pass).then(() => {
+            try {
+                const docRef = await createUserWithEmailAndPassword(auth, email, pass);
+                const newUser = docRef.user;
+                await setDoc(doc(db, "users", newUser.uid), {
+                    id: newUser.uid,
+                    email: newUser.email
+                })
                 onClose();
-            })
-            .catch((error) => {
-                setErrorMessage(error.message);
-            })
+            } 
+            catch (error){
+                setErrorMessage(error);
+            }
         } else {
             setErrorMessage("Passwords do not match")
         }

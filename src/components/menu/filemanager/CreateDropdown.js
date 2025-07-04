@@ -2,31 +2,37 @@ import {useState} from 'react';
 import '../../css/Dropdown.css';
 import '../../css/Popup.css'
 
-function CreateDropdown({activeDropdown, onCanvasWidth, onCanvasHeight, onActiveDropdown, onCanvasImage}) {
+function CreateDropdown({activeDropdown, onCanvasWidth, onCanvasHeight, onActiveDropdown, onCanvasImage, onCanvasName, onCanvasID, onActive, onRefreshToggle}) {
 
   const [activeValue, setActiveValue] = useState(null);
   const [width, setWidth] = useState(1000);
   const [height, setHeight] = useState(800);
+  const [name, setName] = useState("")
   const [error, setError] = useState(null);
   const [image, setImage] = useState(null);
   const [buttonToggle, setButtonToggle] = useState(false);
 
   function canvasCreate() {
 
-    if (height === null || width === null) {
-      setError("please ensure there is a width and height")
+    if (height === null || width === null || name === "") {
+      setError("Please ensure all fields are filled out")
     } else if (width > 2500) {
       setError("The width must be less than 2500")
     } else if (height > 2500) {
       setError("The height must be less than 2500")
     } else {
-    setError(null)
-    onCanvasWidth(width)
-    onCanvasHeight(height)
-    setWidth(null)
-    setHeight(null)
-    setActiveValue(null)
-    onActiveDropdown(null)
+    setError(null);
+    onCanvasWidth(width);
+    onCanvasHeight(height);
+    onCanvasName(name);
+    onActive(true);
+    onCanvasID(null);
+    onRefreshToggle();
+    setWidth(1000);
+    setHeight(800);
+    setName("");
+    setActiveValue(null);
+    onActiveDropdown(null);
     }
   }
 
@@ -43,15 +49,24 @@ function CreateDropdown({activeDropdown, onCanvasWidth, onCanvasHeight, onActive
     }
 
   function canvasImageCreate() {
+    if (name === "") {
+      setError("Pleae ensure you have named your project");
+    } else {
     const img = new Image();
     img.src = image;
     img.onload = () => {
-      onCanvasWidth(img.width)
-      onCanvasHeight(img.height)
-      onCanvasImage(image)
-      setActiveValue(null)
-      onActiveDropdown(null)
+      onCanvasWidth(img.width);
+      onCanvasHeight(img.height);
+      onCanvasImage(image);
+      onCanvasName(name);
+      onActive(true);
+      onCanvasID(null);
+      onRefreshToggle();
+      setActiveValue(null);
+      onActiveDropdown(null);
+      setName("");
       setButtonToggle(!buttonToggle);
+    }
     }
   }
 
@@ -72,7 +87,7 @@ function CreateDropdown({activeDropdown, onCanvasWidth, onCanvasHeight, onActive
       <div className="dropdown-container">
           <div className='dropdown-content'>
             <button onClick={() => togglePopup('new')}>Create new canvas</button>
-            <button onClick={() => togglePopup('upload')}>Create canvas from upload</button>
+            <button onClick={() => togglePopup('upload')}>Create canvas from image</button>
           </div>
       </div>
       }
@@ -86,10 +101,12 @@ function CreateDropdown({activeDropdown, onCanvasWidth, onCanvasHeight, onActive
             <div className='create-content'><p>Please choose the dimensions of your canvas below</p>
               <div className='dimensions'>
                 <p>w:</p>
-                <input type='number' value={width} onChange={(e) => setWidth(e.target.value)} placeholder='width'/>
+                <input type='number' value={width} onChange={(e) => setWidth(e.target.value)} placeholder='width' />
                 <p>h:</p>
-                <input type='number' value={height} onChange={(e) => setHeight(e.target.value)} placeholder='height'/>
+                <input type='number' value={height} onChange={(e) => setHeight(e.target.value)} placeholder='height' />
               </div>
+
+              Floor Plan Name: <input type='text' value={name} onChange={(e) => setName(e.target.value)} placeholder='name' maxLength={100} />
               {error && (
                 <p style={{color: 'red'}}>{error}</p>
               )}
@@ -113,6 +130,7 @@ function CreateDropdown({activeDropdown, onCanvasWidth, onCanvasHeight, onActive
                 <p>Upload floor plan:</p>
                 <input type='file' accept='image/*' onChange={imageUpload} />
               </div>
+              Floor Plan Name: <input type='text' value={name} onChange={(e) => setName(e.target.value)} placeholder='name' maxLength={100} />
               {error && (
                 <p style={{color: 'red'}}>{error}</p>
               )}

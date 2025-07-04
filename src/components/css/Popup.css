@@ -4,7 +4,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.6);
+  background: #00000099;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -15,7 +15,7 @@
   width: 80%;
   height: 80%;
   max-width: 90vw;
-  background: rgb(255, 255, 251);
+  background: #fffffb;
   border-radius: 6px;
   z-index: 10000;
   overflow: auto;
@@ -25,7 +25,7 @@
 .small-frame {
   width: 40%;
   max-width: 90vw;
-  background: rgb(255, 255, 251);
+  background: #fffffb;
   border-radius: 6px;
   z-index: 10000;
 }
@@ -35,20 +35,21 @@
   justify-content: flex-end;
 }
 .exit button {
-  background-color: rgb(255, 255, 251);
+  background-color: #fffffb;
   border: none;
   padding: 5px 10px 5px 10px;
   border-radius: 2px;
 }
 
 .exit button:hover {
-    background-color: rgb(255, 103, 103);
+    background-color: #ff6767;
     cursor: pointer;
 }
 
 h2 {
   display: flex;
   justify-content: center;
+  white-space: pre;
 }
 
 .popup-content{
@@ -56,7 +57,7 @@ h2 {
 }
 
 .popup-content button {
-    background-color: rgb(255, 255, 251);
+    background-color: #fffffb;
     padding: 1rem;
     border: none;
     border-radius: 5px;
@@ -104,7 +105,7 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 .create-button button:disabled {
-  background-color: rgb(255, 255, 251);
+  background-color: #fffffb;
   cursor: default;
 }
 
@@ -116,7 +117,7 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 .floor-plan-container {
-  border: 1px solid black;
+  border: 1px solid #000000;
   text-align: center;
   border-radius: 5px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
@@ -146,6 +147,65 @@ label {
 input {
   width: 200px;
   border-radius: 2px;
+}
+
+.floor-plan-grid li {
+  list-style: none;
+}
+
+.upper-bar {
+  display: flex;
+  gap: 15px;
+}
+
+ul {
+  border-top: solid 1px #d3d3d3;
+}
+
+li {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  border: 1px solid #d3d3d3;
+  border-radius: 5px;
+  transition: background-color 0.5s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  margin: 0 50px 0 50px;
+  padding: 10px 0 10px 0;
+}
+
+li:hover {
+  background-color: #efefef;
+  cursor: pointer;
+}
+
+.round-icon {
+  display: flex;
+  justify-content: flex-end;
+  width: 20px;
+  padding: 5px;
+  border-radius: 20px;
+  transition: background-color 0.5s ease;
+}
+
+.round-icon:hover {
+  background-color: #fffffb;
+  cursor: pointer;
+}
+
+.tabs {
+  display: flex;
+}
+
+.tabs button {
+  border: solid 1px #d3d3d3;
+}
+
+.user-item {
+  display: flex;
+  gap: 20px;
+  align-items: center;
 }
 
 

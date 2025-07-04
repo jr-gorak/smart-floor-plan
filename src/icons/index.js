@@ -17,6 +17,7 @@ import WindowClosed from './window-closed-variant.svg';
 import WindowOpen from './window-open-variant.svg';
 import Delete from './delete-circle.png';
 import Copy from './content-copy.svg';
+import Share from './share-circle.svg';
 
 export {
     Draw,
@@ -37,5 +38,6 @@ export {
     WindowClosed,
     WindowOpen,
     Delete,
-    Copy
+    Copy,
+    Share
 };

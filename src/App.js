@@ -9,16 +9,11 @@ import AccountPopup from './components/menu/information/AccountPopup';
 import DrawTool from './components/menu/toolset/DrawTool';
 import SensorTool from './components/menu/toolset/SensorTool';
 import ComponentTool from './components/menu/toolset/ComponentTool';
+import UserAuthentication from './components/menu/filemanager/UserAuthentication';
 
 function App() {
 
   const user = auth.currentUser;
-  
-  if (user) {
-    console.log("User is in!")
-  } else {
-    console.log("No user is in!")
-  }
 
   const [zoom, setZoom] = useState(1);
   const [transl, setTransl] = useState(0);
@@ -26,21 +21,35 @@ function App() {
 
   const [canvasWidth, setCanvasWidth] = useState(() => sessionStorage.getItem('canvasWidth'));
   const [canvasHeight, setCanvasHeight] = useState(() => sessionStorage.getItem('canvasHeight'));
+  const [canvasName, setCanvasName] = useState(() => sessionStorage.getItem('canvasName'));
+  const [canvasID, setCanvasID] = useState(() => sessionStorage.getItem('canvasID'));
+  const [activeCanvas, setActiveCanvas] = useState(() => sessionStorage.getItem('activeCanvas'));
+
   const [canvasAction, setCanvasAction] = useState('select');
   const [canvasImage, setCanvasImage] = useState(null);
-
+  const [saveToggle, setSaveToggle] = useState(false);
+  const [loadToggle, setLoadToggle] = useState(false);
+  const [refreshToggle, setRefreshToggle] = useState(false);
+  const [saveResult, setSaveResult] = useState(null);
   const openPopup = (value) => setActivePopup(value);
   const closePopup = () => setActivePopup(null);
 
   const retrieveWidth = (width) => setCanvasWidth(width);
   const retrieveHeight = (height) => setCanvasHeight(height);
   const retrieveAction = (action) => setCanvasAction(action);
-  const retrieveImage = (image) => setCanvasImage(image)
+  const retrieveImage = (image) => setCanvasImage(image);
+  const retrieveName = (name) => setCanvasName(name);
+  const retrieveID = (id) => setCanvasID(id);
+  const retrieveActive = (active) => setActiveCanvas(active);
+  const retrieveSave = (save) => setSaveResult(save);
 
   useEffect(() => {
     sessionStorage.setItem('canvasWidth', canvasWidth)
     sessionStorage.setItem('canvasHeight', canvasHeight)
-  }, [canvasWidth, canvasHeight]);
+    sessionStorage.setItem('canvasName', canvasName)
+    sessionStorage.setItem('canvasID', canvasID)
+    sessionStorage.setItem('activeCanvas', activeCanvas)
+  }, [canvasWidth, canvasHeight, canvasName, canvasID, activeCanvas, refreshToggle]);
 
   const centerZoom = () => {
     window.scrollTo({
@@ -81,15 +90,19 @@ function App() {
   return (
     <div className="App">
 
+
       <header>
-        <Menu onOpenPopup={openPopup} onCanvasWidth={retrieveWidth} onCanvasHeight={retrieveHeight} onCanvasImage={retrieveImage} user={user}/>
+        <Menu onOpenPopup={openPopup} onCanvasWidth={retrieveWidth} onCanvasHeight={retrieveHeight} onCanvasImage={retrieveImage} onCanvasName={retrieveName} onActive={retrieveActive} onCanvasID={retrieveID} onSaveToggle={() => setSaveToggle(true)} onRefreshToggle={() => setRefreshToggle(true)} onSaveResult={retrieveSave} saveResult={saveResult} user={user} />
       </header>
        
-       {canvasHeight > 0 &&
-      <div className='Canvas' style={{transform: `scale(${zoom}) translate(${transl}%, ${transl}%)` , transformOrigin: 'top left'}} onWheel={zoomScroll}>
-        <FabricCanvas canvasWidth={canvasWidth} canvasHeight={canvasHeight} canvasAction={canvasAction} canvasImage={canvasImage}/>
+       <div className='Canvas-State' style={{visibility: activeCanvas? 'visible' : 'hidden'}}>
+        <div className='Canvas' style={{transform: `scale(${zoom}) translate(${transl}%, ${transl}%)` , transformOrigin: 'top left'}} onWheel={zoomScroll}>
+          <FabricCanvas canvasWidth={canvasWidth} canvasHeight={canvasHeight} canvasAction={canvasAction} canvasImage={canvasImage} canvasName={canvasName} canvasID={canvasID}
+          onCanvasID={retrieveID} activeCanvas={activeCanvas} saveToggle={saveToggle} onSaveToggle={() => setSaveToggle(false)} onSaveResult={retrieveSave} loadToggle={loadToggle} onLoadToggle={() => setLoadToggle(false)} 
+          refreshToggle={refreshToggle} onRefreshToggle={()=> setRefreshToggle(false)} user={user}/>
+        </div>
       </div>
-      }
+
 
       {activePopup === 'draw' && (
       <DrawTool onCanvasAction={retrieveAction} canvasAction={canvasAction}/>
@@ -103,11 +116,16 @@ function App() {
         <AboutPopup onClose={closePopup}/>
       )} {activePopup === 'guide' && (
         <GuidePopup onClose={closePopup}/>
-      )} {activePopup === 'account' && (
-        <AccountPopup onClose={closePopup} user={user}/>
+      )}
+      {activePopup === 'account' && !user && (
+        <UserAuthentication onClose={closePopup} />
+      )}
+       {activePopup === 'account' && user  && (
+        <AccountPopup onClose={closePopup} onCanvasName={retrieveName} onCanvasID={retrieveID} onCanvasWidth={retrieveWidth} onCanvasHeight={retrieveHeight} onActive={retrieveActive} onLoadToggle={() => setLoadToggle(true)}  onRefreshToggle={()=> setRefreshToggle(true)} user={user}/>
       )}
       
     </div>
+    
   );
 }
 
