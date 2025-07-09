@@ -1,5 +1,6 @@
 html, body {
   background-color: #9cdaf3;
+  overflow: visible;
   scrollbar-width: thin;
 }
 
@@ -17,6 +18,3 @@ header {
   transition: transform 0.1s ease;
 }
 
-.canvas-container {
-  box-shadow: 0 2px 4px #00000033;
-}

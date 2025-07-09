@@ -13,7 +13,6 @@ function Menu( {onOpenPopup, onCanvasWidth, onCanvasHeight, onCanvasImage, onCan
     const [saveIndicator, setSaveIndicator] = useState(null);
 
     function togglePopup(value) {
-
         if (isActive === false) {
             onOpenPopup(value)
             setIsActive(true);
@@ -26,10 +25,9 @@ function Menu( {onOpenPopup, onCanvasWidth, onCanvasHeight, onCanvasImage, onCan
             setIsActive(false);
             setActiveValue(null)
         }  
-    }
+    };
 
     function toggleDropdown(value) {
-
         if (activeDropdown === null) {
             setActiveDropdown(value)
         } else if (activeDropdown !== value) {
@@ -37,34 +35,32 @@ function Menu( {onOpenPopup, onCanvasWidth, onCanvasHeight, onCanvasImage, onCan
         } else {
             setActiveDropdown(null)
         }
-    }
+    };
 
     function checkSave() {
-
         if (!user) {
             onOpenPopup('account')
         } else {
-
             onSaveToggle();
         }
-    }
+    };
 
     useEffect(() => {
         if (saveResult === 'success') {
-                setSaveIndicator('save-success')
-                setTimeout(() => {
-                    setSaveIndicator('button-off')
-                    onSaveResult(null);
-                }, 500);
+            setSaveIndicator('save-success')
+            setTimeout(() => {
+                setSaveIndicator('button-off')
+                onSaveResult(null);
+            }, 500);
                 
-            } else if (saveResult === 'failure') {
-                setSaveIndicator('save-failure')
-                setTimeout(() => {
-                    setSaveIndicator('button-off')
-                    onSaveResult(null);
-                }, 500);
-            }
-    }, [saveResult, onSaveResult])
+        } else if (saveResult === 'failure') {
+            setSaveIndicator('save-failure')
+            setTimeout(() => {
+                setSaveIndicator('button-off')
+                onSaveResult(null);
+            }, 500);
+        }
+    }, [saveResult, onSaveResult]);
 
     return (
         <div className='menu'>
@@ -76,11 +72,11 @@ function Menu( {onOpenPopup, onCanvasWidth, onCanvasHeight, onCanvasImage, onCan
 
             <div className='file'>
                 <div className='dropdown'> <button className={activeDropdown === 'create' ? 'button-on' : 'button-off'} onClick={() => toggleDropdown('create')}><img src={Create} className="menu-icon" alt="logo"/>Create New</button>
-                <CreateDropdown activeDropdown={activeDropdown} onActiveDropdown={(value) => setActiveDropdown(value)} onCanvasWidth={onCanvasWidth} onCanvasHeight={onCanvasHeight} onCanvasImage={onCanvasImage} onCanvasName={onCanvasName} onCanvasID={onCanvasID} onActive={onActive} onRefreshToggle={onRefreshToggle}/>
+                    <CreateDropdown activeDropdown={activeDropdown} onActiveDropdown={(value) => setActiveDropdown(value)} onCanvasWidth={onCanvasWidth} onCanvasHeight={onCanvasHeight} onCanvasImage={onCanvasImage} onCanvasName={onCanvasName} onCanvasID={onCanvasID} onActive={onActive} onRefreshToggle={onRefreshToggle}/>
                 </div>
                 <button className={saveIndicator} onClick={() => checkSave()}><img src={Save} className="menu-icon" alt="logo"/> Save</button>
                 <div className='dropdown'> <button className={activeDropdown === 'export' ? 'button-on' : 'button-off'} onClick={() => toggleDropdown('export')}><img src={Export} className="menu-icon" alt="logo"/>Export</button>
-                <ExportDropdown activeDropdown={activeDropdown} />
+                    <ExportDropdown activeDropdown={activeDropdown} />
                 </div>
             </div>
 
@@ -89,7 +85,6 @@ function Menu( {onOpenPopup, onCanvasWidth, onCanvasHeight, onCanvasImage, onCan
                 <button onClick={() => onOpenPopup('guide')}><img src={Guide} className="menu-icon" alt="logo"/> How to Use</button>
                 <button onClick={() => onOpenPopup('about')}><img src={About} className="menu-icon" alt="logo"/> About</button>
             </div>
-            
         </div>
     );
 };

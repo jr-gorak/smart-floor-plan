@@ -1,16 +1,59 @@
 import {useEffect, useRef, useState} from "react";
 import * as fabric from "fabric";
-import {Delete, Copy} from '../icons/index';
+import {Delete, Copy, Lorawan, Person, Battery, LightOff, Co2, Voltage, Humidity, Thermometer, Pressure, Sound, Motion, Sensor, Move, Settings} from '../icons/index';
 import { db } from "../firebase";
 import { addDoc, collection, doc, updateDoc, query, getDoc } from "firebase/firestore";
+import DeviceSettings from "./menu/toolset/DeviceSettings";
+
 
 var deleteImg = document.createElement('img');
-deleteImg.src = Delete;
-
 var copyImg = document.createElement('img');
-copyImg.src = Copy;
+var moveImg = document.createElement('img');
+var settingsImg = document.createElement('img');
+var lorawanImg = document.createElement('img');
+var personImg = document.createElement('img');
+var batteryImg = document.createElement('img');
+var lightoffImg = document.createElement('img');
+var co2Img = document.createElement('img');
+var voltageImg = document.createElement('img');
+var humidityImg = document.createElement('img');
+var thermometerImg = document.createElement('img');
+var pressureImg = document.createElement('img');
+var soundImg = document.createElement('img');
+var motionImg = document.createElement('img');
+var sensorImg = document.createElement('img');
 
-function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, canvasName, canvasID, onCanvasID, saveToggle, onSaveToggle, onSaveResult, loadToggle, onLoadToggle, refreshToggle, onRefreshToggle, user}) {
+copyImg.src = Copy;
+deleteImg.src = Delete;
+moveImg.src = Move;
+settingsImg.src = Settings;
+lorawanImg.src = Lorawan;
+personImg.src = Person;
+batteryImg.src =  Battery;
+lightoffImg.src =  LightOff;
+co2Img.src = Co2;
+voltageImg.src = Voltage;
+humidityImg.src = Humidity;
+thermometerImg.src = Thermometer;
+pressureImg.src = Pressure;
+soundImg.src = Sound;
+motionImg.src =  Motion;
+motionImg.height = 20;
+motionImg.width = 20;
+sensorImg.src = Sensor;
+
+fabric.FabricObject.prototype.toObject = (function(toObject) {
+  return function(propertyArray = []) {
+    return {
+      ...toObject.call(this, propertyArray),
+      classifier: this.classifier,
+      id: this.id,
+    };
+  };
+})(fabric.FabricObject.prototype.toObject);
+
+function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, canvasName, canvasID, onCanvasID, saveToggle, onSaveToggle, onSaveResult, loadToggle, onLoadToggle, refreshToggle, onRefreshToggle, 
+    canvasDevice, deviceToggle, onDeviceToggle, user, deviceList, onDeviceList, originalDeviceList, onHandlerToggle}) {
     const canvasRef = useRef(null);
     const fabricCanvas = useRef(null);
     const [isDrawing, setIsDrawing] = useState(false);
@@ -18,7 +61,16 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
     const [actionType, setActionType] = useState(null);
     const [x1, setX1] = useState(0);
     const [y1, setY1] = useState(0);
+    const [tempObject, setTempObject] = useState(null);
+    const [togglePopup, setTogglePopup] = useState(false);
+    const [activeDevice, setActiveDevice] = useState(null);
+    const [updateDeviceToggle, setUpdateDeviceToggle] = useState(null);
+    const [updatedDevice, setUpdatedDevice] = useState(null);
+    
 
+    const retrieveUpdate = (update) => setUpdatedDevice(update);
+
+    const settingsMode = 'canvas';
 
     function sessionSave(canvas) {
         const file = canvas.toJSON();
@@ -47,11 +99,10 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
 
         setTimeout(() => {
             sessionLoad();
+                requestAnimationFrame(() => {
+                    fabricCanvas.current.renderAll();
+                });
         }, 0);
-
-        requestAnimationFrame(() => {
-            fabricCanvas.current.renderAll();
-         });
 
         const triggerSave = () => {
             sessionSave(fabricCanvas.current)
@@ -69,96 +120,103 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
     //file
     useEffect(() => {
 
-    async function saveCanvas(canvas) {
-        
-        if (!user) return;
+        async function saveCanvas(canvas) {
+            
+            if (!user) return;
 
-        const file = canvas.toJSON();
-        file.height = canvas.getHeight();
-        file.width = canvas.getWidth();
-        try{
-        const docRef = await addDoc(collection(db, "canvases"), {
-            owner: user.uid,
-            canvasName: canvasName,
-            canvasData: file,
-            shared: [],
-            created: new Date(),
-            updated: new Date()
-            });
+            const file = canvas.toJSON();
+            file.height = canvas.getHeight();
+            file.width = canvas.getWidth();
 
-            onCanvasID(docRef.id);
-            onSaveResult('success')
-        } catch (error) {
-            onSaveResult('failure')
-            console.log(error);
-        }
-    }
-
-    async function updateCanvas(canvas) {
-        const file = canvas.toJSON();
-        file.height = canvas.getHeight();
-        file.width = canvas.getWidth();
-
-        try{
-        await updateDoc(doc(db, "canvases", canvasID), {
-            canvasData: file,
-            updated: new Date()
-            });
-            onSaveResult('success')
-        } catch (error) {
-            onSaveResult('failure')
-            console.log(error);
-        }
-    }
-
-    async function loadCanvas() {
-
-        const q = query(
-        doc(db, "canvases", canvasID)
-        );
-
-      try{ 
-        
-        const querySnapshot = await getDoc(q);
-        const retrieve = querySnapshot.data();
-        const json = retrieve.canvasData;
-        
-        if (retrieve) {
-            fabricCanvas.current.loadFromJSON(json, () => {
-                requestAnimationFrame(() => {
-                fabricCanvas.current.renderAll();
-                setActionType(null);
+            try{
+            const docRef = await addDoc(collection(db, "canvases"), {
+                owner: user.uid,
+                canvasName: canvasName,
+                canvasData: file,
+                shared: [],
+                devices: deviceList,
+                originalDevices: originalDeviceList,
+                created: new Date(),
+                updated: new Date(),
                 });
-            });
+
+                onCanvasID(docRef.id);
+                onSaveResult('success')
+            } catch (error) {
+                onSaveResult('failure')
+                console.log(error);
+            }
         }
 
-    } catch(error) {
-      console.log(error);
-    }}
+        async function updateCanvas(canvas) {
+            const file = canvas.toJSON();
+            file.height = canvas.getHeight();
+            file.width = canvas.getWidth();
 
-    function refreshCanvas() {
-        fabricCanvas.current.clear();
-        fabricCanvas.current.backgroundColor = "white";
-        sessionSave(fabricCanvas.current)
-        fabricCanvas.current.renderAll();
-    }
+            try{
+            await updateDoc(doc(db, "canvases", canvasID), {
+                canvasData: file,
+                devices: deviceList,
+                updated: new Date()
+                });
+                onSaveResult('success')
+            } catch (error) {
+                onSaveResult('failure')
+                console.log(error);
+            }
+        }
+
+        async function loadCanvas() {
+
+            const q = query(
+            doc(db, "canvases", canvasID)
+            );
+
+            try{ 
+            
+                const querySnapshot = await getDoc(q);
+                const retrieve = querySnapshot.data();
+                const json = retrieve.canvasData;
+                
+                if (retrieve) {
+                    fabricCanvas.current.loadFromJSON(json)
+                    requestAnimationFrame(() => {
+                        fabricCanvas.current.renderAll();
+                    });
+                    setActionType(null);
+                    sessionSave(fabricCanvas.current)
+                }
+
+            } catch(error) {
+                console.log(error);
+            }
+        };
+
+        function refreshCanvas() {
+            fabricCanvas.current.clear();
+            fabricCanvas.current.backgroundColor = "white";
+            sessionSave(fabricCanvas.current)
+            requestAnimationFrame(() => {
+                fabricCanvas.current.renderAll();
+            });
+        };
 
 
-    if (saveToggle && (canvasID === null || canvasID ==='null' || canvasID === 'load')) {
-        saveCanvas(fabricCanvas.current);
-        onSaveToggle();
-    } if (saveToggle && canvasID) {
-        updateCanvas(fabricCanvas.current);
-        onSaveToggle();
-    } if (loadToggle && canvasID) {
-        loadCanvas();
-        onLoadToggle();
-    } if (refreshToggle) {
-        refreshCanvas();
-        onRefreshToggle()
-     }
-        
-    }, [ canvasName, saveToggle, onSaveToggle, loadToggle, onLoadToggle, user, canvasID, onCanvasID, refreshToggle, onRefreshToggle, canvasAction, onSaveResult])
+        if (saveToggle && (canvasID === null || canvasID ==='null' || canvasID === 'load')) {
+            saveCanvas(fabricCanvas.current);
+            onSaveToggle();
+        } if (saveToggle && canvasID) {
+            updateCanvas(fabricCanvas.current);
+            onSaveToggle();
+        } if (loadToggle && canvasID) {
+            loadCanvas();
+            onLoadToggle();
+        } if (refreshToggle) {
+            refreshCanvas();
+            onRefreshToggle()
+        }
+            
+    }, [ canvasName, saveToggle, onSaveToggle, loadToggle, onLoadToggle, user, canvasID, onCanvasID, refreshToggle, onRefreshToggle, canvasAction, onSaveResult, deviceList, originalDeviceList])
 
     // Setting Background Image
     useEffect(()=> {
@@ -166,10 +224,145 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
         if(canvasImage) {
             fabric.FabricImage.fromURL(canvasImage).then((img) => {
                 fabricCanvas.current.backgroundImage = img;
+                fabricCanvas.current.backgroundImage.classifier = 'background';
+                fabricCanvas.current.backgroundImage.id = null;
                 fabricCanvas.current.renderAll();
             })
         }
     }, [canvasImage]);
+
+    useEffect(() => {
+        function createDevice(device) {
+
+            let l = canvasWidth/2;
+            let t = canvasHeight/2;
+            let sx = 1;
+            let sy = 1;
+
+            if(updateDeviceToggle) {
+                const oldDevice =  fabricCanvas.current.getObjects().find(obj => obj.id === updatedDevice.id)
+                l = oldDevice.left;
+                t = oldDevice.top;
+                sx = oldDevice.scaleX;
+                sy = oldDevice.scaleY;
+                fabricCanvas.current.remove(oldDevice);
+                setUpdateDeviceToggle(false);
+            }
+
+            const deviceArray = []
+            let sensorCounter = 0;
+            let angleScaler = 0;
+
+            var deviceImg = new fabric.FabricImage(lorawanImg, {
+                left: 0,
+                top: 0,
+                scaleX: 1.5,
+                scaleY: 1.5,
+                originX: 'center',
+                originY: 'center',
+                selectable: true,
+                id: device.id,
+                classifier: 'device',
+            });
+
+            deviceArray.push(deviceImg);
+            
+
+            const deviceText = new fabric.FabricText(device.label, {
+                fontSize: 12,
+                id: null,
+                classifier: null,
+                path: null,
+
+            })
+
+            deviceText.set({
+                left: deviceImg.left - deviceText.width / 2,
+                top: deviceImg.top + 35,
+            })
+
+            deviceArray.push(deviceText);
+
+            device.entities.forEach(sensor => {
+                if (sensor.visible === true) {
+                    sensorCounter++;
+                }
+            });
+
+            device.entities.forEach(sensor => {
+                if (sensor.visible === true) {
+                    const angle = (2 * Math.PI / sensorCounter) * angleScaler;
+
+                    const x = deviceImg.left + 30 * Math.cos(angle);
+                    const y = deviceImg.top + 30 * Math.sin(angle);
+
+                    let imgHolder = sensorImg;
+
+                    if (sensor.type.toLowerCase().includes('temp')) {
+                        imgHolder = thermometerImg;
+                    } else if (sensor.type.toLowerCase().includes('occupancy')) {
+                        imgHolder = personImg;
+                    } else if (sensor.type.toLowerCase().includes('battery')) {
+                        imgHolder = batteryImg;
+                    } else if (sensor.type.toLowerCase().includes('light')) {
+                        imgHolder = lightoffImg;
+                    } else if (sensor.type.toLowerCase().includes('co2')) {
+                        imgHolder = co2Img;
+                    } else if (sensor.type.toLowerCase().includes('volt') || sensor.type.toLowerCase().includes('vdd')) {
+                        imgHolder = voltageImg;
+                    } else if (sensor.type.toLowerCase().includes('humidity')) {
+                        imgHolder = humidityImg;
+                    } else if (sensor.type.toLowerCase().includes('pressure')) {
+                        imgHolder = pressureImg;
+                    } else if (sensor.type.toLowerCase().includes('sound')) {
+                        imgHolder = soundImg;
+                    } else if (sensor.type.toLowerCase().includes('motion')) {
+                        imgHolder = motionImg;
+                    } 
+
+                    var sensorObject = new fabric.FabricImage(imgHolder, {
+                        left: x,
+                        top: y,
+                        scaleX: 1,
+                        scaleY: 1,
+                        originX: 'center',
+                        originY: 'center',
+                        id: sensor.id,
+                        classifier: 'sensor',
+                });
+
+                    angleScaler++;
+                    deviceArray.push(sensorObject); 
+                }
+            });
+
+                const group = new fabric.Group(deviceArray, {
+                left: l,
+                top: t,
+                scaleX: sx,
+                scaleY: sy,
+                originX: 'center',
+                originY: 'center',
+                classifier: 'device',
+                id: device.id,
+            });
+
+            fabricCanvas.current.add(group);
+            fabricCanvas.current.renderAll();
+            setActionType(null);
+
+            }
+
+        if(deviceToggle) {
+            createDevice(canvasDevice);
+            onDeviceToggle();
+        }
+
+        if(updateDeviceToggle) {
+            createDevice(updatedDevice);
+        }
+
+    }, [deviceToggle, onDeviceToggle, updateDeviceToggle, canvasDevice, canvasWidth, canvasHeight, updatedDevice])
 
     // Drawing Shapes
     useEffect(()=> {
@@ -203,16 +396,31 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
                 cornersize: 24,
             });
 
-            object.controls.copyControl = new fabric.Control({
-                x: -0.5,
-                y: -0.5,
-                offsetY: -16,
-                offsetX: 16,
-                cursorStyle: 'pointer',
-                mouseUpHandler: copyObject,
-                render: renderIcon(copyImg),
-                cornersize: 24,
-            });
+            if (object.classifier === 'draw') {
+                object.controls.copyControl = new fabric.Control({
+                    x: -0.5,
+                    y: -0.5,
+                    offsetY: -16,
+                    offsetX: 16,
+                    cursorStyle: 'pointer',
+                    mouseUpHandler: copyObject,
+                    render: renderIcon(copyImg),
+                    cornersize: 24,
+                });
+            }
+
+            if (object.classifier === 'device') {
+                object.controls.settingsControl = new fabric.Control({
+                    x: -0.5,
+                    y: -0.5,
+                    offsetY: -16,
+                    offsetX: 16, 
+                    cursorStyle: 'pointer',
+                    mouseUpHandler: deviceSettings,
+                    render: renderIcon(settingsImg),
+                    cornersize: 24,
+                })
+            }
         };
         
         if (shape) {
@@ -227,6 +435,8 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
                 stroke: 'black',
                 strokwWidth: 10,
                 objectCaching: false,
+                classifier: 'draw',
+                id: null,
                 })
             fabricCanvas.current.add(newLine);
             setShape(newLine);
@@ -248,6 +458,9 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
                 stroke: 'black',
                 strokwWidth: 10,
                 objectCaching: false,
+                classifier: 'draw',
+                id: null,
+
             });
             fabricCanvas.current.add(newRect);
             setShape(newRect);
@@ -356,22 +569,6 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
                     break;
             }
         };
-
-        fabricCanvas.current.on('mouse:down', mouseDown);
-        fabricCanvas.current.on('mouse:move', mouseMove);
-        fabricCanvas.current.on('mouse:up', mouseUp);
-
-        return () =>
-        {
-            if (fabricCanvas.current) {
-            fabricCanvas.current.off('mouse:down', mouseDown);
-            fabricCanvas.current.off('mouse:move', mouseMove);
-            fabricCanvas.current.off('mouse:up', mouseUp);
-            }
-        }
-
-    }, [isDrawing, shape, actionType, canvasAction, x1, y1]);
-
     
     function renderIcon(icon) {
             return function (ctx, left, top, _styleOverride, fabricObject) {
@@ -384,6 +581,16 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
             }};
 
         function deleteObject(_eventData, transform) {
+
+            if (transform.target.classifier === 'device') {
+                const id = transform.target.id;
+                const deviceIndex = deviceList.findIndex(d => d.id === id)
+                const originalDevice = originalDeviceList.find(d => d.id === id)
+                deviceList[deviceIndex] = structuredClone(originalDevice);
+                const newDeviceList = [...deviceList];
+                onDeviceList(newDeviceList);
+            }
+
             const canvas = transform.target.canvas;
             canvas.remove(transform.target);
             canvas.requestRenderAll();
@@ -396,40 +603,47 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
                 cloned.top += 10;
                 cloned.controls.deleteControl = transform.target.controls.deleteControl;
                 cloned.controls.copyControl = transform.target.controls.copyControl;
+                cloned.classifier = 'draw';
                 canvas.add(cloned);
             })
         };
 
-    // Keyboard Controls
-    useEffect(() => {
-        let tempObject = null;
-        let tempCanvas = null;
+        function deviceSettings(_eventData, transform) {
+            const id = transform.target.id;
+            const findDevice = deviceList.find(d => d.id === id)
+            setActiveDevice(findDevice);
+            setTogglePopup(true);
+        }
 
         function keyDown(e){
-            const activeObject = fabricCanvas.current.getActiveObject();
 
-            if ((e.ctrlKey) && e.key === 'c') {
-                if(activeObject) {
-                    tempObject = activeObject
-                    tempCanvas = activeObject.canvas;
-                }
-            } else if ((e.ctrlKey) && e.key === 'x') {
-                if(activeObject) {
-                    tempObject = activeObject
-                    tempCanvas = activeObject.canvas;
-                    deleteObject(null, { target: activeObject})
-                }
-            } else if ((e.ctrlKey) && e.key === 'v') {
-                if(tempObject) {
-                    tempObject.clone().then((cloned) => {
-                        cloned.left += 10;
-                        cloned.top += 10;
-                        cloned.controls.deleteControl = tempObject.controls.deleteControl;
-                        cloned.controls.copyControl = tempObject.controls.copyControl;
-                        tempCanvas.add(cloned);
-                    })
-                }
-            } else if (e.key === 'Delete' || e.key === 'Backspace') {
+            const activeObject = fabricCanvas.current.getActiveObject()
+
+            if ((activeObject && activeObject.classifier === 'draw') || (tempObject && tempObject.classifier === 'draw')) {
+                if ((e.ctrlKey) && e.key === 'c') {
+                    if(activeObject) {
+                        setTempObject(activeObject);
+                    }
+                } else if ((e.ctrlKey) && e.key === 'x') {
+                    if(activeObject) {
+                        setTempObject(activeObject)
+                        deleteObject(null, { target: activeObject})
+                    }
+                } else if ((e.ctrlKey) && e.key === 'v') {
+                    if(tempObject) {
+                        tempObject.clone().then((cloned) => {
+                            cloned.left += 10;
+                            cloned.top += 10;
+                            cloned.controls.deleteControl = tempObject.controls.deleteControl;
+                            cloned.controls.copyControl = tempObject.controls.copyControl;
+                            fabricCanvas.current.add(cloned);
+                            fabricCanvas.current.renderAll();
+                        });
+                    }
+                } 
+            }
+
+            if (e.key === 'Delete' || e.key === 'Backspace') {
                 if(activeObject) {
                     deleteObject(null, { target: activeObject})
                 }
@@ -439,21 +653,44 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
         document.removeEventListener('keydown', keyDown);
         document.addEventListener('keydown', keyDown);
 
+                fabricCanvas.current.on('mouse:down', mouseDown);
+        fabricCanvas.current.on('mouse:move', mouseMove);
+        fabricCanvas.current.on('mouse:up', mouseUp);
+
         return () => {
             document.removeEventListener('keydown', keyDown);
+
+                        if (fabricCanvas.current) {
+            fabricCanvas.current.off('mouse:down', mouseDown);
+            fabricCanvas.current.off('mouse:move', mouseMove);
+            fabricCanvas.current.off('mouse:up', mouseUp);
+            }
         }
-    }, []);
+    }, [tempObject, setTempObject, deviceList, onDeviceList, isDrawing, shape, actionType, canvasAction, x1, y1, originalDeviceList]);
+
+    useEffect(() => {
+        
+        onHandlerToggle(togglePopup);
+
+    }, [onHandlerToggle, togglePopup])
 
     return (
         <div>
-            <canvas ref={canvasRef}></canvas>
-            {canvasName && (
-            <div className="canvas-info" style={{display: "flex", justifyContent: "flex-end"}}>
-                {canvasName} 
-                {" ("}{canvasWidth} x {canvasHeight}{")"}
+            <div>
+                <canvas ref={canvasRef}></canvas>
+                {canvasName && (
+                <div className="canvas-info" style={{display: "flex", justifyContent: "flex-end"}}>
+                    {canvasName} 
+                    {" ("}{canvasWidth} x {canvasHeight}{")"}
+                </div>
+                )}
             </div>
-            )}
-
+            <div>
+                {togglePopup && (
+                    <DeviceSettings settingsMode={settingsMode} activeDevice={activeDevice} deviceList={deviceList} onTogglePopup={() => setTogglePopup(false)} onUpdateDeviceToggle={() => setUpdateDeviceToggle(true)} onDeviceList={onDeviceList} onUpdatedDevice={retrieveUpdate}></DeviceSettings>
+                )
+                }
+            </div>
         </div>
     )
 };

@@ -42,7 +42,7 @@
     justify-content: left;
 }
 
-.content button {
+button {
     background-color: rgb(255, 255, 251);
     padding: 1rem;
     border: none;
@@ -53,10 +53,9 @@
     display: flex;
     align-items: center;
     gap: 5px;
-    height: 100%;
 }
 
-.content button:hover {
+button:hover {
     background-color: #efefef;
     cursor: pointer;
 }

@@ -13,6 +13,7 @@
 
 .frame {
   width: 80%;
+  min-width: 500px;
   height: 80%;
   max-width: 90vw;
   background: #fffffb;
@@ -23,10 +24,13 @@
 }
 
 .small-frame {
-  width: 40%;
+  width: 50%;
+  max-height: 80%;
+  min-width: 600px;
   max-width: 90vw;
   background: #fffffb;
   border-radius: 6px;
+  overflow: auto;
   z-index: 10000;
 }
 
@@ -74,11 +78,6 @@ h2 {
 .popup-content button:hover {
     background-color: #efefef;
     cursor: pointer;
-}
-
-.create-content p{
-  display: flex;
-  justify-content: center;
 }
 
 .dimensions {
@@ -208,4 +207,62 @@ li:hover {
   align-items: center;
 }
 
+.vertical-display {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
 
+label input {
+  width: 100%
+}
+
+.input-on {
+  cursor: pointer !important;
+}
+
+.input-off {
+  background-color: #fffffb !important;
+  cursor: default !important;
+  border: none;
+}
+
+.checkbox {
+  width: 20px;
+}
+
+.sensor-list {
+  border: 1px solid lightgray;
+  border-radius: 5px;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+  padding: 0 20px 20px 10px;
+  margin-bottom: 10px;
+}
+
+h2 input {
+  font-size: 18px;
+  font-weight: bold;
+  width: auto;
+}
+
+tr {
+  text-align: left;
+}
+
+th {
+  padding-right: 20px;
+}
+
+td {
+  padding-right: 10px;
+}
+
+.sensor-display {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.sensor-display img {
+  margin-top: 5px;
+}

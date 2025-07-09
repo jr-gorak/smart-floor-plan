@@ -5,7 +5,7 @@ import { collection, query, where, getDoc, getDocs, doc, deleteDoc, addDoc, or, 
 import { useState, useEffect } from 'react';
 import { Delete, Copy, Share } from '../../../icons';
 
-function Account({ onClose, onCanvasName, onCanvasID, onCanvasWidth, onCanvasHeight, onActive, onLoadToggle, onRefreshToggle, user }) {
+function Account({ onClose, onCanvasName, onCanvasID, onCanvasWidth, onCanvasHeight, onActive, onLoadToggle, onRefreshToggle, onDeviceList, onOriginalDeviceList, user }) {
 
   const [files, setFiles] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -146,11 +146,13 @@ function Account({ onClose, onCanvasName, onCanvasID, onCanvasWidth, onCanvasHei
       }
     }
 
-  function loadCanvas(canvasID, canvasName, width, height) {
+  function loadCanvas(canvasID, canvasName, width, height, devices, originalDevices) {
     onCanvasID(canvasID);
     onCanvasName(canvasName);
     onCanvasWidth(width);
     onCanvasHeight(height);
+    onDeviceList(devices);
+    onOriginalDeviceList(originalDevices);
     onActive(true);
     onLoadToggle();
     onClose();
@@ -239,7 +241,7 @@ function Account({ onClose, onCanvasName, onCanvasID, onCanvasWidth, onCanvasHei
           {tabMode === 'floorplan' && (
             <ul className='floor-plan-grid'>
             {files.filter(file => file.owner === user.uid).map((file) => (
-              <li key={file.id} onClick={() => loadCanvas(file.id, file.canvasName, file.canvasData.width, file.canvasData.height)}>
+              <li key={file.id} onClick={() => loadCanvas(file.id, file.canvasName, file.canvasData.width, file.canvasData.height, file.devices, file.originalDevices)}>
               <div className='upper-bar' onClick={e => e.stopPropagation()}>
                 <img className="round-icon" onClick={() => togglePopup('copy', file.canvasName, file.id, file.canvasData, file.shared)} src={Copy} alt='Copy Button'/>
                 <img className="round-icon" onClick={() => togglePopup('share', file.canvasName, file.id, file.canvasData, file.shared)} src={Share} alt='Share Button'/>

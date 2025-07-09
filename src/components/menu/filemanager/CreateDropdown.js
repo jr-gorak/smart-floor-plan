@@ -98,7 +98,7 @@ function CreateDropdown({activeDropdown, onCanvasWidth, onCanvasHeight, onActive
             <button onClick={() => setActiveValue(null)}>X</button>
             </div>
             <h2>Create New Canvas</h2>
-            <div className='create-content'><p>Please choose the dimensions of your canvas below</p>
+            <div className='popup-content'><p>Please choose the dimensions of your canvas below</p>
               <div className='dimensions'>
                 <p>w:</p>
                 <input type='number' value={width} onChange={(e) => setWidth(e.target.value)} placeholder='width' />
@@ -125,7 +125,7 @@ function CreateDropdown({activeDropdown, onCanvasWidth, onCanvasHeight, onActive
             <button onClick={() => setActiveValue(null)}>X</button>
             </div>
             <h2>Upload Image for Canvas Background</h2>
-            <div className='create-content'><p>Please select an image to upload as the background of the canvas</p>
+            <div className='popup-content'><p>Please select an image to upload as the background of the canvas</p>
               <div className='dimensions'>
                 <p>Upload floor plan:</p>
                 <input type='file' accept='image/*' onChange={imageUpload} />
