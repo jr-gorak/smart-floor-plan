@@ -1,46 +1,12 @@
 import {useEffect, useRef, useState} from "react";
 import * as fabric from "fabric";
-import {Delete, Copy, Lorawan, Person, Battery, LightOff, Co2, Voltage, Humidity, Thermometer, Pressure, Sound, Motion, Sensor, Move, Settings} from '../icons/index';
+import {
+deleteImg, copyImg, settingsImg, lorawanImg, batteryImg, lightoffImg, co2Img, voltageImg, humidityImg, thermometerImg, pressureImg, soundImg, motionImg,
+doorwayImg, windowImg, personImg, sensorImg, stairsImg, bedImg, sofaImg, chairImg, threesofaImg, stoveImg, kitchensinkImg, bathtubImg, roundsinkImg, toiletImg} from '../icons/index';
+
 import { db } from "../firebase";
 import { addDoc, collection, doc, updateDoc, query, getDoc } from "firebase/firestore";
 import DeviceSettings from "./menu/toolset/DeviceSettings";
-
-
-var deleteImg = document.createElement('img');
-var copyImg = document.createElement('img');
-var moveImg = document.createElement('img');
-var settingsImg = document.createElement('img');
-var lorawanImg = document.createElement('img');
-var personImg = document.createElement('img');
-var batteryImg = document.createElement('img');
-var lightoffImg = document.createElement('img');
-var co2Img = document.createElement('img');
-var voltageImg = document.createElement('img');
-var humidityImg = document.createElement('img');
-var thermometerImg = document.createElement('img');
-var pressureImg = document.createElement('img');
-var soundImg = document.createElement('img');
-var motionImg = document.createElement('img');
-var sensorImg = document.createElement('img');
-
-copyImg.src = Copy;
-deleteImg.src = Delete;
-moveImg.src = Move;
-settingsImg.src = Settings;
-lorawanImg.src = Lorawan;
-personImg.src = Person;
-batteryImg.src =  Battery;
-lightoffImg.src =  LightOff;
-co2Img.src = Co2;
-voltageImg.src = Voltage;
-humidityImg.src = Humidity;
-thermometerImg.src = Thermometer;
-pressureImg.src = Pressure;
-soundImg.src = Sound;
-motionImg.src =  Motion;
-motionImg.height = 20;
-motionImg.width = 20;
-sensorImg.src = Sensor;
 
 fabric.FabricObject.prototype.toObject = (function(toObject) {
   return function(propertyArray = []) {
@@ -53,7 +19,7 @@ fabric.FabricObject.prototype.toObject = (function(toObject) {
 })(fabric.FabricObject.prototype.toObject);
 
 function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, canvasName, canvasID, onCanvasID, saveToggle, onSaveToggle, onSaveResult, loadToggle, onLoadToggle, refreshToggle, onRefreshToggle, 
-    canvasDevice, deviceToggle, onDeviceToggle, user, deviceList, onDeviceList, originalDeviceList, onHandlerToggle}) {
+    canvasDevice, deviceToggle, onDeviceToggle, user, deviceList, onDeviceList, originalDeviceList, onHandlerToggle, drawWidth}) {
     const canvasRef = useRef(null);
     const fabricCanvas = useRef(null);
     const [isDrawing, setIsDrawing] = useState(false);
@@ -240,13 +206,16 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
             let sy = 1;
 
             if(updateDeviceToggle) {
+                
                 const oldDevice =  fabricCanvas.current.getObjects().find(obj => obj.id === updatedDevice.id)
+                if (oldDevice) {
                 l = oldDevice.left;
                 t = oldDevice.top;
                 sx = oldDevice.scaleX;
                 sy = oldDevice.scaleY;
                 fabricCanvas.current.remove(oldDevice);
                 setUpdateDeviceToggle(false);
+                }
             }
 
             const deviceArray = []
@@ -261,6 +230,7 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
                 originX: 'center',
                 originY: 'center',
                 selectable: true,
+                strokeUniform: true,
                 id: device.id,
                 classifier: 'device',
             });
@@ -341,6 +311,7 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
                 top: t,
                 scaleX: sx,
                 scaleY: sy,
+                strokeUniform: true,
                 originX: 'center',
                 originY: 'center',
                 classifier: 'device',
@@ -364,8 +335,64 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
 
     }, [deviceToggle, onDeviceToggle, updateDeviceToggle, canvasDevice, canvasWidth, canvasHeight, updatedDevice])
 
+    useEffect(() => {
+
+        function createComponent(type) {
+            var component = new fabric.FabricImage(type, {
+                left: canvasWidth/2,
+                top: canvasHeight/2,
+                originX: 'center',
+                originY: 'center',
+                scaleX: 0.1,
+                scaleY: 0.1,
+                selectable: true,
+                strokeUniform: true,
+                id: null,
+                classifier: 'draw',
+            });
+
+            fabricCanvas.current.add(component);
+            fabricCanvas.current.renderAll();
+        };
+
+        if (canvasAction === 'doorway') {
+            createComponent(doorwayImg);
+        } else if (canvasAction === 'window') {
+            createComponent(windowImg);
+        }  else if (canvasAction === 'stairs') {
+            createComponent(stairsImg);
+        } else if (canvasAction === 'bed') {
+            createComponent(bedImg);
+        } else if (canvasAction === 'chair') {
+            createComponent(chairImg);
+        } else if (canvasAction === 'sofa') {
+            createComponent(sofaImg);
+        } else if (canvasAction === 'three-sofa') {
+            createComponent(threesofaImg);
+        } else if (canvasAction === 'stove') {
+            createComponent(stoveImg);
+        } else if (canvasAction === 'kitchen-sink') {
+            createComponent(kitchensinkImg);
+        }  else if (canvasAction === 'bathtub') {
+            createComponent(bathtubImg);
+        } else if (canvasAction === 'round-sink') {
+            createComponent(roundsinkImg);
+        } else if (canvasAction === 'toilet') {
+            createComponent(toiletImg);
+        }
+
+
+
+
+
+
+
+
+
+    }, [canvasAction, canvasHeight, canvasWidth])
+
     // Drawing Shapes
-    useEffect(()=> {
+    useEffect(() => {
 
         setActionType(canvasAction)
 
@@ -433,7 +460,8 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
             setY1(pointer.y);
             const newLine = new fabric.Line([pointer.x, pointer.y, pointer.x, pointer.y], {
                 stroke: 'black',
-                strokwWidth: 10,
+                strokeWidth: drawWidth,
+                strokeUniform: true,
                 objectCaching: false,
                 classifier: 'draw',
                 id: null,
@@ -450,22 +478,46 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
             const newRect = new fabric.Rect({
                 left: pointer.x,
                 top: pointer.y,
-                originX: 'left',
-                originY: 'top',
+                originX: 'center',
+                originY: 'center',
                 width: 0,
                 height: 0,
                 fill: null,
                 stroke: 'black',
-                strokwWidth: 10,
+                strokeWidth: drawWidth,
+                strokeUniform: true,
                 objectCaching: false,
                 classifier: 'draw',
                 id: null,
-
             });
             fabricCanvas.current.add(newRect);
             setShape(newRect);
             setIsDrawing(true);
         }
+
+        const mouseDownCircle = (event) => {
+            const pointer = fabricCanvas.current.getPointer(event.e)
+            setX1(pointer.x);
+            setY1(pointer.y);
+            const newCircle = new fabric.Circle({
+                left: pointer.x,
+                top: pointer.y,
+                originX: 'left',
+                originY: 'top',
+                fill: null,
+                radius: 0,
+                stroke: 'black',
+                strokeWidth: drawWidth,
+                strokeUniform: true,
+                objectCaching: false,
+                classifier: 'draw',
+                id: null,
+
+            });
+            fabricCanvas.current.add(newCircle);
+            setShape(newCircle);
+            setIsDrawing(true);
+        }    
 
         const drawLine = (event) => {
             if (isDrawing && shape) {
@@ -491,19 +543,28 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
         const drawRect = (event) => {
             if (isDrawing && shape) {
                 const pointer = fabricCanvas.current.getPointer(event.e);
+
+                const width = Math.abs(x1 - pointer.x);
+                const height = Math.abs(y1 - pointer.y);
+                const left = Math.min(pointer.x, x1)
+                const top = Math.min(pointer.y, y1)
+
                 shape.set({
-                    width: Math.abs(x1 - pointer.x),
-                    height: Math.abs(y1 - pointer.y)
+                    left: left + width / 2,
+                    top: top + height / 2,
+                    width, 
+                    height
                 });
 
-                if (x1 > pointer.x) {
-                    shape.set({left: pointer.x});
-                }
-
-                if (y1 > pointer.y) {
-                    shape.set({top: pointer.y});
-                }
-                
+                fabricCanvas.current.renderAll();
+            }
+        }
+        
+        const drawCircle = (event) => {
+            if (isDrawing && shape) {
+                const pointer = fabricCanvas.current.getPointer(event.e);
+                const radius = Math.hypot(pointer.x - x1, pointer.y - y1) / 2;
+                shape.set({radius});
                 fabricCanvas.current.renderAll();
             }
         }
@@ -525,7 +586,7 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
             setShape(null);
         };
 
-        const mouseUpRect = () => {
+        const mouseUpShape = () => {
             shape.setCoords()
             setIsDrawing(false);
             setShape(null);
@@ -538,6 +599,9 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
                     break;
                 case 'square':
                     mouseDownRect(event);
+                    break;
+                case 'circle':
+                    mouseDownCircle(event);
                     break;
                 default:
                     break;
@@ -552,6 +616,9 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
                 case 'square':
                     drawRect(event);
                     break;
+                case 'circle':
+                    drawCircle(event);
+                    break;
                 default:
                     break;
             }
@@ -563,7 +630,10 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
                     mouseUpLine(event);
                     break;
                 case 'square':
-                    mouseUpRect();
+                    mouseUpShape();
+                    break;
+                case 'circle':
+                    mouseUpShape();
                     break;
                 default:
                     break;
@@ -644,8 +714,9 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
             }
 
             if (e.key === 'Delete' || e.key === 'Backspace') {
-                if(activeObject) {
+                if(activeObject && !activeDevice) {
                     deleteObject(null, { target: activeObject})
+                    
                 }
             }
         };
@@ -666,7 +737,7 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
             fabricCanvas.current.off('mouse:up', mouseUp);
             }
         }
-    }, [tempObject, setTempObject, deviceList, onDeviceList, isDrawing, shape, actionType, canvasAction, x1, y1, originalDeviceList]);
+    }, [tempObject, setTempObject, deviceList, onDeviceList, isDrawing, shape, actionType, canvasAction, x1, y1, originalDeviceList, activeDevice, drawWidth]);
 
     useEffect(() => {
         

@@ -36,6 +36,7 @@ function App() {
   const [saveResult, setSaveResult] = useState(null);
   const [canvasDevice, setCanvasDevice] = useState(false);
   const [handlerToggle, setHandlerToggle] = useState(null);
+  const [drawWidth, setDrawWidth] = useState(1)
   const openPopup = (value) => setActivePopup(value);
   const closePopup = () => setActivePopup(null);
 
@@ -49,6 +50,7 @@ function App() {
   const retrieveSave = (save) => setSaveResult(save);
   const retrieveDevice = (device) => setCanvasDevice(device);
   const retrieveDeviceList = (list) => setDeviceList(list);
+  const retrieveDrawWidth = (pixel) => setDrawWidth(pixel);
 
   useEffect(() => {
     sessionStorage.setItem('canvasWidth', canvasWidth)
@@ -58,7 +60,7 @@ function App() {
     sessionStorage.setItem('activeCanvas', activeCanvas)
     sessionStorage.setItem('sensors', JSON.stringify(deviceList))
     sessionStorage.setItem('original-sensors', JSON.stringify(originalDeviceList))
-  }, [canvasWidth, canvasHeight, canvasName, canvasID, activeCanvas, refreshToggle, deviceList, canvasDevice, originalDeviceList]);
+  }, [canvasWidth, canvasHeight, canvasName, canvasID, activeCanvas, refreshToggle, deviceList, canvasDevice, originalDeviceList, drawWidth]);
 
   const centerZoom = () => {
     window.scrollTo({
@@ -113,16 +115,16 @@ function App() {
           <FabricCanvas canvasWidth={canvasWidth} canvasHeight={canvasHeight} canvasAction={canvasAction} canvasImage={canvasImage} canvasName={canvasName} canvasID={canvasID}
           onCanvasID={retrieveID} activeCanvas={activeCanvas} saveToggle={saveToggle} onSaveToggle={() => setSaveToggle(false)} onSaveResult={retrieveSave} loadToggle={loadToggle} onLoadToggle={() => setLoadToggle(false)} 
           refreshToggle={refreshToggle} onRefreshToggle={()=> setRefreshToggle(false)} canvasDevice={canvasDevice} deviceToggle={deviceToggle} onDeviceToggle={() => setDeviceToggle(false)} user={user} 
-          deviceList={deviceList} onDeviceList={retrieveDeviceList} originalDeviceList={originalDeviceList} onHandlerToggle={(toggle) => setHandlerToggle(toggle)}/>
+          deviceList={deviceList} onDeviceList={retrieveDeviceList} originalDeviceList={originalDeviceList} onHandlerToggle={(toggle) => setHandlerToggle(toggle)} drawWidth={drawWidth}/>
         </div>
       </div>
 
       {activePopup === 'draw' && (
-      <DrawTool onCanvasAction={retrieveAction} canvasAction={canvasAction}/>
+      <DrawTool onCanvasAction={retrieveAction} drawWidth={drawWidth} onDrawWidth={retrieveDrawWidth} />
       )} {activePopup === 'sensor' && (
       <SensorTool onCanvasDevice={retrieveDevice} onDeviceToggle={() => setDeviceToggle(true)} onDeviceList={retrieveDeviceList} deviceList={deviceList} onOriginalDeviceList={(list) => setOriginalDeviceList(list)} activeCanvas={activeCanvas}/>
       )} {activePopup === 'component' && (
-      <ComponentTool/>
+      <ComponentTool onCanvasAction={retrieveAction}/>
       )}
 
       {activePopup === 'about' && (
@@ -134,7 +136,7 @@ function App() {
         <UserAuthentication onClose={closePopup} />
       )}
        {activePopup === 'account' && user  && (
-        <AccountPopup onClose={closePopup} onCanvasName={retrieveName} onCanvasID={retrieveID} onCanvasWidth={retrieveWidth} onCanvasHeight={retrieveHeight} onActive={retrieveActive} onLoadToggle={() => setLoadToggle(true)}  onRefreshToggle={()=> setRefreshToggle(true)} onDeviceList={retrieveDeviceList} deviceList={deviceList} onOriginalDeviceList={(list) => setOriginalDeviceList(list)} user={user}/>
+        <AccountPopup onClose={closePopup} onCanvasName={retrieveName} onCanvasID={retrieveID} onCanvasWidth={retrieveWidth} onCanvasHeight={retrieveHeight} onActive={retrieveActive} onLoadToggle={() => setLoadToggle(true)}  onRefreshToggle={()=> setRefreshToggle(true)} onDeviceList={retrieveDeviceList} deviceList={deviceList} onOriginalDeviceList={(list) => setOriginalDeviceList(list)} originalDeviceList={originalDeviceList} user={user}/>
       )}
       
     </div>

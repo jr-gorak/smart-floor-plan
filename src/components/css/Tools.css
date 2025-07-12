@@ -33,7 +33,7 @@
 .content-grid {
     display: grid;
     grid-auto-rows: auto;
-    row-gap: 15px;
+    row-gap: 5px;
 }
 
 .content {
@@ -63,3 +63,21 @@ button:hover {
 .content:last-child {
     margin-bottom: 10px;
 }
+
+.slider {
+    border-top: 1px solid black;
+    padding-top: 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+
+datalist {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding-bottom: 10px;
+}
+
+

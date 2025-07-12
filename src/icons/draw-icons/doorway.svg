@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="500" height="500">
+  <path style="stroke: rgb(0, 0, 0); fill: rgb(255, 255, 255); stroke-width: 3px;" d="M 36.737 34.039 C 271.012 34.039 467.046 222.878 489.864 470.532"/>
+  <rect x="18.661" y="34.183" width="19.283" height="436.494" style="stroke: rgb(0, 0, 0);"/>
+  <path style="fill: rgb(255, 255, 255); stroke: rgb(255, 255, 255);" d="M 38.966 35.343 L 38.917 470.702 L 488.67 470.051 C 487.123 440.049 234.819 128.9 234.819 128.9 L 54.86 41.892"/>
+</svg>

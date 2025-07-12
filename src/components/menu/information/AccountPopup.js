@@ -5,7 +5,7 @@ import { collection, query, where, getDoc, getDocs, doc, deleteDoc, addDoc, or, 
 import { useState, useEffect } from 'react';
 import { Delete, Copy, Share } from '../../../icons';
 
-function Account({ onClose, onCanvasName, onCanvasID, onCanvasWidth, onCanvasHeight, onActive, onLoadToggle, onRefreshToggle, onDeviceList, onOriginalDeviceList, user }) {
+function Account({ onClose, onCanvasName, onCanvasID, onCanvasWidth, onCanvasHeight, onActive, onLoadToggle, onRefreshToggle, deviceList, onDeviceList, onOriginalDeviceList, originalDeviceList, user }) {
 
   const [files, setFiles] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -86,6 +86,8 @@ function Account({ onClose, onCanvasName, onCanvasID, onCanvasWidth, onCanvasHei
           owner: user.uid,
           canvasName: nameCopy,
           canvasData: activeData,
+          devices: deviceList,
+          originalDevices: originalDeviceList,
           shared: [],
           created: new Date(),
           updated: new Date()

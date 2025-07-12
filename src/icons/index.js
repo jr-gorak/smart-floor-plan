@@ -1,75 +1,118 @@
-import Draw from './pencil.svg';
-import Sensor from './sensors.svg';
-import Component from './door.svg';
-import Create from './plus-box-outline.svg';
-import Save from './content-save.svg';
-import Export from './file-export-outline.svg';
-import Account from './account.svg';
-import Guide from './information.svg';
-import About from './help.svg';
-import DrawLine from './vector-line.svg';
-import Square from './square-outline.svg';
-import DoorOpen from './door-open.svg';
-import DoorClose from './door-closed.svg';
-import Upstairs from './stairs-up.svg';
-import Downstairs from './stairs-down.svg';
-import WindowClosed from './window-closed-variant.svg';
-import WindowOpen from './window-open-variant.svg';
-import Delete from './delete-circle.png';
-import Copy from './content-copy.svg';
-import Share from './share-circle.svg';
-import Move from './hand-back-right-outline.svg';
-import Settings from './cog-outline.svg';
-// Sensors
-import Lorawan from './assistant_device.svg';
-import Zigbee from './missing_controller.svg';
-import Person from './accessibility.svg';
-import Battery from './battery.svg';
-import LightOff from './light_off.svg';
-import LightOn from './lightbulb.svg';
-import Co2 from './co2.svg';
-import Voltage from './bolt.svg';
-import Humidity from './cool_to_dry.svg';
-import Thermometer from './device_thermostat.svg';
-import Pressure from './compress.svg';
-import Sound from './sound_detection.svg';
-import Motion from './motion_blur.svg';
+import Draw from './menu-icons/pencil.svg';
+import Sensor from './menu-icons/sensors.svg';
+import Component from './menu-icons/door.svg';
+import Create from './menu-icons/plus-box-outline.svg';
+import Save from './menu-icons/content-save.svg';
+import Export from './menu-icons/file-export-outline.svg';
+import Account from './menu-icons/account.svg';
+import Guide from './menu-icons/information.svg';
+import About from './menu-icons/help.svg';
+import DrawLine from './menu-icons/vector-line.svg';
+import Square from './menu-icons/square-outline.svg';
+import CircleOutline from './menu-icons/circle-outline.svg';
+import Map from './menu-icons/map-outline.svg';
+
+import Delete from './control-icons/delete-circle.png';
+import Copy from './control-icons/content-copy.svg';
+import Share from './control-icons/share-circle.svg';
+import Move from './control-icons/hand-back-right-outline.svg';
+import Settings from './control-icons/cog-outline.svg';
+
+import DoorOpen from './device-icons/door-open.svg';
+import DoorClose from './device-icons/door-closed.svg';
+import Upstairs from './device-icons/stairs-up.svg';
+import Downstairs from './device-icons/stairs-down.svg';
+import WindowClosed from './device-icons/window-closed-variant.svg';
+import WindowOpen from './device-icons/window-open-variant.svg';
+import Lorawan from './device-icons/assistant_device.svg';
+import Zigbee from './device-icons/missing_controller.svg';
+import Person from './device-icons/accessibility.svg';
+import Battery from './device-icons/battery.svg';
+import LightOff from './device-icons/light_off.svg';
+import LightOn from './device-icons/lightbulb.svg';
+import Co2 from './device-icons/co2.svg';
+import Voltage from './device-icons/bolt.svg';
+import Humidity from './device-icons/cool_to_dry.svg';
+import Thermometer from './device-icons/device_thermostat.svg';
+import Pressure from './device-icons/compress.svg';
+import Sound from './device-icons/sound_detection.svg';
+import Motion from './device-icons/motion_blur.svg';
+
+import Door from './draw-icons/doorway.svg';
+import Bathtub from './draw-icons/bathtub.svg';
+import Bed from './draw-icons/bed.svg';
+import Chair from './draw-icons/chair.svg';
+import KitchenSink from './draw-icons/kitchen_sink.svg';
+import RoundSink from './draw-icons/round_sink.svg';
+import Sofa from './draw-icons/sofa.svg';
+import Stairs from './draw-icons/stairs.svg';
+import Stove from './draw-icons/stove.svg';
+import ThreeSofa from './draw-icons/three_seat_sofa.svg';
+import Toilet from './draw-icons/toilet.svg';
+import Window from './draw-icons/window.svg';
+
+var deleteImg = document.createElement('img');
+var copyImg = document.createElement('img');
+var moveImg = document.createElement('img');
+var settingsImg = document.createElement('img');
+var lorawanImg = document.createElement('img');
+var personImg = document.createElement('img');
+var batteryImg = document.createElement('img');
+var lightoffImg = document.createElement('img');
+var co2Img = document.createElement('img');
+var voltageImg = document.createElement('img');
+var humidityImg = document.createElement('img');
+var thermometerImg = document.createElement('img');
+var pressureImg = document.createElement('img');
+var soundImg = document.createElement('img');
+var motionImg = document.createElement('img');
+var sensorImg = document.createElement('img');
+var doorwayImg = document.createElement('img');
+var windowImg = document.createElement('img');
+var bathtubImg = document.createElement('img');
+var bedImg = document.createElement('img');
+var chairImg = document.createElement('img');
+var kitchensinkImg = document.createElement('img');
+var roundsinkImg = document.createElement('img');
+var sofaImg = document.createElement('img');
+var stairsImg = document.createElement('img');
+var stoveImg = document.createElement('img');
+var threesofaImg = document.createElement('img');
+var toiletImg = document.createElement('img');
+
+copyImg.src = Copy;
+deleteImg.src = Delete;
+moveImg.src = Move;
+settingsImg.src = Settings;
+lorawanImg.src = Lorawan;
+personImg.src = Person;
+batteryImg.src =  Battery;
+lightoffImg.src =  LightOff;
+co2Img.src = Co2;
+voltageImg.src = Voltage;
+humidityImg.src = Humidity;
+thermometerImg.src = Thermometer;
+pressureImg.src = Pressure;
+soundImg.src = Sound;
+motionImg.src =  Motion;
+sensorImg.src = Sensor;
+doorwayImg.src = Door;
+windowImg.src = Window;
+bathtubImg.src = Bathtub;
+bedImg.src = Bed;
+chairImg.src = Chair;
+kitchensinkImg.src = KitchenSink;
+roundsinkImg.src = RoundSink;
+sofaImg.src = Sofa;
+stairsImg.src = Stairs;
+stoveImg.src = Stove;
+threesofaImg.src = ThreeSofa;
+toiletImg.src = Toilet;
 
 export {
-    Draw,
-    Sensor,
-    Component,
-    Create,
-    Save,
-    Export,
-    Account,
-    Guide,
-    About,
-    DrawLine,
-    Square,
-    DoorOpen,
-    DoorClose,
-    Upstairs,
-    Downstairs,
-    WindowClosed,
-    WindowOpen,
-    Delete,
-    Copy,
-    Share,
-    Move,
-    Settings,
-    // Sensors
-    Lorawan,
-    Zigbee,
-    Person,
-    Battery,
-    LightOff,
-    LightOn,
-    Co2,
-    Voltage,
-    Humidity,
-    Thermometer,
-    Pressure,
-    Sound,
-    Motion
+    Draw, Sensor ,Component, Create, Save, Export, Account, Guide, About, DrawLine, Square, DoorOpen, DoorClose, Upstairs, Downstairs ,WindowClosed, WindowOpen, Delete,
+    Copy,Share, Move, Settings, Lorawan, Zigbee, Person, Battery, LightOff, LightOn, Co2, Voltage, Humidity, Thermometer, Pressure, Sound, Motion, 
+    Door, Bathtub, Bed, Chair, KitchenSink, RoundSink, Sofa, Stairs, Stove, ThreeSofa, Toilet, Window, Map, CircleOutline,
+    deleteImg, copyImg, moveImg, settingsImg, lorawanImg, batteryImg, lightoffImg, co2Img, voltageImg, humidityImg, thermometerImg, pressureImg, soundImg, motionImg,
+    doorwayImg, windowImg, personImg, sensorImg, bathtubImg, bedImg, chairImg, kitchensinkImg, roundsinkImg, sofaImg, stairsImg,stoveImg, threesofaImg, toiletImg,
 };

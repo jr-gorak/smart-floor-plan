@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="500" height="500">
+  <rect x="94.655" y="17.435" width="306.566" height="461.667" style="stroke: rgb(0, 0, 0); fill: rgb(255, 255, 255); stroke-width: 20px;" rx="20.953" ry="20.953"/>
+  <rect x="124.769" y="89.372" width="249.412" height="363.818" style="stroke: rgb(0, 0, 0); fill: rgb(255, 255, 255); stroke-width: 15px;" rx="112.022" ry="112.022"/>
+  <ellipse style="stroke: rgb(0, 0, 0); fill: rgb(255, 255, 255); stroke-width: 15px;" cx="247.13" cy="251.998" rx="16.403" ry="15.844"/>
+  <rect x="170.609" y="42.237" width="151.754" height="29.448" style="stroke: rgb(0, 0, 0); fill: rgb(255, 255, 255); stroke-width: 15px;" rx="11.325" ry="11.325"/>
+  <ellipse style="stroke: rgb(0, 0, 0); fill: rgb(255, 255, 255); stroke-width: 15px;" cx="248.486" cy="99.392" rx="17.563" ry="46.242"/>
+</svg>
