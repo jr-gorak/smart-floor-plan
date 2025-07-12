@@ -123,6 +123,7 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
             await updateDoc(doc(db, "canvases", canvasID), {
                 canvasData: file,
                 devices: deviceList,
+                originalDevices: originalDeviceList,
                 updated: new Date()
                 });
                 onSaveResult('success')
