@@ -32,8 +32,8 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
     const [activeDevice, setActiveDevice] = useState(null);
     const [updateDeviceToggle, setUpdateDeviceToggle] = useState(null);
     const [updatedDevice, setUpdatedDevice] = useState(null);
+    const [polygonVertices, setPolygonVertices] = useState([]);
     
-
     const retrieveUpdate = (update) => setUpdatedDevice(update);
 
     const settingsMode = 'canvas';
@@ -54,7 +54,7 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
         }
     }
 
-    //Active Canvas
+    //Initialize Canvas
     useEffect(() => {
 
         fabricCanvas.current = new fabric.Canvas(canvasRef.current, {
@@ -83,7 +83,7 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
             fabricCanvas.current = null;
         }}, [canvasWidth, canvasHeight]);
 
-    //file
+    //Canvas File Handling
     useEffect(() => {
 
         async function saveCanvas(canvas) {
@@ -198,6 +198,7 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
         }
     }, [canvasImage]);
 
+    // Create Devices
     useEffect(() => {
         function createDevice(device) {
 
@@ -334,8 +335,9 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
             createDevice(updatedDevice);
         }
 
-    }, [deviceToggle, onDeviceToggle, updateDeviceToggle, canvasDevice, canvasWidth, canvasHeight, updatedDevice])
+    }, [deviceToggle, onDeviceToggle, updateDeviceToggle, canvasDevice, canvasWidth, canvasHeight, updatedDevice]);
 
+    //Create Components
     useEffect(() => {
 
         function createComponent(type) {
@@ -382,15 +384,7 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
             createComponent(toiletImg);
         }
 
-
-
-
-
-
-
-
-
-    }, [canvasAction, canvasHeight, canvasWidth])
+    }, [canvasAction, canvasHeight, canvasWidth]);
 
     // Drawing Shapes
     useEffect(() => {
@@ -520,6 +514,25 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
             setIsDrawing(true);
         }    
 
+        const mouseDownMark = (event) => {
+            const pointer = fabricCanvas.current.getPointer(event.e);
+            const point = {x: pointer.x, y: pointer.y};
+            setPolygonVertices([...polygonVertices, point])
+
+            const newLine = new fabric.Line([pointer.x, pointer.y, pointer.x, pointer.y], {
+                stroke: 'red',
+                strokeWidth: 5,
+                strokeUniform: true,
+                objectCaching: false,
+                classifier: 'temporary',
+                id: null,
+                })
+
+            fabricCanvas.current.add(newLine);
+            setShape(newLine);
+            setIsDrawing(true);
+        }
+
         const drawLine = (event) => {
             if (isDrawing && shape) {
                 const pointer = fabricCanvas.current.getPointer(event.e);
@@ -536,6 +549,10 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
                 if ((deg < -88 && deg > -92) || (deg > 88 && deg < 92)) {
                     shape.set({x2: x1, y2: pointer.y});
                 };
+
+                if ((polygonVertices.length > 2 && pointer.x < polygonVertices[0].x + 5 && pointer.x > polygonVertices[0].x - 5) && (pointer.y < polygonVertices[0].y + 5 && pointer.y > polygonVertices[0].y - 5)) {
+                    shape.set({x2: polygonVertices[0].x, y2: polygonVertices[0].y})
+                }
 
                 fabricCanvas.current.renderAll();
             };
@@ -593,6 +610,32 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
             setShape(null);
         }
 
+        const mouseUpMark = () => {
+
+            if (polygonVertices.length > 2 && (shape.x1 < polygonVertices[0].x + 5 && shape.x1 > polygonVertices[0].x - 5) && (shape.y1 < polygonVertices[0].y + 5 && shape.y1> polygonVertices[0].y - 5)) {
+                const mark = new fabric.Polygon(polygonVertices, {
+                    fill:  'rgba(255, 0, 0, 0.05)',
+                    stroke: 'rgba(255, 0, 0, 0.05)',
+                    strokeWidth: 1,
+                    id: null,
+                    classifier: 'mark'
+                })
+
+                fabricCanvas.current.add(mark)
+                setPolygonVertices([]);
+                setShape(null);
+                setIsDrawing(false);
+
+                fabricCanvas.current.getObjects().forEach(o => {
+                    if (o.classifier === 'temporary') {
+                        fabricCanvas.current.remove(o);
+                    }
+                });
+
+                fabricCanvas.current.renderAll();
+            }
+        };
+
         const mouseDown = (event) => {
             switch (actionType) {
                 case 'line':
@@ -603,6 +646,9 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
                     break;
                 case 'circle':
                     mouseDownCircle(event);
+                    break;
+                case 'mark':
+                    mouseDownMark(event);
                     break;
                 default:
                     break;
@@ -620,6 +666,9 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
                 case 'circle':
                     drawCircle(event);
                     break;
+                case 'mark':
+                    drawLine(event);
+                    break;
                 default:
                     break;
             }
@@ -636,10 +685,26 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
                 case 'circle':
                     mouseUpShape();
                     break;
+                case 'mark':
+                    mouseUpMark();
+                    break;
                 default:
                     break;
             }
         };
+
+        if (polygonVertices.length > 0 && canvasAction !== 'mark') {
+            setPolygonVertices([]);
+            setShape(null);
+            setIsDrawing(false);
+
+            fabricCanvas.current.getObjects().forEach(o => {
+                if (o.classifier === 'temporary') {
+                    fabricCanvas.current.remove(o);
+                }
+            });
+            fabricCanvas.current.renderAll();
+         };
     
     function renderIcon(icon) {
             return function (ctx, left, top, _styleOverride, fabricObject) {
@@ -725,20 +790,20 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
         document.removeEventListener('keydown', keyDown);
         document.addEventListener('keydown', keyDown);
 
-                fabricCanvas.current.on('mouse:down', mouseDown);
+        fabricCanvas.current.on('mouse:down', mouseDown);
         fabricCanvas.current.on('mouse:move', mouseMove);
         fabricCanvas.current.on('mouse:up', mouseUp);
 
         return () => {
             document.removeEventListener('keydown', keyDown);
 
-                        if (fabricCanvas.current) {
-            fabricCanvas.current.off('mouse:down', mouseDown);
-            fabricCanvas.current.off('mouse:move', mouseMove);
-            fabricCanvas.current.off('mouse:up', mouseUp);
+            if (fabricCanvas.current) {
+                fabricCanvas.current.off('mouse:down', mouseDown);
+                fabricCanvas.current.off('mouse:move', mouseMove);
+                fabricCanvas.current.off('mouse:up', mouseUp);
             }
         }
-    }, [tempObject, setTempObject, deviceList, onDeviceList, isDrawing, shape, actionType, canvasAction, x1, y1, originalDeviceList, activeDevice, drawWidth]);
+    }, [tempObject, setTempObject, deviceList, onDeviceList, isDrawing, shape, actionType, canvasAction, x1, y1, originalDeviceList, activeDevice, drawWidth, polygonVertices]);
 
     useEffect(() => {
         
