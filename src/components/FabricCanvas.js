@@ -1,4 +1,4 @@
-import {useEffect, useRef, useState} from "react";
+import {useCallback, useEffect, useRef, useState} from "react";
 import * as fabric from "fabric";
 import {
 deleteImg, copyImg, settingsImg, lorawanImg, batteryImg, lightoffImg, co2Img, voltageImg, humidityImg, thermometerImg, pressureImg, soundImg, motionImg,
@@ -7,6 +7,9 @@ doorwayImg, windowImg, personImg, sensorImg, stairsImg, bedImg, sofaImg, chairIm
 import { db } from "../firebase";
 import { addDoc, collection, doc, updateDoc, query, getDoc } from "firebase/firestore";
 import DeviceSettings from "./menu/toolset/DeviceSettings";
+import RoomSettings from "./menu/toolset/RoomSettings";
+import { v4 as uuidv4 } from 'uuid';
+import './css/FabricCanvas.css';
 
 fabric.FabricObject.prototype.toObject = (function(toObject) {
   return function(propertyArray = []) {
@@ -14,6 +17,7 @@ fabric.FabricObject.prototype.toObject = (function(toObject) {
       ...toObject.call(this, propertyArray),
       classifier: this.classifier,
       id: this.id,
+      area_id: this.area_id
     };
   };
 })(fabric.FabricObject.prototype.toObject);
@@ -30,17 +34,75 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
     const [tempObject, setTempObject] = useState(null);
     const [togglePopup, setTogglePopup] = useState(false);
     const [activeDevice, setActiveDevice] = useState(null);
+    const [activeRoom, setActiveRoom] = useState(null);
+    const [updatedRoom, setUpdatedRoom] = useState(null);
     const [updateDeviceToggle, setUpdateDeviceToggle] = useState(null);
     const [updatedDevice, setUpdatedDevice] = useState(null);
     const [polygonVertices, setPolygonVertices] = useState([]);
+    const [roomLabel, setRoomLabel] = useState("");
+    const [hideRooms, setHideRooms] = useState(false);
+    const [hideLabels, setHideLabels] = useState(false);
+    const [hideDevices, setHideDevices] = useState(false);
     
     const retrieveUpdate = (update) => setUpdatedDevice(update);
 
     const settingsMode = 'canvas';
 
+        const AssignAreaIDs = useCallback((room) => {
+        const x1 = room.left;
+        const x2 = room.left + room.width;
+        const y1 = room.top;
+        const y2 = room.top + room.height;
+
+        fabricCanvas.current.getObjects().forEach(obj => {
+            if(obj.classifier === 'device' && obj.left > x1 && obj.left < x2 && obj.top > y1 && obj.top < y2) {
+                obj.set({area_id: room.area_id})
+                const findDevice = deviceList.find(d => d.id === obj.id)
+                if (findDevice) {
+                    findDevice.area_id = room.area_id;
+                    const newDeviceList = [...deviceList];
+                    onDeviceList(newDeviceList);
+                }
+            }
+        });
+    }, [deviceList, onDeviceList]);
+
+    const AssignAreaIDsOnMove = useCallback((device) => {
+        let matchedID = false;
+        fabricCanvas.current.getObjects().forEach(room => {
+            if(room.classifier === 'mark' && device.left > room.left && device.left < room.left + room.width && device.top > room.top && device.top < room.top + room.height) {
+                device.set({area_id: room.area_id})
+                const findDevice = deviceList.find(d => d.id === device.id)
+                if (findDevice) {
+                    findDevice.area_id = room.area_id;
+                    const newDeviceList = [...deviceList];
+                    onDeviceList(newDeviceList);
+                }
+                matchedID = true;
+                return;
+            } 
+        });
+
+        if (!matchedID) {
+            device.set({area_id: null})
+            const findDevice = deviceList.find(d => d.id === device.id)
+            if (findDevice) {
+                findDevice.area_id = null;
+                const newDeviceList = [...deviceList];
+                onDeviceList(newDeviceList);
+            }
+        }
+    }, [deviceList, onDeviceList]);
+
     function sessionSave(canvas) {
+        fabricCanvas.current.getObjects().forEach(obj => {
+            obj.visible = true;
+        });
+        
+         setTimeout(() => {
         const file = canvas.toJSON();
         sessionStorage.setItem('fabricCanvas', JSON.stringify(file));
+        }, 0)
     }
 
     function sessionLoad() {
@@ -193,6 +255,7 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
                 fabricCanvas.current.backgroundImage = img;
                 fabricCanvas.current.backgroundImage.classifier = 'background';
                 fabricCanvas.current.backgroundImage.id = null;
+                fabricCanvas.current.backgroundImage.area_id = null;
                 fabricCanvas.current.renderAll();
             })
         }
@@ -206,17 +269,19 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
             let t = canvasHeight/2;
             let sx = 1;
             let sy = 1;
+            let area_id = null;
 
             if(updateDeviceToggle) {
                 
                 const oldDevice =  fabricCanvas.current.getObjects().find(obj => obj.id === updatedDevice.id)
                 if (oldDevice) {
-                l = oldDevice.left;
-                t = oldDevice.top;
-                sx = oldDevice.scaleX;
-                sy = oldDevice.scaleY;
-                fabricCanvas.current.remove(oldDevice);
-                setUpdateDeviceToggle(false);
+                    l = oldDevice.left;
+                    t = oldDevice.top;
+                    sx = oldDevice.scaleX;
+                    sy = oldDevice.scaleY;
+                    area_id = oldDevice.area_id;
+                    fabricCanvas.current.remove(oldDevice);
+                    setUpdateDeviceToggle(false);
                 }
             }
 
@@ -235,6 +300,7 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
                 strokeUniform: true,
                 id: device.id,
                 classifier: 'device',
+                area_id: area_id,
             });
 
             deviceArray.push(deviceImg);
@@ -243,9 +309,9 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
             const deviceText = new fabric.FabricText(device.label, {
                 fontSize: 12,
                 id: null,
-                classifier: null,
+                classifier: 'text',
                 path: null,
-
+                area_id: area_id,
             })
 
             deviceText.set({
@@ -301,6 +367,7 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
                         originY: 'center',
                         id: sensor.id,
                         classifier: 'sensor',
+                        area_id: area_id,
                 });
 
                     angleScaler++;
@@ -318,11 +385,16 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
                 originY: 'center',
                 classifier: 'device',
                 id: device.id,
+                area_id: area_id,
             });
 
             fabricCanvas.current.add(group);
             fabricCanvas.current.renderAll();
             setActionType(null);
+
+            group.on('moving', () => {
+                AssignAreaIDsOnMove(group)
+            })
 
             }
 
@@ -335,7 +407,7 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
             createDevice(updatedDevice);
         }
 
-    }, [deviceToggle, onDeviceToggle, updateDeviceToggle, canvasDevice, canvasWidth, canvasHeight, updatedDevice]);
+    }, [deviceToggle, onDeviceToggle, updateDeviceToggle, canvasDevice, canvasWidth, canvasHeight, updatedDevice, AssignAreaIDs, AssignAreaIDsOnMove]);
 
     //Create Components
     useEffect(() => {
@@ -352,6 +424,7 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
                 strokeUniform: true,
                 id: null,
                 classifier: 'draw',
+                area_id: null,
             });
 
             fabricCanvas.current.add(component);
@@ -393,10 +466,28 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
 
         if (actionType === 'select') {
             fabricCanvas.current.selection = true;
-            fabricCanvas.current.getObjects().forEach(o => {
-                o.selectable = true;
-                o.perPixelTargetFind = true;
-                setControls(o)
+            fabricCanvas.current.getObjects().forEach(obj => {
+                obj.selectable = true;
+                obj.perPixelTargetFind = true;
+                setControls(obj)
+
+                if (obj.classifier === 'device') {
+                    obj.on('moving', () => {
+                        AssignAreaIDsOnMove(obj)
+                    })
+                }
+
+                if (obj.classifier === 'mark') {
+                    obj.lockMovementX = true;
+                    obj.lockMovementY = true;
+                    obj.lockRotation = true;
+                    obj.lockScalingX = true;
+                    obj.lockScalingFlip = true;
+                    obj.lockScalingY = true;
+                    obj.cursorStyle = 'default';
+                    obj.cornerColor = 'rgba(0, 0, 0, 0)';
+                    obj.hasBorders = false;
+                }
             });
 
         } else {
@@ -407,16 +498,10 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
         }
 
         function setControls(object) {
-            object.controls.deleteControl = new fabric.Control({
-                x: 0.5,
-                y: -0.5,
-                offsetY: 16,
-                offsetX: 16,
-                cursorStyle: 'pointer',
-                mouseUpHandler: deleteObject,
-                render: renderIcon(deleteImg),
-                cornersize: 24,
-            });
+
+            if (object.classifier === 'text') {
+                return;
+            }
 
             if (object.classifier === 'draw') {
                 object.controls.copyControl = new fabric.Control({
@@ -443,6 +528,30 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
                     cornersize: 24,
                 })
             }
+
+            if (object.classifier === 'mark') {
+                object.controls.settingsControl = new fabric.Control({
+                    x: -0.5,
+                    y: -0.5,
+                    offsetY: -16,
+                    offsetX: 16, 
+                    cursorStyle: 'pointer',
+                    mouseUpHandler: roomInformation,
+                    render: renderIcon(settingsImg),
+                    cornersize: 24,
+                })
+            }
+
+            object.controls.deleteControl = new fabric.Control({
+                x: 0.5,
+                y: -0.5,
+                offsetY: 16,
+                offsetX: 16,
+                cursorStyle: 'pointer',
+                mouseUpHandler: deleteObject,
+                render: renderIcon(deleteImg),
+                cornersize: 24,
+            });
         };
         
         if (shape) {
@@ -460,6 +569,7 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
                 objectCaching: false,
                 classifier: 'draw',
                 id: null,
+                area_id: null,
                 })
             fabricCanvas.current.add(newLine);
             setShape(newLine);
@@ -484,6 +594,7 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
                 objectCaching: false,
                 classifier: 'draw',
                 id: null,
+                area_id: null,
             });
             fabricCanvas.current.add(newRect);
             setShape(newRect);
@@ -507,7 +618,7 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
                 objectCaching: false,
                 classifier: 'draw',
                 id: null,
-
+                area_id: null,
             });
             fabricCanvas.current.add(newCircle);
             setShape(newCircle);
@@ -526,6 +637,7 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
                 objectCaching: false,
                 classifier: 'temporary',
                 id: null,
+                area_id: null,
                 })
 
             fabricCanvas.current.add(newLine);
@@ -613,15 +725,30 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
         const mouseUpMark = () => {
 
             if (polygonVertices.length > 2 && (shape.x1 < polygonVertices[0].x + 5 && shape.x1 > polygonVertices[0].x - 5) && (shape.y1 < polygonVertices[0].y + 5 && shape.y1> polygonVertices[0].y - 5)) {
+                const id = uuidv4();
                 const mark = new fabric.Polygon(polygonVertices, {
-                    fill:  'rgba(255, 0, 0, 0.05)',
-                    stroke: 'rgba(255, 0, 0, 0.05)',
+                    fill:  '#ff00000d',
+                    stroke: '#ff00000d',
                     strokeWidth: 1,
-                    id: null,
-                    classifier: 'mark'
+                    id: id,
+                    classifier: 'mark',
+                    area_id: id,
                 })
 
+                const text = new fabric.FabricText('Room Label', {
+                    fontSize: 24,
+                    id: mark.id,
+                    classifier: 'text',
+                    path: null,
+                    area_id: mark.area_id,
+                })
+
+                text.set({
+                    left: mark.left + (mark.height/2),
+                    top: mark.top + (mark.height/2),
+                })
                 fabricCanvas.current.add(mark)
+                fabricCanvas.current.add(text)
                 setPolygonVertices([]);
                 setShape(null);
                 setIsDrawing(false);
@@ -631,8 +758,9 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
                         fabricCanvas.current.remove(o);
                     }
                 });
-
                 fabricCanvas.current.renderAll();
+
+                AssignAreaIDs(mark)
             }
         };
 
@@ -705,6 +833,18 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
             });
             fabricCanvas.current.renderAll();
          };
+
+         if (updatedRoom) {
+            const oldRoom = fabricCanvas.current.getObjects().find(obj => obj.id === updatedRoom.id && obj.classifier === 'mark')
+            const oldText = fabricCanvas.current.getObjects().find(obj => obj.id === updatedRoom.id && obj.classifier === 'text')
+            if (oldRoom && oldText) {
+                oldRoom.set({area_id: updatedRoom.area_id, fill: updatedRoom.fill, stroke: updatedRoom.fill})
+                oldText.set({text: roomLabel})
+                fabricCanvas.current.renderAll();
+                AssignAreaIDs(updatedRoom)
+            }
+            setUpdatedRoom(null);
+         }
     
     function renderIcon(icon) {
             return function (ctx, left, top, _styleOverride, fabricObject) {
@@ -717,6 +857,11 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
             }};
 
         function deleteObject(_eventData, transform) {
+            const canvas = transform.target.canvas;
+
+            if (transform.target.classifier === 'text') {
+                return;
+            }
 
             if (transform.target.classifier === 'device') {
                 const id = transform.target.id;
@@ -727,7 +872,13 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
                 onDeviceList(newDeviceList);
             }
 
-            const canvas = transform.target.canvas;
+            if (transform.target.classifier === 'mark') {
+                const oldText = fabricCanvas.current.getObjects().find(obj => obj.id === transform.target.id && obj.classifier === 'text')
+                if (oldText) {
+                    canvas.remove(oldText);
+                }
+            }
+
             canvas.remove(transform.target);
             canvas.requestRenderAll();
         };
@@ -749,6 +900,12 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
             const findDevice = deviceList.find(d => d.id === id)
             setActiveDevice(findDevice);
             setTogglePopup(true);
+        }
+
+        function roomInformation(_eventData, transform) {
+            const roomText = fabricCanvas.current.getObjects().find(obj => obj.id === transform.target.id && obj.classifier === 'text')
+            setRoomLabel(roomText.text)
+            setActiveRoom(transform.target);
         }
 
         function keyDown(e){
@@ -803,30 +960,112 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
                 fabricCanvas.current.off('mouse:up', mouseUp);
             }
         }
-    }, [tempObject, setTempObject, deviceList, onDeviceList, isDrawing, shape, actionType, canvasAction, x1, y1, originalDeviceList, activeDevice, drawWidth, polygonVertices]);
+    }, [tempObject, setTempObject, deviceList, onDeviceList, isDrawing, shape, actionType, canvasAction, x1, y1, originalDeviceList, activeDevice, drawWidth, polygonVertices, updatedRoom, roomLabel, AssignAreaIDs, AssignAreaIDsOnMove]);
 
     useEffect(() => {
         
-        onHandlerToggle(togglePopup);
+    onHandlerToggle(togglePopup);
 
-    }, [onHandlerToggle, togglePopup])
+    }, [onHandlerToggle, togglePopup]);
+
+    useEffect(() => {
+
+    }, [])
+
+    //Hidden View Toggles
+    useEffect(() => {
+        if (hideRooms) {
+            fabricCanvas.current.getObjects().forEach(obj => {
+                if(obj.classifier === 'mark') {
+                    obj.visible = false
+                }
+            })
+            fabricCanvas.current.renderAll();
+        } else {
+            fabricCanvas.current.getObjects().forEach(obj => {
+                if(obj.classifier === 'mark') {
+                    obj.visible = true
+                }
+            })
+            fabricCanvas.current.renderAll();
+        }
+
+        if (hideLabels) {
+            fabricCanvas.current.getObjects().forEach(obj => {
+                if(obj.classifier === 'text') {
+                    obj.visible = false
+                }
+            })
+            fabricCanvas.current.renderAll();
+        } else {
+            fabricCanvas.current.getObjects().forEach(obj => {
+                if(obj.classifier === 'text') {
+                    obj.visible = true
+                }
+            })
+            fabricCanvas.current.renderAll();
+        }
+
+        if (hideDevices) {
+            fabricCanvas.current.getObjects().forEach(obj => {
+                if(obj.classifier === 'device') {
+                    obj.visible = false
+                }
+            })
+            fabricCanvas.current.renderAll();
+        } else {
+            fabricCanvas.current.getObjects().forEach(obj => {
+                if(obj.classifier === 'device') {
+                    obj.visible = true
+                }
+            })
+            fabricCanvas.current.renderAll();
+        }
+
+    }, [hideRooms, hideLabels, hideDevices]);
 
     return (
-        <div>
+        <div className="canvas-container">
+            <div className="canvas-controls">
+                <b>Viewpoint</b>
+                <div className="view-checkbox">
+                    <p>Hide Rooms</p>
+                    <input className='checkbox' type="checkbox" defaultChecked={hideRooms} onChange={(e) => setHideRooms(e.target.checked)}/>
+                </div>
+                <div className="view-checkbox">
+                    <p>Hide Labels</p>
+                    <input className='checkbox' type="checkbox" defaultChecked={hideLabels} onChange={(e) => setHideLabels(e.target.checked)}/>
+                </div>
+                <div className="view-checkbox">
+                    <p>Hide Devices</p>
+                    <input className='checkbox' type="checkbox" defaultChecked={hideDevices} onChange={(e) => setHideDevices(e.target.checked)}/>
+                </div>
+            </div>
+
             <div>
                 <canvas ref={canvasRef}></canvas>
                 {canvasName && (
-                <div className="canvas-info" style={{display: "flex", justifyContent: "flex-end"}}>
-                    {canvasName} 
-                    {" ("}{canvasWidth} x {canvasHeight}{")"}
+                <div>
+                    <div className="canvas-info">
+                        {canvasName} 
+                        {" ("}{canvasWidth} x {canvasHeight}{")"}
+                    </div>
                 </div>
                 )}
             </div>
+
             <div>
+
                 {togglePopup && (
                     <DeviceSettings settingsMode={settingsMode} activeDevice={activeDevice} deviceList={deviceList} onTogglePopup={() => setTogglePopup(false)} onUpdateDeviceToggle={() => setUpdateDeviceToggle(true)} onDeviceList={onDeviceList} onUpdatedDevice={retrieveUpdate}></DeviceSettings>
                 )
                 }
+
+                {activeRoom && (
+                    <div>
+                        <RoomSettings activeRoom={activeRoom} roomLabel={roomLabel} onActiveRoom={(value) => setActiveRoom(value)} onUpdatedRoom={(update) => setUpdatedRoom(update)} onUpdatedLabel={(text) => setRoomLabel(text)}></RoomSettings>
+                    </div>
+                )}
             </div>
         </div>
     )

@@ -89,7 +89,7 @@ function App() {
         } else {
           setZoom(Math.max(zoom - 0.05, 0.5))
           if (zoom < 1) {
-          setTransl(Math.min(transl + 5, 50))
+          setTransl(Math.min(transl + 5, 40))
           }
         }
 

@@ -1,0 +1,30 @@
+.canvas-container {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+.canvas-controls {
+    margin-top: 10%;
+    background-color: #fffffb;
+    padding: 10px 10px 10px 10px;
+    box-shadow: 0 2px 4px #00000033;
+    min-width: 130px;
+    height: 200px;
+}
+
+.view-checkbox {
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+    align-content: center;
+}
+
+.view-checkbox input {
+    margin-top: 5px;
+}
+
+.canvas-info {
+    display: flex;
+    justify-content: flex-end;
+}

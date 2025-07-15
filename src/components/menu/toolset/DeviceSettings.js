@@ -5,7 +5,7 @@ import '../../css/Popup.css';
 import {Sensor, Lorawan, Zigbee, Thermometer, Battery, Person, LightOff, Co2, Voltage, Humidity, Pressure, Sound, Motion} from '../../../icons/index'
 
 function DeviceSettings({settingsMode, activeDevice, deviceList, onTogglePopup, onUpdateDeviceToggle, onCanvasDevice, onDeviceToggle, onDeviceList, onUpdatedDevice}) {
-  
+
   const [activeInput, setActiveInput] = useState(null);
   document.body.style.overflow = 'hidden';
   
@@ -89,6 +89,7 @@ function DeviceSettings({settingsMode, activeDevice, deviceList, onTogglePopup, 
 
           <p><b>Original Name: </b>{activeDevice.name}</p>
           <p><b>Platform:</b> {activeDevice.platform}</p>
+          <p><b>Area ID:</b> {activeDevice.area_id}</p>
 
           <div className='sensor-list'>
             <p><b>Sensors:</b></p>
