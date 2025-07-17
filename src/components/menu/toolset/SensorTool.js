@@ -147,10 +147,7 @@ function SensorTool({onCanvasDevice, onDeviceToggle, onDeviceList, onOriginalDev
 
       {!deviceList && 
         <div>
-          {!activeCanvas && 
-            <p style={{color: 'red'}}>There is no active canvas!</p>
-          }
-          <button  className={!activeCanvas ? "input-off" : "input-on "} disabled={!activeCanvas} onClick={() => togglePopup('upload')}>Upload Devices</button>
+          <button onClick={() => togglePopup('upload')}>Upload Devices</button>
         </div>
       }
 

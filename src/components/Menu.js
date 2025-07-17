@@ -5,7 +5,7 @@ import {Draw, Sensor, Component, Create, Save, Account, Guide, About, Export} fr
 import CreateDropdown from './menu/filemanager/CreateDropdown';
 import ExportDropdown from './menu/filemanager/ExportDropdown';
 
-function Menu( {onOpenPopup, onCanvasWidth, onCanvasHeight, onCanvasImage, onCanvasName, onActive, onCanvasID, onSaveToggle, onRefreshToggle, onSaveResult, saveResult, user} ) {
+function Menu( {onOpenPopup, onCanvasWidth, onCanvasHeight, onCanvasImage, onCanvasName, onActive, onCanvasID, onSaveToggle, onRefreshToggle, onSaveResult, saveResult, user, activeCanvas} ) {
 
     const [isActive, setIsActive] = useState(false);
     const [activeValue, setActiveValue] = useState(null);
@@ -65,9 +65,9 @@ function Menu( {onOpenPopup, onCanvasWidth, onCanvasHeight, onCanvasImage, onCan
     return (
         <div className='menu'>
             <div className='draw'>
-                <button className={activeValue === 'draw' ? 'button-on' : 'button-off'} onClick={() => togglePopup('draw')}><img src={Draw} className="menu-icon" alt="logo"/><p>Draw</p></button>
-                <button className={activeValue === 'sensor' ? 'button-on' : 'button-off'} onClick={() => togglePopup('sensor')}><img src={Sensor} className="menu-icon" alt="logo"/> Add Sensor</button>
-                <button className={activeValue === 'component' ? 'button-on' : 'button-off'} onClick={() => togglePopup('component')}><img src={Component} className="menu-icon" alt="logo"/> Add Component</button>
+                <button className={activeValue === 'draw' ? 'button-on' : 'button-off'} onClick={() => togglePopup('draw')} disabled={!activeCanvas} ><img src={Draw} className="menu-icon" alt="logo"/><p>Draw</p></button>
+                <button className={activeValue === 'sensor' ? 'button-on' : 'button-off'} onClick={() => togglePopup('sensor')} disabled={!activeCanvas} ><img src={Sensor} className="menu-icon" alt="logo"/> Add Sensor</button>
+                <button className={activeValue === 'component' ? 'button-on' : 'button-off'} onClick={() => togglePopup('component')} disabled={!activeCanvas} ><img src={Component} className="menu-icon" alt="logo"/> Add Component</button>
             </div>
 
             <div className='file'>

@@ -155,18 +155,22 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
     //Initialize Canvas
     useEffect(() => {
 
+   
+
         fabricCanvas.current = new fabric.Canvas(canvasRef.current, {
             width: canvasWidth,
             height: canvasHeight,
             backgroundColor: 'white',
         });
 
+        if (!refreshToggle) {
         setTimeout(() => {
             sessionLoad();
                 requestAnimationFrame(() => {
                     fabricCanvas.current.renderAll();
                 });
-        }, 0);
+        }, 100);
+        }
 
         const triggerSave = () => {
             sessionSave(fabricCanvas.current)
@@ -179,7 +183,7 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
             window.removeEventListener("beforeunload", triggerSave);
             fabricCanvas.current?.dispose();
             fabricCanvas.current = null;
-        }}, [canvasWidth, canvasHeight]);
+        }}, [canvasWidth, canvasHeight, refreshToggle, loadToggle]);
 
     //Canvas File Handling
     useEffect(() => {
@@ -244,12 +248,13 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
                 const json = retrieve.canvasData;
                 
                 if (retrieve) {
-                    fabricCanvas.current.loadFromJSON(json)
-                    requestAnimationFrame(() => {
-                        fabricCanvas.current.renderAll();
-                    });
-                    setActionType(null);
+            fabricCanvas.current.loadFromJSON(json, () => {
+                requestAnimationFrame(() => {
+                    fabricCanvas.current.renderAll();
                     sessionSave(fabricCanvas.current)
+                });
+            });
+                    setActionType(null);                   
                 }
 
             } catch(error) {
@@ -259,8 +264,8 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
 
         function refreshCanvas() {
             fabricCanvas.current.clear();
-            fabricCanvas.current.backgroundColor = "white";
-            sessionSave(fabricCanvas.current)
+            fabricCanvas.current.backgroundColor = "white"
+            sessionSave(fabricCanvas.current);
             requestAnimationFrame(() => {
                 fabricCanvas.current.renderAll();
             });
@@ -283,7 +288,7 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
             onRefreshToggle()
         }
             
-    }, [ canvasName, saveToggle, onSaveToggle, loadToggle, onLoadToggle, user, canvasID, onCanvasID, refreshToggle, onRefreshToggle, canvasAction, onSaveResult, deviceList, originalDeviceList])
+    }, [canvasHeight, canvasWidth, canvasName, saveToggle, onSaveToggle, loadToggle, onLoadToggle, user, canvasID, onCanvasID, refreshToggle, onRefreshToggle, canvasAction, onSaveResult, deviceList, originalDeviceList])
 
     // Setting Background Image
     useEffect(()=> {

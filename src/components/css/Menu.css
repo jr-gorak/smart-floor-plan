@@ -32,6 +32,11 @@
     cursor: pointer;
 }
 
+.menu button:disabled {
+    background-color: #fffffb;
+    cursor: default
+}
+
 .button-on {
     background-color: #efefef !important;
 }
