@@ -4,6 +4,11 @@
     gap: 10px;
 }
 
+.canvas-side-menu {
+    display: flex;
+    flex-direction: column;
+}
+
 .canvas-controls {
     margin-top: 10%;
     background-color: #fffffb;
@@ -27,4 +32,27 @@
 .canvas-info {
     display: flex;
     justify-content: flex-end;
+}
+
+.floor-mapping {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px 0 0 0;
+}
+
+.floor-button {
+    display: flex;
+    justify-content: center;
+    width: 50px;
+    box-shadow: 0 2px 4px #00000033;
+}
+
+.arrow-button{
+    font-size: 30px;
+    font-weight: bold;
+    justify-content: center;
+    width: 70px;
+    box-shadow: 0 2px 4px #00000033;
 }

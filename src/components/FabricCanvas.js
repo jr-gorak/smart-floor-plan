@@ -22,6 +22,8 @@ fabric.FabricObject.prototype.toObject = (function(toObject) {
   };
 })(fabric.FabricObject.prototype.toObject);
 
+
+
 function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, canvasName, canvasID, onCanvasID, saveToggle, onSaveToggle, onSaveResult, loadToggle, onLoadToggle, refreshToggle, onRefreshToggle, 
     canvasDevice, deviceToggle, onDeviceToggle, user, deviceList, onDeviceList, originalDeviceList, onHandlerToggle, drawWidth}) {
     const canvasRef = useRef(null);
@@ -43,10 +45,39 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
     const [hideRooms, setHideRooms] = useState(false);
     const [hideLabels, setHideLabels] = useState(false);
     const [hideDevices, setHideDevices] = useState(false);
+    const [activeFloor, setActiveFloor] = useState(null)
+    const [floorArray, setFloorArray] = useState(["GR"]);
     
     const retrieveUpdate = (update) => setUpdatedDevice(update);
 
     const settingsMode = 'canvas';
+
+    
+
+function AddFloor(direction) {
+    if (direction === 'up') {
+        let floorCount = 0;
+        floorArray.forEach((floor) => {
+            if (floor.includes('B')) {
+                floorCount++
+            }
+        })
+        if (floorArray.length < 5) {
+            setFloorArray(floors => [((floorArray.length - floorCount) + "F"), ...floors])
+        }
+    }
+    if (direction === 'down') {
+        let floorCount = 0;
+        floorArray.forEach((floor) => {
+            if (floor.includes('F')) {
+                floorCount++
+            }
+        })
+        if (floorArray.length < 5) {
+        setFloorArray(floors => [...floors, ((floorArray.length - floorCount) + "B")])
+        }
+    }
+}
 
         const AssignAreaIDs = useCallback((room) => {
         const x1 = room.left;
@@ -99,7 +130,7 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
             obj.visible = true;
         });
         
-         setTimeout(() => {
+    setTimeout(() => {
         const file = canvas.toJSON();
         sessionStorage.setItem('fabricCanvas', JSON.stringify(file));
         }, 0)
@@ -1026,21 +1057,36 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
 
     return (
         <div className="canvas-container">
-            <div className="canvas-controls">
-                <b>Viewpoint</b>
-                <div className="view-checkbox">
-                    <p>Hide Rooms</p>
-                    <input className='checkbox' type="checkbox" defaultChecked={hideRooms} onChange={(e) => setHideRooms(e.target.checked)}/>
+            <div className="canvas-side-menu">
+                <div className="canvas-controls">
+                    <b>Viewpoint</b>
+                    <div className="view-checkbox">
+                        <p>Hide Rooms</p>
+                        <input className='checkbox' type="checkbox" defaultChecked={hideRooms} onChange={(e) => setHideRooms(e.target.checked)}/>
+                    </div>
+                    <div className="view-checkbox">
+                        <p>Hide Labels</p>
+                        <input className='checkbox' type="checkbox" defaultChecked={hideLabels} onChange={(e) => setHideLabels(e.target.checked)}/>
+                    </div>
+                    <div className="view-checkbox">
+                        <p>Hide Devices</p>
+                        <input className='checkbox' type="checkbox" defaultChecked={hideDevices} onChange={(e) => setHideDevices(e.target.checked)}/>
+                    </div>
                 </div>
-                <div className="view-checkbox">
-                    <p>Hide Labels</p>
-                    <input className='checkbox' type="checkbox" defaultChecked={hideLabels} onChange={(e) => setHideLabels(e.target.checked)}/>
-                </div>
-                <div className="view-checkbox">
-                    <p>Hide Devices</p>
-                    <input className='checkbox' type="checkbox" defaultChecked={hideDevices} onChange={(e) => setHideDevices(e.target.checked)}/>
-                </div>
+
+
+
+                    <div className="floor-mapping">
+                        <button className="arrow-button" onClick={() => AddFloor('up')}>⇧</button>
+                        {floorArray.map((floor) => (
+                            <button className="floor-button" key={floor}><b>{floor}</b></button>
+                        ))}
+                        <button className="arrow-button" onClick={() => AddFloor('down')}>⇩</button>
+                    </div>
+                
             </div>
+
+            
 
             <div>
                 <canvas ref={canvasRef}></canvas>
