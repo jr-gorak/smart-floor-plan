@@ -45,39 +45,38 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
     const [hideRooms, setHideRooms] = useState(false);
     const [hideLabels, setHideLabels] = useState(false);
     const [hideDevices, setHideDevices] = useState(false);
-    const [activeFloor, setActiveFloor] = useState(null)
-    const [floorArray, setFloorArray] = useState(["GR"]);
+    const [floorArray, setFloorArray] = useState(() => {const stored = sessionStorage.getItem("floorArray"); return stored? JSON.parse(stored) : ["GR"]; });
+    const [activeFloor, setActiveFloor] = useState(() => {const stored = sessionStorage.getItem("activeFloor"); return stored? JSON.parse(stored) : floorArray[0]; });
+  
     
     const retrieveUpdate = (update) => setUpdatedDevice(update);
 
     const settingsMode = 'canvas';
 
-    
-
-function AddFloor(direction) {
-    if (direction === 'up') {
-        let floorCount = 0;
-        floorArray.forEach((floor) => {
-            if (floor.includes('B')) {
-                floorCount++
+    function AddFloor(direction) {
+        if (direction === 'up') {
+            let floorCount = 0;
+            floorArray.forEach((floor) => {
+                if (floor.includes('B')) {
+                    floorCount++
+                }
+            })
+            if (floorArray.length < 5) {
+                setFloorArray(floors => [((floorArray.length - floorCount) + "F"), ...floors])
             }
-        })
-        if (floorArray.length < 5) {
-            setFloorArray(floors => [((floorArray.length - floorCount) + "F"), ...floors])
+        }
+        if (direction === 'down') {
+            let floorCount = 0;
+            floorArray.forEach((floor) => {
+                if (floor.includes('F')) {
+                    floorCount++
+                }
+            })
+            if (floorArray.length < 5) {
+            setFloorArray(floors => [...floors, ((floorArray.length - floorCount) + "B")])
+            }
         }
     }
-    if (direction === 'down') {
-        let floorCount = 0;
-        floorArray.forEach((floor) => {
-            if (floor.includes('F')) {
-                floorCount++
-            }
-        })
-        if (floorArray.length < 5) {
-        setFloorArray(floors => [...floors, ((floorArray.length - floorCount) + "B")])
-        }
-    }
-}
 
         const AssignAreaIDs = useCallback((room) => {
         const x1 = room.left;
@@ -130,11 +129,11 @@ function AddFloor(direction) {
             obj.visible = true;
         });
         
-    setTimeout(() => {
-        const file = canvas.toJSON();
-        sessionStorage.setItem('fabricCanvas', JSON.stringify(file));
-        }, 0)
-    }
+        setTimeout(() => {
+            const file = canvas.toJSON();
+            sessionStorage.setItem('fabricCanvas', JSON.stringify(file));
+            }, 0)
+        }
 
     function sessionLoad() {
         const retrieve = sessionStorage.getItem('fabricCanvas');
@@ -146,6 +145,12 @@ function AddFloor(direction) {
             });
         }
     }
+
+    //Save Floor List
+    useEffect(() => {
+        sessionStorage.setItem("floorArray", JSON.stringify(floorArray));
+        sessionStorage.setItem("activeFloor", JSON.stringify(activeFloor));
+    }, [floorArray, activeFloor])
 
     //Initialize Canvas
     useEffect(() => {
@@ -259,6 +264,8 @@ function AddFloor(direction) {
             requestAnimationFrame(() => {
                 fabricCanvas.current.renderAll();
             });
+            setFloorArray(["GR"])
+            setActiveDevice("GR")
         };
 
 
@@ -1079,7 +1086,7 @@ function AddFloor(direction) {
                     <div className="floor-mapping">
                         <button className="arrow-button" onClick={() => AddFloor('up')}>⇧</button>
                         {floorArray.map((floor) => (
-                            <button className="floor-button" key={floor}><b>{floor}</b></button>
+                            <button className={activeFloor === floor ? "floor-button-active" : "floor-button"} key={floor} onClick={() => setActiveFloor(floor)} disabled={activeFloor === floor}><b>{floor}</b></button>
                         ))}
                         <button className="arrow-button" onClick={() => AddFloor('down')}>⇩</button>
                     </div>

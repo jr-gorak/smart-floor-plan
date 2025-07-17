@@ -42,6 +42,15 @@
     padding: 20px 0 0 0;
 }
 
+.floor-button-active {
+    display: flex;
+    justify-content: center;
+    width: 50px;
+    box-shadow: 0 2px 4px #00000033;
+    background-color: #efefef;
+    cursor: default !important;
+}
+
 .floor-button {
     display: flex;
     justify-content: center;

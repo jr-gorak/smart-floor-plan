@@ -23,7 +23,7 @@ function App() {
   const [canvasHeight, setCanvasHeight] = useState(() => sessionStorage.getItem('canvasHeight'));
   const [canvasName, setCanvasName] = useState(() => sessionStorage.getItem('canvasName'));
   const [canvasID, setCanvasID] = useState(() => sessionStorage.getItem('canvasID'));
-  const [activeCanvas, setActiveCanvas] = useState(() => sessionStorage.getItem('activeCanvas'));
+  const [activeCanvas, setActiveCanvas] = useState(() => JSON.parse(sessionStorage.getItem('activeCanvas')));
   const [deviceList, setDeviceList] =  useState(() => JSON.parse(sessionStorage.getItem('sensors')));
   const [originalDeviceList, setOriginalDeviceList] = useState(() => JSON.parse(sessionStorage.getItem('original-sensors')));
 
@@ -57,7 +57,7 @@ function App() {
     sessionStorage.setItem('canvasHeight', canvasHeight)
     sessionStorage.setItem('canvasName', canvasName)
     sessionStorage.setItem('canvasID', canvasID)
-    sessionStorage.setItem('activeCanvas', activeCanvas)
+    sessionStorage.setItem('activeCanvas', JSON.stringify(activeCanvas))
     sessionStorage.setItem('sensors', JSON.stringify(deviceList))
     sessionStorage.setItem('original-sensors', JSON.stringify(originalDeviceList))
   }, [canvasWidth, canvasHeight, canvasName, canvasID, activeCanvas, refreshToggle, deviceList, canvasDevice, originalDeviceList, drawWidth]);
@@ -101,6 +101,8 @@ function App() {
           window.removeEventListener('wheel', preventScroll);
         }, 1000);
   };
+
+  console.log(activeCanvas)
 
   return (
     <div className="App">
