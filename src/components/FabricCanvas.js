@@ -95,15 +95,19 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
         });
 
         if (floorData[floor]) {
+            
             blankCanvas.loadFromJSON(floorData[floor]);
             setActionType(null);       
         }
 
         fabricCanvas.current = blankCanvas;
-
-        requestAnimationFrame(() => {
+         setTimeout(() => {
+                requestAnimationFrame(() => {
             fabricCanvas.current.renderAll();
         });
+         }, 0)
+
+
 
         setActiveFloor(floor)
     }
@@ -186,8 +190,6 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
     //Initialize Canvas
     useEffect(() => {
 
-   
-
         fabricCanvas.current = new fabric.Canvas(canvasRef.current, {
             width: canvasWidth,
             height: canvasHeight,
@@ -232,6 +234,8 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
                 owner: user.uid,
                 canvasName: canvasName,
                 canvasData: file,
+                floorplanData: floorData,
+                floorArray: floorArray,
                 shared: [],
                 devices: deviceList,
                 originalDevices: originalDeviceList,
@@ -255,6 +259,8 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
             try{
             await updateDoc(doc(db, "canvases", canvasID), {
                 canvasData: file,
+                floorplanData: floorData,
+                floorArray: floorArray,
                 devices: deviceList,
                 originalDevices: originalDeviceList,
                 updated: new Date()
@@ -277,12 +283,19 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
                 const querySnapshot = await getDoc(q);
                 const retrieve = querySnapshot.data();
                 const json = retrieve.canvasData;
-                
+
                 if (retrieve) {
+
+                refreshCanvas();
+                
+                setFloorArray(retrieve.floorArray);
+                setFloorData(retrieve.floorplanData);
+                setActiveFloor("GR");
                 fabricCanvas.current.loadFromJSON(json, () => {
+                    
+                    sessionSave(fabricCanvas.current)
                     requestAnimationFrame(() => {
                         fabricCanvas.current.renderAll();
-                        sessionSave(fabricCanvas.current)
                     });
                 });
                     setActionType(null);                   
@@ -301,7 +314,8 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
                 fabricCanvas.current.renderAll();
             });
             setFloorArray(["GR"])
-            setActiveDevice("GR")
+            setActiveFloor("GR")
+            setFloorData({})
         };
 
 
@@ -319,7 +333,7 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
             onRefreshToggle()
         }
             
-    }, [canvasHeight, canvasWidth, canvasName, saveToggle, onSaveToggle, loadToggle, onLoadToggle, user, canvasID, onCanvasID, refreshToggle, onRefreshToggle, canvasAction, onSaveResult, deviceList, originalDeviceList])
+    }, [canvasHeight, canvasWidth, canvasName, saveToggle, onSaveToggle, loadToggle, onLoadToggle, user, canvasID, onCanvasID, refreshToggle, onRefreshToggle, canvasAction, onSaveResult, deviceList, originalDeviceList, floorArray, floorData])
 
     // Setting Background Image
     useEffect(()=> {
