@@ -2,7 +2,7 @@ import {useState} from 'react';
 import '../../css/Dropdown.css';
 import '../../css/Popup.css'
 
-function CreateDropdown({activeDropdown, onCanvasWidth, onCanvasHeight, onActiveDropdown, onCanvasImage, onCanvasName, onCanvasID, onActive, onRefreshToggle}) {
+function CreateDropdown({activeDropdown, onCanvasWidth, onCanvasHeight, onActiveDropdown, onCanvasImage, onCanvasName, onCanvasID, onActive, onRefreshToggle, onDeviceList, onOriginalDeviceList}) {
 
   const [activeValue, setActiveValue] = useState(null);
   const [width, setWidth] = useState(1000);
@@ -33,6 +33,8 @@ function CreateDropdown({activeDropdown, onCanvasWidth, onCanvasHeight, onActive
     setName("");
     setActiveValue(null);
     onActiveDropdown(null);
+    onDeviceList(null);
+    onOriginalDeviceList(null);
     }
   }
 
@@ -66,6 +68,8 @@ function CreateDropdown({activeDropdown, onCanvasWidth, onCanvasHeight, onActive
       onActiveDropdown(null);
       setName("");
       setButtonToggle(!buttonToggle);
+      onDeviceList(null);
+      onOriginalDeviceList(null);
     }
     }
   }

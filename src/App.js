@@ -50,6 +50,7 @@ function App() {
   const retrieveSave = (save) => setSaveResult(save);
   const retrieveDevice = (device) => setCanvasDevice(device);
   const retrieveDeviceList = (list) => setDeviceList(list);
+  const retrieveOriginalDeviceList = (list) => setOriginalDeviceList(list);
   const retrieveDrawWidth = (pixel) => setDrawWidth(pixel);
 
   useEffect(() => {
@@ -107,7 +108,7 @@ function App() {
 
       <header>
         <Menu onOpenPopup={openPopup} onCanvasWidth={retrieveWidth} onCanvasHeight={retrieveHeight} onCanvasImage={retrieveImage} onCanvasName={retrieveName} onActive={retrieveActive} onCanvasID={retrieveID} onSaveToggle={() => setSaveToggle(true)} 
-        onRefreshToggle={() => setRefreshToggle(true)} onSaveResult={retrieveSave} saveResult={saveResult} user={user} activeCanvas={activeCanvas}/>
+        onRefreshToggle={() => setRefreshToggle(true)} onSaveResult={retrieveSave} saveResult={saveResult} user={user} activeCanvas={activeCanvas} onDeviceList={retrieveDeviceList} onOriginalDeviceList={retrieveOriginalDeviceList} />
       </header>
        
        <div className='Canvas-State' style={{visibility: activeCanvas? 'visible' : 'hidden'}}>
@@ -122,7 +123,7 @@ function App() {
       {activePopup === 'draw' && (
       <DrawTool onCanvasAction={retrieveAction} drawWidth={drawWidth} onDrawWidth={retrieveDrawWidth} />
       )} {activePopup === 'sensor' && (
-      <SensorTool onCanvasDevice={retrieveDevice} onDeviceToggle={() => setDeviceToggle(true)} onDeviceList={retrieveDeviceList} deviceList={deviceList} onOriginalDeviceList={(list) => setOriginalDeviceList(list)} activeCanvas={activeCanvas}/>
+      <SensorTool onCanvasDevice={retrieveDevice} onDeviceToggle={() => setDeviceToggle(true)} onDeviceList={retrieveDeviceList} deviceList={deviceList} onOriginalDeviceList={retrieveOriginalDeviceList} activeCanvas={activeCanvas}/>
       )} {activePopup === 'component' && (
       <ComponentTool onCanvasAction={retrieveAction}/>
       )}
@@ -136,11 +137,9 @@ function App() {
         <UserAuthentication onClose={closePopup} />
       )}
        {activePopup === 'account' && user  && (
-        <AccountPopup onClose={closePopup} onCanvasName={retrieveName} onCanvasID={retrieveID} onCanvasWidth={retrieveWidth} onCanvasHeight={retrieveHeight} onActive={retrieveActive} onLoadToggle={() => setLoadToggle(true)}  onRefreshToggle={()=> setRefreshToggle(true)} onDeviceList={retrieveDeviceList} deviceList={deviceList} onOriginalDeviceList={(list) => setOriginalDeviceList(list)} originalDeviceList={originalDeviceList} user={user}/>
+        <AccountPopup onClose={closePopup} onCanvasName={retrieveName} onCanvasID={retrieveID} onCanvasWidth={retrieveWidth} onCanvasHeight={retrieveHeight} onActive={retrieveActive} onLoadToggle={() => setLoadToggle(true)}  onRefreshToggle={()=> setRefreshToggle(true)} onDeviceList={retrieveDeviceList} deviceList={deviceList} onOriginalDeviceList={retrieveOriginalDeviceList} originalDeviceList={originalDeviceList} user={user}/>
       )}
-      
     </div>
-    
   );
 }
 

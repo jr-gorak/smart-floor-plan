@@ -5,7 +5,7 @@ import {Draw, Sensor, Component, Create, Save, Account, Guide, About, Export} fr
 import CreateDropdown from './menu/filemanager/CreateDropdown';
 import ExportDropdown from './menu/filemanager/ExportDropdown';
 
-function Menu( {onOpenPopup, onCanvasWidth, onCanvasHeight, onCanvasImage, onCanvasName, onActive, onCanvasID, onSaveToggle, onRefreshToggle, onSaveResult, saveResult, user, activeCanvas} ) {
+function Menu( {onOpenPopup, onCanvasWidth, onCanvasHeight, onCanvasImage, onCanvasName, onActive, onCanvasID, onSaveToggle, onRefreshToggle, onSaveResult, saveResult, user, activeCanvas, onDeviceList, onOriginalDeviceList} ) {
 
     const [isActive, setIsActive] = useState(false);
     const [activeValue, setActiveValue] = useState(null);
@@ -72,11 +72,12 @@ function Menu( {onOpenPopup, onCanvasWidth, onCanvasHeight, onCanvasImage, onCan
 
             <div className='file'>
                 <div className='dropdown'> <button className={activeDropdown === 'create' ? 'button-on' : 'button-off'} onClick={() => toggleDropdown('create')}><img src={Create} className="menu-icon" alt="logo"/>Create New</button>
-                    <CreateDropdown activeDropdown={activeDropdown} onActiveDropdown={(value) => setActiveDropdown(value)} onCanvasWidth={onCanvasWidth} onCanvasHeight={onCanvasHeight} onCanvasImage={onCanvasImage} onCanvasName={onCanvasName} onCanvasID={onCanvasID} onActive={onActive} onRefreshToggle={onRefreshToggle}/>
+                    <CreateDropdown activeDropdown={activeDropdown} onActiveDropdown={(value) => setActiveDropdown(value)} onCanvasWidth={onCanvasWidth} onCanvasHeight={onCanvasHeight} onCanvasImage={onCanvasImage} onCanvasName={onCanvasName} onCanvasID={onCanvasID} onActive={onActive} onRefreshToggle={onRefreshToggle}
+                        onDeviceList={onDeviceList} onOriginalDeviceList={onOriginalDeviceList}/>
                 </div>
                 <button className={saveIndicator} onClick={() => checkSave()}><img src={Save} className="menu-icon" alt="logo"/> Save</button>
                 <div className='dropdown'> <button className={activeDropdown === 'export' ? 'button-on' : 'button-off'} onClick={() => toggleDropdown('export')}><img src={Export} className="menu-icon" alt="logo"/>Export</button>
-                    <ExportDropdown activeDropdown={activeDropdown} />
+                    <ExportDropdown activeDropdown={activeDropdown}  />
                 </div>
             </div>
 
