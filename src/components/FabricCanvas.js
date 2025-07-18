@@ -47,7 +47,7 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
     const [hideDevices, setHideDevices] = useState(false);
     const [floorArray, setFloorArray] = useState(() => {const stored = sessionStorage.getItem("floorArray"); return stored? JSON.parse(stored) : ["GR"]; });
     const [activeFloor, setActiveFloor] = useState(() => {const stored = sessionStorage.getItem("activeFloor"); return stored? JSON.parse(stored) : floorArray[0]; });
-  
+    const [floorData, setFloorData] = useState(() => {const stored = sessionStorage.getItem("floorData"); return stored? JSON.parse(stored) : {}; });
     
     const retrieveUpdate = (update) => setUpdatedDevice(update);
 
@@ -76,6 +76,36 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
             setFloorArray(floors => [...floors, ((floorArray.length - floorCount) + "B")])
             }
         }
+    }
+
+    function SwitchFloor(floor) {
+        const file = fabricCanvas.current.toJSON();
+
+        setFloorData(files => ({
+            ...files, 
+            [activeFloor]: file
+        }))
+
+        fabricCanvas.current.dispose()
+
+        const blankCanvas = new fabric.Canvas(canvasRef.current, {
+            width: canvasWidth,
+            height: canvasHeight,
+            backgroundColor: 'white',
+        });
+
+        if (floorData[floor]) {
+            blankCanvas.loadFromJSON(floorData[floor]);
+            setActionType(null);       
+        }
+
+        fabricCanvas.current = blankCanvas;
+
+        requestAnimationFrame(() => {
+            fabricCanvas.current.renderAll();
+        });
+
+        setActiveFloor(floor)
     }
 
         const AssignAreaIDs = useCallback((room) => {
@@ -150,7 +180,8 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
     useEffect(() => {
         sessionStorage.setItem("floorArray", JSON.stringify(floorArray));
         sessionStorage.setItem("activeFloor", JSON.stringify(activeFloor));
-    }, [floorArray, activeFloor])
+        sessionStorage.setItem("floorData", JSON.stringify(floorData));
+    }, [floorArray, activeFloor, floorData])
 
     //Initialize Canvas
     useEffect(() => {
@@ -248,12 +279,12 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
                 const json = retrieve.canvasData;
                 
                 if (retrieve) {
-            fabricCanvas.current.loadFromJSON(json, () => {
-                requestAnimationFrame(() => {
-                    fabricCanvas.current.renderAll();
-                    sessionSave(fabricCanvas.current)
+                fabricCanvas.current.loadFromJSON(json, () => {
+                    requestAnimationFrame(() => {
+                        fabricCanvas.current.renderAll();
+                        sessionSave(fabricCanvas.current)
+                    });
                 });
-            });
                     setActionType(null);                   
                 }
 
@@ -1091,7 +1122,7 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
                     <div className="floor-mapping">
                         <button className="arrow-button" onClick={() => AddFloor('up')}>⇧</button>
                         {floorArray.map((floor) => (
-                            <button className={activeFloor === floor ? "floor-button-active" : "floor-button"} key={floor} onClick={() => setActiveFloor(floor)} disabled={activeFloor === floor}><b>{floor}</b></button>
+                            <button className={activeFloor === floor ? "floor-button-active" : "floor-button"} key={floor} onClick={() => SwitchFloor(floor)} disabled={activeFloor === floor}><b>{floor}</b></button>
                         ))}
                         <button className="arrow-button" onClick={() => AddFloor('down')}>⇩</button>
                     </div>
