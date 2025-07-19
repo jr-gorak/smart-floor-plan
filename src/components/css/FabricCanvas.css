@@ -30,8 +30,17 @@
 }
 
 .canvas-info {
+    display: grid;
+    grid-template-columns: 50% 50%;
+}
+
+.canvas-dimensions {
     display: flex;
     justify-content: flex-end;
+}
+
+.canvas-floor {
+
 }
 
 .floor-mapping {
@@ -58,10 +67,25 @@
     box-shadow: 0 2px 4px #00000033;
 }
 
+.floor-button-container {
+    display: flex;
+    flex-direction: row;
+    align-content: center;
+}
+
 .arrow-button{
     font-size: 30px;
-    font-weight: bold;
     justify-content: center;
     width: 70px;
     box-shadow: 0 2px 4px #00000033;
+}
+
+.remove-button {
+    width: 20px;
+    height: 20px;
+    font-size: 15px;
+    padding: 8px 4px 8px 5px;
+    background-color: #ff6767;
+    margin-left: -10px;
+    margin-top: -10px;
 }

@@ -10,6 +10,7 @@ import DeviceSettings from "./menu/toolset/DeviceSettings";
 import RoomSettings from "./menu/toolset/RoomSettings";
 import { v4 as uuidv4 } from 'uuid';
 import './css/FabricCanvas.css';
+import DeleteWarning from "./DeleteWarning";
 
 fabric.FabricObject.prototype.toObject = (function(toObject) {
   return function(propertyArray = []) {
@@ -48,7 +49,10 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
     const [floorArray, setFloorArray] = useState(() => {const stored = sessionStorage.getItem("floorArray"); return stored? JSON.parse(stored) : ["GR"]; });
     const [activeFloor, setActiveFloor] = useState(() => {const stored = sessionStorage.getItem("activeFloor"); return stored? JSON.parse(stored) : floorArray[0]; });
     const [floorData, setFloorData] = useState(() => {const stored = sessionStorage.getItem("floorData"); return stored? JSON.parse(stored) : {}; });
-    
+    const [deleteWarning, setDeleteWarning] = useState(false);
+    const [deleteConfirmation, setDeleteConfirmation] = useState(false);
+    const [stachedFloor, setStachedFloor] = useState(null);
+
     const retrieveUpdate = (update) => setUpdatedDevice(update);
 
     const settingsMode = 'canvas';
@@ -78,7 +82,7 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
         }
     }
 
-    function SwitchFloor(floor) {
+    const SwitchFloor = useCallback((floor) => {
         const file = fabricCanvas.current.toJSON();
 
         setFloorData(files => ({
@@ -110,7 +114,39 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
 
 
         setActiveFloor(floor)
-    }
+    }, [activeFloor, canvasHeight, canvasWidth, floorData])
+
+    const RemoveFloor = useCallback((floor) => {
+        if (floorData[floor] && floorData[floor].objects.length > 0 && stachedFloor === null) {
+            setDeleteWarning(true);
+            setStachedFloor(floor);
+            return;
+
+        } else if (floorData[floor]){
+            setFloorData(delete floorData[floor])
+        } else if (fabricCanvas.current._objects.length > 0 && stachedFloor === null) {
+            setDeleteWarning(true);
+            setStachedFloor(floor);
+            return;
+        }
+  
+        if (activeFloor === floor) {
+            fabricCanvas.current.clear();
+            fabricCanvas.current.backgroundColor = 'white';
+            let nextFloor = floorArray[floorArray.indexOf(floor)+1]
+            if(activeFloor.includes("B")) {
+                nextFloor = floorArray[floorArray.indexOf(floor)-1]
+            }
+            SwitchFloor(nextFloor)
+        }
+
+        setFloorArray(original => original.filter(floorID => floorID !== floor))
+        setStachedFloor(null);
+        setDeleteConfirmation(null);
+
+    }, [SwitchFloor, activeFloor, floorArray, floorData, stachedFloor])
+
+
 
         const AssignAreaIDs = useCallback((room) => {
         const x1 = room.left;
@@ -186,6 +222,14 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
         sessionStorage.setItem("activeFloor", JSON.stringify(activeFloor));
         sessionStorage.setItem("floorData", JSON.stringify(floorData));
     }, [floorArray, activeFloor, floorData])
+
+    useEffect(() => {
+        if (deleteConfirmation) {
+            console.log(stachedFloor)
+            console.log("HIT!")
+            RemoveFloor(stachedFloor)
+        }
+    }, [deleteConfirmation, stachedFloor, RemoveFloor])
 
     //Initialize Canvas
     useEffect(() => {
@@ -1134,11 +1178,16 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
 
 
                     <div className="floor-mapping">
-                        <button className="arrow-button" onClick={() => AddFloor('up')}>⇧</button>
+                        <button className="arrow-button" onClick={() => AddFloor('up')}>+⇧</button>
                         {floorArray.map((floor) => (
-                            <button className={activeFloor === floor ? "floor-button-active" : "floor-button"} key={floor} onClick={() => SwitchFloor(floor)} disabled={activeFloor === floor}><b>{floor}</b></button>
+                            <div className="floor-button-container">
+                                <button className={activeFloor === floor ? "floor-button-active" : "floor-button"} key={floor} onClick={() => SwitchFloor(floor)} disabled={activeFloor === floor}><b>{floor}</b></button>
+                                {(floor !== 'GR') && (floor === floorArray[0] || floor === floorArray[floorArray.length - 1]) && 
+                                <button className="remove-button" onClick={() => RemoveFloor(floor)}>X</button>
+                                }
+                            </div>
                         ))}
-                        <button className="arrow-button" onClick={() => AddFloor('down')}>⇩</button>
+                        <button className="arrow-button" onClick={() => AddFloor('down')}>+⇩</button>
                     </div>
                 
             </div>
@@ -1148,8 +1197,12 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
             <div>
                 <canvas ref={canvasRef}></canvas>
                 {canvasName && (
-                <div>
-                    <div className="canvas-info">
+                <div className="canvas-info">
+                    <div className="canvas-floor">
+                        {activeFloor}
+                    </div>
+
+                    <div className="canvas-dimensions">
                         {canvasName} 
                         {" ("}{canvasWidth} x {canvasHeight}{")"}
                     </div>
@@ -1165,8 +1218,12 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImage, can
                 }
 
                 {activeRoom && (
+                    <RoomSettings activeRoom={activeRoom} roomLabel={roomLabel} onActiveRoom={(value) => setActiveRoom(value)} onUpdatedRoom={(update) => setUpdatedRoom(update)} onUpdatedLabel={(text) => setRoomLabel(text)}></RoomSettings>
+                )}
+
+                {deleteWarning && (
                     <div>
-                        <RoomSettings activeRoom={activeRoom} roomLabel={roomLabel} onActiveRoom={(value) => setActiveRoom(value)} onUpdatedRoom={(update) => setUpdatedRoom(update)} onUpdatedLabel={(text) => setRoomLabel(text)}></RoomSettings>
+                        <DeleteWarning onDeleteWarning={() => setDeleteWarning(false)} onDeleteConfirmation={() => setDeleteConfirmation(true)} onStachedFloor={() => setStachedFloor(null)}/>
                     </div>
                 )}
             </div>
