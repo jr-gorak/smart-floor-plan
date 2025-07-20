@@ -81,8 +81,19 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImageData,
         }
     }
 
-    const SwitchFloor = useCallback((floor) => {
+    const SwitchFloor = useCallback(async (floor) => {
         const file = fabricCanvas.current.toJSON();
+        const objArray = [];
+
+        async function cloneObjects() {
+            const objects = fabricCanvas.current.getObjects().filter(obj => obj.classifier === 'stairs')
+            for (const obj of objects) {
+                const clone = await obj.clone()
+                objArray.push(clone);
+            }
+        }
+
+        await cloneObjects();
 
         setFloorData(files => ({
             ...files, 
@@ -91,16 +102,21 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImageData,
 
         fabricCanvas.current.dispose()
 
+        console.log(objArray);
+
         const blankCanvas = new fabric.Canvas(canvasRef.current, {
             width: canvasWidth,
             height: canvasHeight,
             backgroundColor: 'white',
         });
 
-        if (floorData[floor]) {
-            
+        if (floorData[floor]) {   
             blankCanvas.loadFromJSON(floorData[floor]);
             setActionType(null);       
+        } else if (objArray.length) {
+            objArray.forEach(obj => {
+                blankCanvas.add(obj)
+            })
         }
 
         fabricCanvas.current = blankCanvas;
@@ -111,6 +127,7 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImageData,
          }, 0)
 
         setActiveFloor(floor)
+        setActionType(null);  
     }, [activeFloor, canvasHeight, canvasWidth, floorData])
 
     const RemoveFloor = useCallback((floor) => {
@@ -582,7 +599,7 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImageData,
                 selectable: true,
                 strokeUniform: true,
                 id: null,
-                classifier: 'draw',
+                classifier: canvasAction === 'stairs' ? 'stairs' : 'draw',
                 area_id: null,
             });
 
@@ -662,7 +679,7 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImageData,
                 return;
             }
 
-            if (object.classifier === 'draw') {
+            if (object.classifier === 'draw' || object.classifier === 'stairs' || object.classifier === 'base') {
                 object.controls.copyControl = new fabric.Control({
                     x: -0.5,
                     y: -0.5,
@@ -1071,7 +1088,7 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImageData,
         function keyDown(e){
             const activeObject = fabricCanvas.current.getActiveObject()
 
-            if ((activeObject && activeObject.classifier === 'draw') || (tempObject && tempObject.classifier === 'draw')) {
+            if (((activeObject && (activeObject.classifier === 'draw' || activeObject.classifier === 'stairs' || activeObject.classifier === 'base'))) || ((tempObject && (tempObject.classifier === 'draw' || tempObject.classifier === 'stairs' || tempObject.classifier === 'base')))) {
                 if ((e.ctrlKey) && e.key === 'c') {
                     if(activeObject) {
                         setTempObject(activeObject);
