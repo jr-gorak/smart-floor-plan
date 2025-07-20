@@ -1,16 +1,46 @@
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 import '../../css/Dropdown.css';
 import '../../css/Popup.css'
 
-function CreateDropdown({activeDropdown, onCanvasWidth, onCanvasHeight, onActiveDropdown, onCanvasImage, onCanvasName, onCanvasID, onActive, onRefreshToggle, onDeviceList, onOriginalDeviceList}) {
+function CreateDropdown({activeDropdown, onCanvasWidth, onCanvasHeight, onActiveDropdown, onCanvasImageData, onCanvasName, onCanvasID, onActive, onRefreshToggle, onDeviceList, onOriginalDeviceList}) {
 
   const [activeValue, setActiveValue] = useState(null);
   const [width, setWidth] = useState(1000);
   const [height, setHeight] = useState(800);
   const [name, setName] = useState("")
   const [error, setError] = useState(null);
-  const [image, setImage] = useState(null);
   const [buttonToggle, setButtonToggle] = useState(false);
+  const [floorArray, setFloorArray] = useState(["GR"]);
+  const [imageData, setImageData] = useState({});
+
+  function AddFloor(direction) {
+        if (direction === 'up') {
+            let floorCount = 0;
+            floorArray.forEach((floor) => {
+                if (floor.includes('B')) {
+                    floorCount++
+                }
+            })
+            if (floorArray.length < 5) {
+                setFloorArray(floors => [((floorArray.length - floorCount) + "F"), ...floors])
+            }
+        }
+        if (direction === 'down') {
+            let floorCount = 0;
+            floorArray.forEach((floor) => {
+                if (floor.includes('F')) {
+                    floorCount++
+                }
+            })
+            if (floorArray.length < 5) {
+            setFloorArray(floors => [...floors, ((floorArray.length - floorCount) + "B")])
+            }
+        }
+    }
+
+  function RemoveFloor(floor) {
+    setFloorArray(original => original.filter(floorID => floorID !== floor))
+  }
 
   function canvasCreate() {
 
@@ -38,16 +68,20 @@ function CreateDropdown({activeDropdown, onCanvasWidth, onCanvasHeight, onActive
     }
   }
 
-    const imageUpload = (e) => {
+    const imageUpload = (e, floor) => {
+      console.log(e);
       const file = e.target.files[0];
       if (file) {
         const reader = new FileReader();
         reader.onload = () => {
-          setImage(reader.result);
-          setButtonToggle(!buttonToggle);
+            setImageData(images => ({
+            ...images, 
+            [floor]: reader.result
+        }))
         }
         reader.readAsDataURL(file)
       }
+      console.log(imageData)
     }
 
   function canvasImageCreate() {
@@ -55,11 +89,11 @@ function CreateDropdown({activeDropdown, onCanvasWidth, onCanvasHeight, onActive
       setError("Pleae ensure you have named your project");
     } else {
     const img = new Image();
-    img.src = image;
+    img.src = imageData["GR"];
     img.onload = () => {
       onCanvasWidth(img.width);
       onCanvasHeight(img.height);
-      onCanvasImage(image);
+      onCanvasImageData(imageData);
       onCanvasName(name);
       onActive(true);
       onCanvasID(null);
@@ -84,6 +118,14 @@ function CreateDropdown({activeDropdown, onCanvasWidth, onCanvasHeight, onActive
           setActiveValue(null)
       }  
   }
+
+  useEffect(() => {
+    if(imageData !=="{}" && name) {
+      setButtonToggle(true);
+    } else {
+      setButtonToggle(false)
+    }
+  }, [imageData, name])
 
   return (
     <div>
@@ -129,10 +171,24 @@ function CreateDropdown({activeDropdown, onCanvasWidth, onCanvasHeight, onActive
             <button onClick={() => setActiveValue(null)}>X</button>
             </div>
             <h2>Upload Image for Canvas Background</h2>
-            <div className='popup-content'><p>Please select an image to upload as the background of the canvas</p>
-              <div className='dimensions'>
+
+            <div className='popup-content'><p>Please select an image to upload as the background of the canvas. If you have multiple floors,
+              feel free to add a different image per floor.
+            </p>
+              <div>
                 <p>Upload floor plan:</p>
-                <input type='file' accept='image/*' onChange={imageUpload} />
+                <button onClick={() => AddFloor('up')}>Add Upper Floor</button>
+
+                {floorArray.map((floor) => (
+                  <div className='upload-map'>
+                    <b>{floor}:  </b><input key={floor} type='file' accept='image/*' onChange={(e) => imageUpload(e, floor)} />
+                    {(floor !== 'GR') && (floor === floorArray[0] || floor === floorArray[floorArray.length - 1]) && 
+                    <button onClick={() => RemoveFloor(floor)}>X</button>
+                    }
+                  </div>
+                ))}
+
+                <button onClick={() => AddFloor('down')}>Add Lower Floor</button>
               </div>
               Floor Plan Name: <input type='text' value={name} onChange={(e) => setName(e.target.value)} placeholder='name' maxLength={100} />
               {error && (

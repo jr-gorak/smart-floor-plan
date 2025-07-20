@@ -28,7 +28,7 @@ function App() {
   const [originalDeviceList, setOriginalDeviceList] = useState(() => JSON.parse(sessionStorage.getItem('original-sensors')));
 
   const [canvasAction, setCanvasAction] = useState('select');
-  const [canvasImage, setCanvasImage] = useState(null);
+  const [canvasImageData, setCanvasImageData] = useState(null);
   const [saveToggle, setSaveToggle] = useState(false);
   const [loadToggle, setLoadToggle] = useState(false);
   const [deviceToggle, setDeviceToggle] = useState(false);
@@ -43,7 +43,7 @@ function App() {
   const retrieveWidth = (width) => setCanvasWidth(width);
   const retrieveHeight = (height) => setCanvasHeight(height);
   const retrieveAction = (action) => setCanvasAction(action);
-  const retrieveImage = (image) => setCanvasImage(image);
+  const retrieveImageData = (image) => setCanvasImageData(image);
   const retrieveName = (name) => setCanvasName(name);
   const retrieveID = (id) => setCanvasID(id);
   const retrieveActive = (active) => setActiveCanvas(active);
@@ -107,13 +107,13 @@ function App() {
     <div className="App">
 
       <header>
-        <Menu onOpenPopup={openPopup} onCanvasWidth={retrieveWidth} onCanvasHeight={retrieveHeight} onCanvasImage={retrieveImage} onCanvasName={retrieveName} onActive={retrieveActive} onCanvasID={retrieveID} onSaveToggle={() => setSaveToggle(true)} 
+        <Menu onOpenPopup={openPopup} onCanvasWidth={retrieveWidth} onCanvasHeight={retrieveHeight} onCanvasImageData={retrieveImageData} onCanvasName={retrieveName} onActive={retrieveActive} onCanvasID={retrieveID} onSaveToggle={() => setSaveToggle(true)} 
         onRefreshToggle={() => setRefreshToggle(true)} onSaveResult={retrieveSave} saveResult={saveResult} user={user} activeCanvas={activeCanvas} onDeviceList={retrieveDeviceList} onOriginalDeviceList={retrieveOriginalDeviceList} />
       </header>
        
        <div className='Canvas-State' style={{visibility: activeCanvas? 'visible' : 'hidden'}}>
         <div className='Canvas' style={{transform: `scale(${zoom}) translate(${transl}%, ${transl}%)` , transformOrigin: 'top left'}} onWheel={zoomScroll}>
-          <FabricCanvas canvasWidth={canvasWidth} canvasHeight={canvasHeight} canvasAction={canvasAction} canvasImage={canvasImage} canvasName={canvasName} canvasID={canvasID}
+          <FabricCanvas canvasWidth={canvasWidth} canvasHeight={canvasHeight} canvasAction={canvasAction} canvasImageData={canvasImageData} canvasName={canvasName} canvasID={canvasID}
           onCanvasID={retrieveID} activeCanvas={activeCanvas} saveToggle={saveToggle} onSaveToggle={() => setSaveToggle(false)} onSaveResult={retrieveSave} loadToggle={loadToggle} onLoadToggle={() => setLoadToggle(false)} 
           refreshToggle={refreshToggle} onRefreshToggle={()=> setRefreshToggle(false)} canvasDevice={canvasDevice} deviceToggle={deviceToggle} onDeviceToggle={() => setDeviceToggle(false)} user={user} 
           deviceList={deviceList} onDeviceList={retrieveDeviceList} originalDeviceList={originalDeviceList} onHandlerToggle={(toggle) => setHandlerToggle(toggle)} drawWidth={drawWidth}/>
