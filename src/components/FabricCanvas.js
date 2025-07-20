@@ -1051,6 +1051,7 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImageData,
                 cloned.controls.copyControl = transform.target.controls.copyControl;
                 cloned.classifier = 'draw';
                 canvas.add(cloned);
+                canvas.setActiveObject(cloned);
             })
         };
 
@@ -1088,6 +1089,7 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImageData,
                             cloned.controls.deleteControl = tempObject.controls.deleteControl;
                             cloned.controls.copyControl = tempObject.controls.copyControl;
                             fabricCanvas.current.add(cloned);
+                            fabricCanvas.current.setActiveObject(cloned);
                             fabricCanvas.current.renderAll();
                         });
                     }
