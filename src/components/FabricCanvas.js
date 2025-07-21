@@ -1,7 +1,7 @@
 import {useCallback, useEffect, useRef, useState} from "react";
 import * as fabric from "fabric";
 import {
-deleteImg, copyImg, settingsImg, lorawanImg, batteryImg, lightoffImg, co2Img, voltageImg, humidityImg, thermometerImg, pressureImg, soundImg, motionImg,
+deleteImg, copyImg, settingsImg, lockImg, unlockImg, lorawanImg, batteryImg, lightoffImg, co2Img, voltageImg, humidityImg, thermometerImg, pressureImg, soundImg, motionImg,
 doorwayImg, windowImg, personImg, sensorImg, stairsImg, bedImg, sofaImg, chairImg, threesofaImg, stoveImg, kitchensinkImg, bathtubImg, roundsinkImg, toiletImg} from '../icons/index';
 
 import { db } from "../firebase";
@@ -86,7 +86,7 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImageData,
         const objArray = [];
 
         async function cloneObjects() {
-            const objects = fabricCanvas.current.getObjects().filter(obj => obj.classifier === 'stairs')
+            const objects = fabricCanvas.current.getObjects().filter(obj => obj.classifier === 'stairs' || obj.classifier === 'locked')
             for (const obj of objects) {
                 const clone = await obj.clone()
                 objArray.push(clone);
@@ -101,8 +101,6 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImageData,
         }))
 
         fabricCanvas.current.dispose()
-
-        console.log(objArray);
 
         const blankCanvas = new fabric.Canvas(canvasRef.current, {
             width: canvasWidth,
@@ -222,6 +220,7 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImageData,
             fabricCanvas.current.loadFromJSON(retrieve, () => {
                 requestAnimationFrame(() => {
                     fabricCanvas.current.renderAll();
+                    setActionType(null);
                 });
             });
         }
@@ -263,6 +262,36 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImageData,
         };
 
         window.addEventListener("beforeunload", triggerSave);
+
+        let selectFlag = false;
+
+        function checkObjects() {
+            if (selectFlag) return;
+            selectFlag = true;
+
+            const activeGroup = fabricCanvas.current.getActiveObject()
+
+            if (activeGroup && activeGroup._objects) {
+                const unlockedObjects = activeGroup.getObjects().filter(obj => obj.classifier !== 'locked')
+                
+                fabricCanvas.current.discardActiveObject()
+                
+                if (unlockedObjects.length > 0) {
+                    const selection = new fabric.ActiveSelection(unlockedObjects, {
+                        canvas: fabricCanvas.current          
+                    })
+                    fabricCanvas.current.setActiveObject(selection);
+                    fabricCanvas.current.renderAll();
+                } else {
+                    fabricCanvas.current.discardActiveObject()
+                }
+            }
+            selectFlag = false;
+        }
+
+        fabricCanvas.current.on('selection:created', checkObjects)
+        fabricCanvas.current.on('selection:updated', checkObjects)
+
 
         return () =>
         {
@@ -653,7 +682,7 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImageData,
                     })
                 }
 
-                if (obj.classifier === 'mark') {
+                if (obj.classifier === 'mark' || obj.classifier === 'locked') {
                     obj.lockMovementX = true;
                     obj.lockMovementY = true;
                     obj.lockRotation = true;
@@ -679,7 +708,7 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImageData,
                 return;
             }
 
-            if (object.classifier === 'draw' || object.classifier === 'stairs' || object.classifier === 'base') {
+            if (object.classifier === 'draw' || object.classifier === 'stairs' || object.classifier === 'locked') {
                 object.controls.copyControl = new fabric.Control({
                     x: -0.5,
                     y: -0.5,
@@ -690,6 +719,17 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImageData,
                     render: renderIcon(copyImg),
                     cornersize: 24,
                 });
+
+                object.controls.lockControl = new fabric.Control({
+                    x: -0.5,
+                    y: -0.5,
+                    offsetY: -16,
+                    offsetX: -16,
+                    cursorStyle: 'pointer',
+                    mouseUpHandler: lockObject,
+                    render: renderIcon(object.classifier === 'locked' ?  lockImg : unlockImg),
+                    cornersize: 24, 
+                })
             }
 
             if (object.classifier === 'device') {
@@ -1079,16 +1119,50 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImageData,
             setTogglePopup(true);
         }
 
+        function lockObject(_eventData, transform) {
+            const obj = transform.target;
+            if (obj.classifier !== 'locked') {
+                obj.classifier = 'locked';
+                    obj.lockMovementX = true;
+                    obj.lockMovementY = true;
+                    obj.lockRotation = true;
+                    obj.lockScalingX = true;
+                    obj.lockScalingFlip = true;
+                    obj.lockScalingY = true;
+                    obj.cursorStyle = 'default';
+                    obj.cornerColor = 'rgba(0, 0, 0, 0)';
+                    obj.hasBorders = false;
+                    obj.isSelectableForGroup = () => false;
+                    setControls(obj);
+                    fabricCanvas.current.renderAll();
+            } else {
+                obj.classifier = 'draw';
+                    obj.lockMovementX = false;
+                    obj.lockMovementY = false;
+                    obj.lockRotation = false;
+                    obj.lockScalingX = false;
+                    obj.lockScalingFlip = false;
+                    obj.lockScalingY = false;
+                    obj.cursorStyle = 'default';
+                    obj.cornerColor = 'rgb(178,204,255)';
+                    obj.hasBorders = true;
+                    setControls(obj);
+                    fabricCanvas.current.renderAll();
+            }
+            console.log(obj);
+            
+        }
+
         function roomInformation(_eventData, transform) {
             const roomText = fabricCanvas.current.getObjects().find(obj => obj.id === transform.target.id && obj.classifier === 'text')
             setRoomLabel(roomText.text)
             setActiveRoom(transform.target);
         }
-
+        
         function keyDown(e){
             const activeObject = fabricCanvas.current.getActiveObject()
 
-            if (((activeObject && (activeObject.classifier === 'draw' || activeObject.classifier === 'stairs' || activeObject.classifier === 'base'))) || ((tempObject && (tempObject.classifier === 'draw' || tempObject.classifier === 'stairs' || tempObject.classifier === 'base')))) {
+            if (((activeObject && (activeObject.classifier === 'draw' || activeObject.classifier === 'stairs' || activeObject.classifier === 'locked'))) || ((tempObject && (tempObject.classifier === 'draw' || tempObject.classifier === 'stairs' || tempObject.classifier === 'locked')))) {
                 if ((e.ctrlKey) && e.key === 'c') {
                     if(activeObject) {
                         setTempObject(activeObject);
@@ -1127,6 +1201,7 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImageData,
         fabricCanvas.current.on('mouse:down', mouseDown);
         fabricCanvas.current.on('mouse:move', mouseMove);
         fabricCanvas.current.on('mouse:up', mouseUp);
+        
 
         return () => {
             document.removeEventListener('keydown', keyDown);

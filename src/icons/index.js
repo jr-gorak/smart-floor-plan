@@ -17,6 +17,8 @@ import Copy from './control-icons/content-copy.svg';
 import Share from './control-icons/share-circle.svg';
 import Move from './control-icons/hand-back-right-outline.svg';
 import Settings from './control-icons/cog-outline.svg';
+import Lock from './control-icons/lock.svg';
+import Unlock from './control-icons/lock-open.svg';
 
 import DoorOpen from './device-icons/door-open.svg';
 import DoorClose from './device-icons/door-closed.svg';
@@ -55,6 +57,8 @@ var deleteImg = document.createElement('img');
 var copyImg = document.createElement('img');
 var moveImg = document.createElement('img');
 var settingsImg = document.createElement('img');
+var lockImg = document.createElement('img');
+var unlockImg = document.createElement('img');
 var lorawanImg = document.createElement('img');
 var personImg = document.createElement('img');
 var batteryImg = document.createElement('img');
@@ -84,6 +88,8 @@ copyImg.src = Copy;
 deleteImg.src = Delete;
 moveImg.src = Move;
 settingsImg.src = Settings;
+lockImg.src = Lock;
+unlockImg.src = Unlock;
 lorawanImg.src = Lorawan;
 personImg.src = Person;
 batteryImg.src =  Battery;
@@ -113,6 +119,6 @@ export {
     Draw, Sensor ,Component, Create, Save, Export, Account, Guide, About, DrawLine, Square, DoorOpen, DoorClose, Upstairs, Downstairs ,WindowClosed, WindowOpen, Delete,
     Copy,Share, Move, Settings, Lorawan, Zigbee, Person, Battery, LightOff, LightOn, Co2, Voltage, Humidity, Thermometer, Pressure, Sound, Motion, 
     Door, Bathtub, Bed, Chair, KitchenSink, RoundSink, Sofa, Stairs, Stove, ThreeSofa, Toilet, Window, Map, CircleOutline,
-    deleteImg, copyImg, moveImg, settingsImg, lorawanImg, batteryImg, lightoffImg, co2Img, voltageImg, humidityImg, thermometerImg, pressureImg, soundImg, motionImg,
+    deleteImg, copyImg, moveImg, settingsImg, lockImg, unlockImg, lorawanImg, batteryImg, lightoffImg, co2Img, voltageImg, humidityImg, thermometerImg, pressureImg, soundImg, motionImg,
     doorwayImg, windowImg, personImg, sensorImg, bathtubImg, bedImg, chairImg, kitchensinkImg, roundsinkImg, sofaImg, stairsImg,stoveImg, threesofaImg, toiletImg,
 };
