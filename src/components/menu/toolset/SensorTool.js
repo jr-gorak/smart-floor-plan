@@ -4,7 +4,7 @@ import '../../css/Tools.css';
 import '../../css/Popup.css';
 import {Sensor, Lorawan, Zigbee} from '../../../icons/index'
 
-function SensorTool({onCanvasDevice, onDeviceToggle, onDeviceList, onOriginalDeviceList, deviceList, activeCanvas}) {
+function SensorTool({onCanvasDevice, onDeviceToggle, onDeviceList, onOriginalDeviceList, deviceList, onLabelList, labelList}) {
 
   const [devices, setDevices] = useState(null);
   const [entities, setEntities] = useState(null);
@@ -42,6 +42,23 @@ function SensorTool({onCanvasDevice, onDeviceToggle, onDeviceList, onOriginalDev
     }
   };
 
+  const locationWords = ["motion","digital","binary","pressure","light"]
+  const activityWords = ["vdd","current","energy","power"]
+  const environmentWords = ["temp", "humid"]
+  
+  function generateLabel(entityString) {
+
+    if (locationWords.some(str => entityString.toLowerCase().includes(str))) {
+      return 'location'
+    } else if (activityWords.some(str => entityString.toLowerCase().includes(str))){
+      return 'activity'
+    } else if (environmentWords.some(str => entityString.toLowerCase().includes(str))){
+      return 'environment'
+    } else {
+      return ''
+    }
+  }
+
   function generateSensors() {
       
     const deviceReader = new FileReader();
@@ -53,8 +70,8 @@ function SensorTool({onCanvasDevice, onDeviceToggle, onDeviceList, onOriginalDev
       const deviceMap = deviceData.filter(d => d.identifiers[0] && (d.identifiers[0][0] === 'thethingsnetwork' || d.identifiers[0][0] === 'zha'))
       .map((d) => ({
         id: d.id,
-        name:  d.name,
-        label: d.name,
+        original_name:  d.name,
+        name: d.name,
         platform: d.identifiers[0][0],
         isActive: false,
         area_id: null,
@@ -73,10 +90,11 @@ function SensorTool({onCanvasDevice, onDeviceToggle, onDeviceList, onOriginalDev
       .map((en) => ({
         id: en.id,
         device_id: en.device_id,
+        original_name: en.entity_id,
         name: en.entity_id,
-        label: en.entity_id,
         platform: en.platform,
         type: en.original_name? en.original_name : generateType(en.entity_id),
+        label: generateLabel(en.original_name? en.original_name : generateType(en.entity_id)),
         visible: false,
         tag: null,
       }));
@@ -133,11 +151,12 @@ function SensorTool({onCanvasDevice, onDeviceToggle, onDeviceList, onOriginalDev
 
       onDeviceList(joinDevices);
       onOriginalDeviceList(structuredClone(joinDevices));
+      onLabelList(["", "location", "activity", "environment"])
       setActiveValue(null);
       setDevices(null);
       setEntities(null);
     }
-  }, [devices, entities, onDeviceList, onOriginalDeviceList]);
+  }, [devices, entities, onDeviceList, onOriginalDeviceList, onLabelList]);
 
   return (
     <div className="box">
@@ -157,7 +176,7 @@ function SensorTool({onCanvasDevice, onDeviceToggle, onDeviceList, onOriginalDev
               <p><b>LoRaWAN Sensors</b></p>
               {deviceList.filter(device => device.platform === "thethingsnetwork").map((device) => (
                 <button key={device.id} className={device.isActive ? "input-off" : "input-on "} onClick={() => togglePopup('device-config', device)} disabled={device.isActive}>
-                  <img src={Lorawan} className="menu-icon" alt="logo"/>{device.label} {device.isActive && <p style={{color: 'green'}}>active</p>}
+                  <img src={Lorawan} className="menu-icon" alt="logo"/>{device.name} {device.isActive && <p style={{color: 'green'}}>active</p>}
                 </button>
               ))}
           </div>
@@ -165,7 +184,7 @@ function SensorTool({onCanvasDevice, onDeviceToggle, onDeviceList, onOriginalDev
             <p><b>ZigBee Sensors</b></p>
             {deviceList.filter(device => device.platform === "zha").map((device) => (
               <button key={device.id} className={device.isActive ? "input-off" : "input-on "} onClick={() => togglePopup('device-config', device)} disabled={device.isActive}>
-                <img src={Zigbee} className="menu-icon" alt="logo"/>{device.label} {device.isActive && <p style={{color: 'green'}}>active</p>}
+                <img src={Zigbee} className="menu-icon" alt="logo"/>{device.name} {device.isActive && <p style={{color: 'green'}}>active</p>}
               </button>
             ))}
           </div>
@@ -198,7 +217,7 @@ function SensorTool({onCanvasDevice, onDeviceToggle, onDeviceList, onOriginalDev
       }
 
       {activeValue === 'device-config' &&
-        <DeviceSettings settingsMode={settingsMode} activeDevice={activeDevice} deviceList={deviceList} onTogglePopup={togglePopup} onCanvasDevice={onCanvasDevice} onDeviceToggle={onDeviceToggle} onDeviceList={onDeviceList}/>
+        <DeviceSettings settingsMode={settingsMode} activeDevice={activeDevice} deviceList={deviceList} onTogglePopup={togglePopup} onCanvasDevice={onCanvasDevice} onDeviceToggle={onDeviceToggle} onDeviceList={onDeviceList} onLabelList={onLabelList} labelList={labelList}/>
       }
     </div>
   );

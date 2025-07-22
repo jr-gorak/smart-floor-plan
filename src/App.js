@@ -26,6 +26,8 @@ function App() {
   const [activeCanvas, setActiveCanvas] = useState(() => JSON.parse(sessionStorage.getItem('activeCanvas')));
   const [deviceList, setDeviceList] =  useState(() => JSON.parse(sessionStorage.getItem('sensors')));
   const [originalDeviceList, setOriginalDeviceList] = useState(() => JSON.parse(sessionStorage.getItem('original-sensors')));
+  const [labelList, setLabelList] = useState(() => JSON.parse(sessionStorage.getItem('labels')));
+  
 
   const [canvasAction, setCanvasAction] = useState('select');
   const [canvasImageData, setCanvasImageData] = useState(null);
@@ -52,6 +54,7 @@ function App() {
   const retrieveDeviceList = (list) => setDeviceList(list);
   const retrieveOriginalDeviceList = (list) => setOriginalDeviceList(list);
   const retrieveDrawWidth = (pixel) => setDrawWidth(pixel);
+  const retrieveLabelList = (labels) => setLabelList(labels);
 
   useEffect(() => {
     sessionStorage.setItem('canvasWidth', canvasWidth)
@@ -61,7 +64,8 @@ function App() {
     sessionStorage.setItem('activeCanvas', JSON.stringify(activeCanvas))
     sessionStorage.setItem('sensors', JSON.stringify(deviceList))
     sessionStorage.setItem('original-sensors', JSON.stringify(originalDeviceList))
-  }, [canvasWidth, canvasHeight, canvasName, canvasID, activeCanvas, refreshToggle, deviceList, canvasDevice, originalDeviceList, drawWidth]);
+    sessionStorage.setItem('labels', JSON.stringify(labelList))
+  }, [canvasWidth, canvasHeight, canvasName, canvasID, activeCanvas, refreshToggle, deviceList, canvasDevice, originalDeviceList, drawWidth, labelList]);
 
   const centerZoom = () => {
     window.scrollTo({
@@ -116,14 +120,14 @@ function App() {
           <FabricCanvas canvasWidth={canvasWidth} canvasHeight={canvasHeight} canvasAction={canvasAction} canvasImageData={canvasImageData} canvasName={canvasName} canvasID={canvasID}
           onCanvasID={retrieveID} activeCanvas={activeCanvas} saveToggle={saveToggle} onSaveToggle={() => setSaveToggle(false)} onSaveResult={retrieveSave} loadToggle={loadToggle} onLoadToggle={() => setLoadToggle(false)} 
           refreshToggle={refreshToggle} onRefreshToggle={()=> setRefreshToggle(false)} canvasDevice={canvasDevice} deviceToggle={deviceToggle} onDeviceToggle={() => setDeviceToggle(false)} user={user} 
-          deviceList={deviceList} onDeviceList={retrieveDeviceList} originalDeviceList={originalDeviceList} onHandlerToggle={(toggle) => setHandlerToggle(toggle)} drawWidth={drawWidth}/>
+          deviceList={deviceList} onDeviceList={retrieveDeviceList} originalDeviceList={originalDeviceList} onHandlerToggle={(toggle) => setHandlerToggle(toggle)} drawWidth={drawWidth} onLabelList={retrieveLabelList} labelList={labelList}/>
         </div>
       </div>
 
       {activePopup === 'draw' && (
       <DrawTool onCanvasAction={retrieveAction} drawWidth={drawWidth} onDrawWidth={retrieveDrawWidth} />
       )} {activePopup === 'sensor' && (
-      <SensorTool onCanvasDevice={retrieveDevice} onDeviceToggle={() => setDeviceToggle(true)} onDeviceList={retrieveDeviceList} deviceList={deviceList} onOriginalDeviceList={retrieveOriginalDeviceList} activeCanvas={activeCanvas}/>
+      <SensorTool onCanvasDevice={retrieveDevice} onDeviceToggle={() => setDeviceToggle(true)} onDeviceList={retrieveDeviceList} deviceList={deviceList} onOriginalDeviceList={retrieveOriginalDeviceList} onLabelList={retrieveLabelList} labelList={labelList}/>
       )} {activePopup === 'component' && (
       <ComponentTool onCanvasAction={retrieveAction}/>
       )}

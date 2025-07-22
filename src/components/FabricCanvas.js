@@ -27,7 +27,7 @@ fabric.FabricObject.prototype.toObject = (function(toObject) {
 })(fabric.FabricObject.prototype.toObject);
 
 function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImageData, canvasName, canvasID, onCanvasID, saveToggle, onSaveToggle, onSaveResult, loadToggle, onLoadToggle, refreshToggle, onRefreshToggle, 
-    canvasDevice, deviceToggle, onDeviceToggle, user, deviceList, onDeviceList, originalDeviceList, onHandlerToggle, drawWidth}) {
+    canvasDevice, deviceToggle, onDeviceToggle, user, deviceList, onDeviceList, originalDeviceList, onHandlerToggle, drawWidth, onLabelList, labelList}) {
     const canvasRef = useRef(null);
     const fabricCanvas = useRef(null);
     const [isDrawing, setIsDrawing] = useState(false);
@@ -297,7 +297,6 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImageData,
         fabricCanvas.current.on('selection:created', checkObjects)
         fabricCanvas.current.on('selection:updated', checkObjects)
 
-
         return () =>
         {
             window.removeEventListener("beforeunload", triggerSave);
@@ -516,7 +515,7 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImageData,
             deviceArray.push(deviceImg);
             
 
-            const deviceText = new fabric.FabricText(device.label, {
+            const deviceText = new fabric.FabricText(device.name, {
                 fontSize: 12,
                 id: null,
                 classifier: 'text',
@@ -1307,7 +1306,7 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImageData,
                     <div className="floor-mapping">
                         <button className="arrow-button" onClick={() => AddFloor('up')}>+⇧</button>
                         {floorArray.map((floor) => (
-                            <div className="floor-button-container">
+                            <div key={floor} className="floor-button-container">
                                 <button className={activeFloor === floor ? "floor-button-active" : "floor-button"} key={floor} onClick={() => SwitchFloor(floor)} disabled={activeFloor === floor}><b>{floor}</b></button>
                                 {(floor !== 'GR') && (floor === floorArray[0] || floor === floorArray[floorArray.length - 1]) && 
                                 <button className="remove-button" onClick={() => RemoveFloor(floor)}>X</button>
@@ -1337,7 +1336,7 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImageData,
             <div>
 
                 {togglePopup && (
-                    <DeviceSettings settingsMode={settingsMode} activeDevice={activeDevice} deviceList={deviceList} onTogglePopup={() => setTogglePopup(false)} onUpdateDeviceToggle={() => setUpdateDeviceToggle(true)} onDeviceList={onDeviceList} onUpdatedDevice={retrieveUpdate}></DeviceSettings>
+                    <DeviceSettings settingsMode={settingsMode} activeDevice={activeDevice} deviceList={deviceList} onTogglePopup={() => setTogglePopup(false)} onUpdateDeviceToggle={() => setUpdateDeviceToggle(true)} onDeviceList={onDeviceList} onUpdatedDevice={retrieveUpdate} onLabelList={onLabelList} labelList={labelList}></DeviceSettings>
                 )
                 }
 

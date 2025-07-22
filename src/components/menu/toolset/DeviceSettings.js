@@ -4,7 +4,10 @@ import '../../css/Tools.css';
 import '../../css/Popup.css';
 import {Sensor, Lorawan, Zigbee, Thermometer, Battery, Person, LightOff, Co2, Voltage, Humidity, Pressure, Sound, Motion, WindowClosed, Component} from '../../../icons/index'
 
-function DeviceSettings({settingsMode, activeDevice, deviceList, onTogglePopup, onUpdateDeviceToggle, onCanvasDevice, onDeviceToggle, onDeviceList, onUpdatedDevice}) {
+function DeviceSettings({settingsMode, activeDevice, deviceList, onTogglePopup, onUpdateDeviceToggle, onCanvasDevice, onDeviceToggle, onDeviceList, onUpdatedDevice,
+  onLabelList, labelList}) {
+
+    console.log(labelList);
 
   const [activeInput, setActiveInput] = useState(null);
   const [device, setDevice] = useState(activeDevice);
@@ -21,13 +24,13 @@ function DeviceSettings({settingsMode, activeDevice, deviceList, onTogglePopup, 
 
   function updateDevice(classifier, id, value) {
     if (classifier === 'device') {
-      activeDevice.label = value;
+      activeDevice.name = value;
     } else if (classifier === 'entity-label') {
-      const findEntities = activeDevice.entities.find(d => d.id === id)
-      findEntities.label = value;
+      const entity = activeDevice.entities.find(d => d.id === id)
+      entity.name = value;
     } else if (classifier === 'entity-visible') {
-      const findEntities = activeDevice.entities.find(d => d.id === id)
-      findEntities.visible = value;
+      const entity = activeDevice.entities.find(d => d.id === id)
+      entity.visible = value;
     } else if (classifier === 'type') {
       const entity = activeDevice.entities.find(e => e.id === id)
       const index = device.entities.findIndex(e => e.id === id)
@@ -35,6 +38,9 @@ function DeviceSettings({settingsMode, activeDevice, deviceList, onTogglePopup, 
       entity.type = value;
       stacheDevice.entities[index].type = value;
       setDevice(stacheDevice);
+    } else if (classifier === 'label') {
+      const entity = activeDevice.entities.find(e => e.id === id)
+      entity.label = value;
     }
   };
 
@@ -96,10 +102,10 @@ function DeviceSettings({settingsMode, activeDevice, deviceList, onTogglePopup, 
         <h2 style={{alignItems: 'center'}}>
         {activeDevice.platform === "thethingsnetwork" && <img style={{width: 40}} src={Lorawan} className="menu-icon" alt="logo"/>}
         {activeDevice.platform === "zha" && <img style={{width: 40}} src={Zigbee} className="menu-icon" alt="logo"/>}
-        <input className={activeInput === activeDevice.id ? 'input-on' : 'input-off'} onFocus={() => setActiveInput(activeDevice.id)} onBlur={() => setActiveInput(null)} type='text' defaultValue={activeDevice.label} onChange={(e) => updateDevice('device', activeDevice.id, e.target.value)}></input></h2>
+        <input className={activeInput === activeDevice.id ? 'input-on' : 'input-off'} onFocus={() => setActiveInput(activeDevice.id)} onBlur={() => setActiveInput(null)} type='text' defaultValue={activeDevice.name} onChange={(e) => updateDevice('device', activeDevice.id, e.target.value)}></input></h2>
         <div className='popup-content'>
 
-          <p><b>Original Name: </b>{activeDevice.name}</p>
+          <p><b>Original Name: </b>{activeDevice.original_name}</p>
           <p><b>Platform:</b> {activeDevice.platform}</p>
           <p><b>Area ID:</b> {activeDevice.area_id}</p>
 
@@ -111,14 +117,15 @@ function DeviceSettings({settingsMode, activeDevice, deviceList, onTogglePopup, 
                   <th>Name</th>
                   <th>Visible</th>
                   <th>Type</th>
+                  <th>Label</th>
                 </tr> 
               </thead>
               <tbody>
                 {activeDevice.entities.map((ent) => (
                   <tr key={ent.id}>
-                    <td style={{width: `${50}%`}}><input style={{width: `${100}%`}} className={activeInput === ent.id ? 'input-on' : 'input-off'} onFocus={() => setActiveInput(ent.id)} onBlur={() => setActiveInput(null)} type='text' defaultValue={ent.label} onChange={(e) => updateDevice('entity-label', ent.id, e.target.value)}></input></td>
+                    <td style={{width: `${50}%`}}><input style={{width: `${100}%`}} className={activeInput === ent.id ? 'input-on' : 'input-off'} onFocus={() => setActiveInput(ent.id)} onBlur={() => setActiveInput(null)} type='text' defaultValue={ent.name} onChange={(e) => updateDevice('entity-label', ent.id, e.target.value)}></input></td>
                     <td style={{width: `${10}%`}}><input className='checkbox' type="checkbox" defaultChecked={ent.visible} onChange={(e) => updateDevice('entity-visible', ent.id, e.target.checked)}/></td>
-                    <td style={{width: `${30}%`}}>
+                    <td style={{width: `${20}%`}}>
                       <div className='sensor-display'>
                         <img src={filterImage(ent.type)} alt='sensor type icon'></img>
                         {(ent.type.toLowerCase() !== 'digital' && ent.type.toLowerCase() !== 'binary' && ent.type.toLowerCase() !== 'door' && ent.type.toLowerCase() !== 'window') && (
@@ -139,6 +146,16 @@ function DeviceSettings({settingsMode, activeDevice, deviceList, onTogglePopup, 
                         </select>
                         )}
                       </div>
+                    </td>
+                    <td style={{width: `${10}%`}}>
+                      <select key={ent.label} defaultValue={ent.label} onChange={(e) => updateDevice('label', ent.id, e.target.value)}>
+    
+                      {labelList.map((label) => (
+                        <option value={label}>{label}</option>
+                      ))}
+                      </select>
+
+
                     </td>
                   </tr>
                 ))}
