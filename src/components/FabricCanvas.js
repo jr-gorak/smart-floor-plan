@@ -2,7 +2,10 @@ import {useCallback, useEffect, useRef, useState} from "react";
 import * as fabric from "fabric";
 import {
 deleteImg, copyImg, settingsImg, lockImg, unlockImg, lorawanImg, batteryImg, lightoffImg, co2Img, voltageImg, humidityImg, thermometerImg, pressureImg, soundImg, motionImg,
-doorwayImg, windowImg, personImg, sensorImg, stairsImg, bedImg, sofaImg, chairImg, threesofaImg, stoveImg, kitchensinkImg, bathtubImg, roundsinkImg, toiletImg} from '../icons/index';
+doorwayImg, windowImg, personImg, sensorImg, stairsImg, bedImg, sofaImg, chairImg, threesofaImg, stoveImg, kitchensinkImg, bathtubImg, roundsinkImg, toiletImg,
+
+windowClosedImg,
+doorImg} from '../icons/index';
 
 import { db } from "../firebase";
 import { addDoc, collection, doc, updateDoc, query, getDoc } from "firebase/firestore";
@@ -270,6 +273,8 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImageData,
             selectFlag = true;
 
             const activeGroup = fabricCanvas.current.getActiveObject()
+
+            if (activeGroup.classifier === 'device') return;
 
             if (activeGroup && activeGroup._objects) {
                 const unlockedObjects = activeGroup.getObjects().filter(obj => obj.classifier !== 'locked')
@@ -561,6 +566,10 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImageData,
                         imgHolder = soundImg;
                     } else if (sensor.type.toLowerCase().includes('motion')) {
                         imgHolder = motionImg;
+                    } else if (sensor.type.toLowerCase().includes('door')) {
+                        imgHolder = doorImg;
+                    } else if (sensor.type.toLowerCase().includes('window')) {
+                        imgHolder = windowClosedImg;
                     } 
 
                     var sensorObject = new fabric.FabricImage(imgHolder, {

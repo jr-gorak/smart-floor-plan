@@ -252,6 +252,12 @@ label input {
   margin-bottom: 10px;
 }
 
+.sensor-list select {
+  border: none;
+  outline: none;
+  font-size: 16px;
+}
+
 h2 input {
   font-size: 18px;
   font-weight: bold;
@@ -278,4 +284,5 @@ td {
 
 .sensor-display img {
   margin-top: 5px;
+  width: 30px
 }

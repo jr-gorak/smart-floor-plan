@@ -72,7 +72,9 @@ var soundImg = document.createElement('img');
 var motionImg = document.createElement('img');
 var sensorImg = document.createElement('img');
 var doorwayImg = document.createElement('img');
+var doorImg = document.createElement('img');
 var windowImg = document.createElement('img');
+var windowClosedImg = document.createElement('img');
 var bathtubImg = document.createElement('img');
 var bedImg = document.createElement('img');
 var chairImg = document.createElement('img');
@@ -103,7 +105,9 @@ soundImg.src = Sound;
 motionImg.src =  Motion;
 sensorImg.src = Sensor;
 doorwayImg.src = Door;
+doorImg.src = Component;
 windowImg.src = Window;
+windowClosedImg.src = WindowClosed;
 bathtubImg.src = Bathtub;
 bedImg.src = Bed;
 chairImg.src = Chair;
@@ -120,5 +124,5 @@ export {
     Copy,Share, Move, Settings, Lorawan, Zigbee, Person, Battery, LightOff, LightOn, Co2, Voltage, Humidity, Thermometer, Pressure, Sound, Motion, 
     Door, Bathtub, Bed, Chair, KitchenSink, RoundSink, Sofa, Stairs, Stove, ThreeSofa, Toilet, Window, Map, CircleOutline,
     deleteImg, copyImg, moveImg, settingsImg, lockImg, unlockImg, lorawanImg, batteryImg, lightoffImg, co2Img, voltageImg, humidityImg, thermometerImg, pressureImg, soundImg, motionImg,
-    doorwayImg, windowImg, personImg, sensorImg, bathtubImg, bedImg, chairImg, kitchensinkImg, roundsinkImg, sofaImg, stairsImg,stoveImg, threesofaImg, toiletImg,
+    doorwayImg, doorImg, windowImg, windowClosedImg, personImg, sensorImg, bathtubImg, bedImg, chairImg, kitchensinkImg, roundsinkImg, sofaImg, stairsImg,stoveImg, threesofaImg, toiletImg,
 };

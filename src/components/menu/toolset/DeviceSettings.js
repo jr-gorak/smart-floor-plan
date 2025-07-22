@@ -2,11 +2,12 @@ import ReactDOM from 'react-dom';
 import { useState } from 'react';
 import '../../css/Tools.css';
 import '../../css/Popup.css';
-import {Sensor, Lorawan, Zigbee, Thermometer, Battery, Person, LightOff, Co2, Voltage, Humidity, Pressure, Sound, Motion} from '../../../icons/index'
+import {Sensor, Lorawan, Zigbee, Thermometer, Battery, Person, LightOff, Co2, Voltage, Humidity, Pressure, Sound, Motion, WindowClosed, Component} from '../../../icons/index'
 
 function DeviceSettings({settingsMode, activeDevice, deviceList, onTogglePopup, onUpdateDeviceToggle, onCanvasDevice, onDeviceToggle, onDeviceList, onUpdatedDevice}) {
 
   const [activeInput, setActiveInput] = useState(null);
+  const [device, setDevice] = useState(activeDevice);
   document.body.style.overflow = 'hidden';
   
   function toggleHandle() {
@@ -27,6 +28,13 @@ function DeviceSettings({settingsMode, activeDevice, deviceList, onTogglePopup, 
     } else if (classifier === 'entity-visible') {
       const findEntities = activeDevice.entities.find(d => d.id === id)
       findEntities.visible = value;
+    } else if (classifier === 'type') {
+      const entity = activeDevice.entities.find(e => e.id === id)
+      const index = device.entities.findIndex(e => e.id === id)
+      const stacheDevice = {...device};
+      entity.type = value;
+      stacheDevice.entities[index].type = value;
+      setDevice(stacheDevice);
     }
   };
 
@@ -53,6 +61,10 @@ function DeviceSettings({settingsMode, activeDevice, deviceList, onTogglePopup, 
       return Sound;
     } else if (type.toLowerCase().includes('motion')) {
       return Motion;
+    } else if (type.toLowerCase().includes('door')) {
+      return Component;
+    } else if (type.toLowerCase().includes('window')) {
+      return WindowClosed;
     } else {
       return Sensor;
     }
@@ -106,7 +118,28 @@ function DeviceSettings({settingsMode, activeDevice, deviceList, onTogglePopup, 
                   <tr key={ent.id}>
                     <td style={{width: `${50}%`}}><input style={{width: `${100}%`}} className={activeInput === ent.id ? 'input-on' : 'input-off'} onFocus={() => setActiveInput(ent.id)} onBlur={() => setActiveInput(null)} type='text' defaultValue={ent.label} onChange={(e) => updateDevice('entity-label', ent.id, e.target.value)}></input></td>
                     <td style={{width: `${10}%`}}><input className='checkbox' type="checkbox" defaultChecked={ent.visible} onChange={(e) => updateDevice('entity-visible', ent.id, e.target.checked)}/></td>
-                    <td style={{width: `${30}%`}}><div className='sensor-display'><img src={filterImage(ent.type)} alt='sensor type icon'></img>{ent.type}</div></td>
+                    <td style={{width: `${30}%`}}>
+                      <div className='sensor-display'>
+                        <img src={filterImage(ent.type)} alt='sensor type icon'></img>
+                        {(ent.type.toLowerCase() !== 'digital' && ent.type.toLowerCase() !== 'binary' && ent.type.toLowerCase() !== 'door' && ent.type.toLowerCase() !== 'window') && (
+                          ent.type
+                        )}
+
+                        {(ent.type.toLowerCase() === 'digital' || ent.type.toLowerCase() === 'binary' || ent.type.toLowerCase() === 'door' || ent.type.toLowerCase() === 'window') && (
+                        <select key={ent.id} onChange={(e) => updateDevice('type', ent.id, e.target.value)}>
+                          <option value={ent.type}>{ent.type}</option>
+                          {ent.type !== 'door' && (
+                            <option value='door'>door</option>
+                          )}
+                          {ent.type !== 'window' && (
+                            <option value='window'>window</option>
+                          )}
+                          
+                          
+                        </select>
+                        )}
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>
