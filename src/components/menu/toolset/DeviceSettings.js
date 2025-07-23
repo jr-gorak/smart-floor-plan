@@ -129,25 +129,25 @@ function DeviceSettings({settingsMode, activeDevice, deviceList, onTogglePopup, 
         <input className={activeInput === activeDevice.id ? 'input-on' : 'input-off'} onFocus={() => setActiveInput(activeDevice.id)} onBlur={() => setActiveInput(null)} type='text' defaultValue={activeDevice.name} onChange={(e) => updateDevice('device', activeDevice.id, e.target.value)}></input></h2>
         <div className='popup-content'>
 
-          <p><b>Original Name: </b>{activeDevice.original_name}</p>
-          <p><b>Platform:</b> {activeDevice.platform}</p>
-          <p><b>Area ID:</b> {activeDevice.area_id}</p>
+          <div className='device-info'><div className='info-tooltip' title='The original name of the sensor. Click on header name above to change the name of the device.'>🛈</div><b>Original Name: </b>{activeDevice.original_name}</div>
+          <div className='device-info'><div className='info-tooltip' title='The device branding. This application only supports LoRaWAN and Zigbee sensors.'>🛈</div><b>Platform:</b> {activeDevice.platform}</div>
+          <div className='device-info'><div className='info-tooltip' title='The marked room that the device is located. Use "mark room" in the "Draw" menu to trace and label rooms. Then, drag the device to the desired position'>🛈</div><b>Area ID:</b> {activeDevice.area_id}</div>
 
           <div className='sensor-list'>
             <p><b>Sensors:</b></p>
             <table>      
               <thead>        
                 <tr>
-                  <th>Name</th>
-                  <th>Visible</th>
-                  <th>Type</th>
-                  <th>Label</th>
+                  <th><div className='sensor-header'><div className='info-tooltip' title='Click on the name of a sensor to edit it.'>🛈</div><p>Name</p></div></th>
+                  <th><div className='sensor-header'><div className='info-tooltip' title='Click on the checkbox for the sensors you wish to use for the device.'>🛈</div><p>Active</p></div></th>
+                  <th><div className='sensor-header'><div className='info-tooltip' title='The type of sensor, for binary based readings you can specify their purpose.'>🛈</div><p>Type</p></div></th>
+                  <th><div className='sensor-header'><div className='info-tooltip' title='Select a label type for tracking data. Location: timeline of where an individual has been. Activity: measures an activity an individual is performing. Environment: measures the environment of the room'>🛈</div><p>Label</p></div></th>
                 </tr> 
               </thead>
               <tbody>
                 {activeDevice.entities.map((ent) => (
                   <tr key={ent.id}>
-                    <td style={{width: `${50}%`}}><input style={{width: `${100}%`}} className={activeInput === ent.id ? 'input-on' : 'input-off'} onFocus={() => setActiveInput(ent.id)} onBlur={() => setActiveInput(null)} type='text' defaultValue={ent.name} onChange={(e) => updateDevice('entity-label', ent.id, e.target.value)}></input></td>
+                    <td style={{width: `${45}%`}}><input style={{width: `${100}%`}} className={activeInput === ent.id ? 'input-on' : 'input-off'} onFocus={() => setActiveInput(ent.id)} onBlur={() => setActiveInput(null)} type='text' defaultValue={ent.name} onChange={(e) => updateDevice('entity-label', ent.id, e.target.value)}></input></td>
                     <td style={{width: `${10}%`}}><input className='checkbox' type="checkbox" defaultChecked={ent.visible} onChange={(e) => updateDevice('entity-visible', ent.id, e.target.checked)}/></td>
                     <td style={{width: `${20}%`}}>
                       <div className='sensor-display'>
@@ -170,11 +170,11 @@ function DeviceSettings({settingsMode, activeDevice, deviceList, onTogglePopup, 
                         )}
                       </div>
                     </td>
-                    <td style={{width: `${10}%`}}>
-                      <select key={ent.label} defaultValue={ent.label} onChange={(e) => updateDevice('label', ent.id, e.target.value)}>
+                    <td style={{width: `${15}%`}}>
+                      <select  defaultValue={ent.label} onChange={(e) => updateDevice('label', ent.id, e.target.value)}>
     
                       {labelList.map((label) => (
-                        <option value={label}>{label}</option>
+                        <option key={label} value={label}>{label}</option>
                       ))}
                         <option value='input'>...add label</option>
                       </select>

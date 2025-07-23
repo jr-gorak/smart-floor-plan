@@ -288,6 +288,30 @@ td {
   padding-right: 10px;
 }
 
+.device-info {
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
+  align-items: center;
+  padding-bottom: 20px;
+}
+
+.sensor-header {
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
+  align-items: center;
+}
+
+.info-tooltip {
+  color: #9cdaf3;
+  font-weight: lighter;
+}
+
+.info-tooltip:hover {
+  cursor: default;
+}
+
 .sensor-display {
   display: flex;
   align-items: center;
