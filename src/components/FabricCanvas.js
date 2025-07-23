@@ -5,7 +5,8 @@ deleteImg, copyImg, settingsImg, lockImg, unlockImg, lorawanImg, batteryImg, lig
 doorwayImg, windowImg, personImg, sensorImg, stairsImg, bedImg, sofaImg, chairImg, threesofaImg, stoveImg, kitchensinkImg, bathtubImg, roundsinkImg, toiletImg,
 
 windowClosedImg,
-doorImg} from '../icons/index';
+doorImg,
+zigbeeImg} from '../icons/index';
 
 import { db } from "../firebase";
 import { addDoc, collection, doc, updateDoc, query, getDoc } from "firebase/firestore";
@@ -500,7 +501,13 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImageData,
             let sensorCounter = 0;
             let angleScaler = 0;
 
-            var deviceImg = new fabric.FabricImage(lorawanImg, {
+            let deviceHolder = lorawanImg;
+
+            if (device.platform === 'zha') {
+                deviceHolder = zigbeeImg
+            }
+
+            var deviceImg = new fabric.FabricImage(deviceHolder, {
                 left: 0,
                 top: 0,
                 scaleX: 1.5,

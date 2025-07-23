@@ -60,6 +60,7 @@ var settingsImg = document.createElement('img');
 var lockImg = document.createElement('img');
 var unlockImg = document.createElement('img');
 var lorawanImg = document.createElement('img');
+var zigbeeImg = document.createElement('img');
 var personImg = document.createElement('img');
 var batteryImg = document.createElement('img');
 var lightoffImg = document.createElement('img');
@@ -93,6 +94,7 @@ settingsImg.src = Settings;
 lockImg.src = Lock;
 unlockImg.src = Unlock;
 lorawanImg.src = Lorawan;
+zigbeeImg.src = Zigbee;
 personImg.src = Person;
 batteryImg.src =  Battery;
 lightoffImg.src =  LightOff;
@@ -123,6 +125,6 @@ export {
     Draw, Sensor ,Component, Create, Save, Export, Account, Guide, About, DrawLine, Square, DoorOpen, DoorClose, Upstairs, Downstairs ,WindowClosed, WindowOpen, Delete,
     Copy,Share, Move, Settings, Lorawan, Zigbee, Person, Battery, LightOff, LightOn, Co2, Voltage, Humidity, Thermometer, Pressure, Sound, Motion, 
     Door, Bathtub, Bed, Chair, KitchenSink, RoundSink, Sofa, Stairs, Stove, ThreeSofa, Toilet, Window, Map, CircleOutline,
-    deleteImg, copyImg, moveImg, settingsImg, lockImg, unlockImg, lorawanImg, batteryImg, lightoffImg, co2Img, voltageImg, humidityImg, thermometerImg, pressureImg, soundImg, motionImg,
+    deleteImg, copyImg, moveImg, settingsImg, lockImg, unlockImg, lorawanImg, zigbeeImg, batteryImg, lightoffImg, co2Img, voltageImg, humidityImg, thermometerImg, pressureImg, soundImg, motionImg,
     doorwayImg, doorImg, windowImg, windowClosedImg, personImg, sensorImg, bathtubImg, bedImg, chairImg, kitchensinkImg, roundsinkImg, sofaImg, stairsImg,stoveImg, threesofaImg, toiletImg,
 };
