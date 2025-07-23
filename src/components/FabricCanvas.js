@@ -354,8 +354,8 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImageData,
                 devices: deviceList,
                 originalDevices: originalDeviceList,
                 labelList: labelList,
-                deviceRegistry: deviceRegistry,
-                entityRegistry: entityRegistry,
+                deviceRegistry: JSON.stringify(deviceRegistry),
+                entityRegistry: JSON.stringify(entityRegistry),
                 updated: new Date()
                 });
                 onSaveResult('success')
