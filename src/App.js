@@ -27,6 +27,8 @@ function App() {
   const [deviceList, setDeviceList] =  useState(() => JSON.parse(sessionStorage.getItem('sensors')));
   const [originalDeviceList, setOriginalDeviceList] = useState(() => JSON.parse(sessionStorage.getItem('original-sensors')));
   const [labelList, setLabelList] = useState(() => JSON.parse(sessionStorage.getItem('labels')));
+  const [deviceRegistry, setDeviceRegistry] = useState(() => JSON.parse(sessionStorage.getItem('deviceRegistry')));
+  const [entityRegistry, setEntityRegistry] = useState(() => JSON.parse(sessionStorage.getItem('entityRegistry')));
   
   const [canvasAction, setCanvasAction] = useState('select');
   const [canvasImageData, setCanvasImageData] = useState(null);
@@ -54,6 +56,8 @@ function App() {
   const retrieveOriginalDeviceList = (list) => setOriginalDeviceList(list);
   const retrieveDrawWidth = (pixel) => setDrawWidth(pixel);
   const retrieveLabelList = (labels) => setLabelList(labels);
+  const retrieveDeviceRegistry = (data) => setDeviceRegistry(data);
+  const retrieveEntityRegistry = (data) => setEntityRegistry(data);
 
   useEffect(() => {
     sessionStorage.setItem('canvasWidth', canvasWidth)
@@ -64,7 +68,12 @@ function App() {
     sessionStorage.setItem('sensors', JSON.stringify(deviceList))
     sessionStorage.setItem('original-sensors', JSON.stringify(originalDeviceList))
     sessionStorage.setItem('labels', JSON.stringify(labelList))
-  }, [canvasWidth, canvasHeight, canvasName, canvasID, activeCanvas, refreshToggle, deviceList, canvasDevice, originalDeviceList, drawWidth, labelList]);
+    sessionStorage.setItem('deviceRegistry', JSON.stringify(deviceRegistry))
+    sessionStorage.setItem('entityRegistry', JSON.stringify(entityRegistry))
+    console.log(deviceRegistry);
+    console.log(entityRegistry);
+
+  }, [canvasWidth, canvasHeight, canvasName, canvasID, activeCanvas, refreshToggle, deviceList, canvasDevice, originalDeviceList, drawWidth, labelList, deviceRegistry, entityRegistry]);
 
   const centerZoom = () => {
     window.scrollTo({
@@ -119,14 +128,14 @@ function App() {
           <FabricCanvas canvasWidth={canvasWidth} canvasHeight={canvasHeight} canvasAction={canvasAction} canvasImageData={canvasImageData} canvasName={canvasName} canvasID={canvasID}
           onCanvasID={retrieveID} activeCanvas={activeCanvas} saveToggle={saveToggle} onSaveToggle={() => setSaveToggle(false)} onSaveResult={retrieveSave} loadToggle={loadToggle} onLoadToggle={() => setLoadToggle(false)} 
           refreshToggle={refreshToggle} onRefreshToggle={()=> setRefreshToggle(false)} canvasDevice={canvasDevice} deviceToggle={deviceToggle} onDeviceToggle={() => setDeviceToggle(false)} user={user} 
-          deviceList={deviceList} onDeviceList={retrieveDeviceList} originalDeviceList={originalDeviceList} onHandlerToggle={(toggle) => setHandlerToggle(toggle)} drawWidth={drawWidth} labelList={labelList}/>
+          deviceList={deviceList} onDeviceList={retrieveDeviceList} originalDeviceList={originalDeviceList} onHandlerToggle={(toggle) => setHandlerToggle(toggle)} drawWidth={drawWidth} labelList={labelList} deviceRegistry={deviceRegistry} entityRegistry={entityRegistry}/>
         </div>
       </div>
 
       {activePopup === 'draw' && (
       <DrawTool onCanvasAction={retrieveAction} drawWidth={drawWidth} onDrawWidth={retrieveDrawWidth} />
       )} {activePopup === 'sensor' && (
-      <SensorTool onCanvasDevice={retrieveDevice} onDeviceToggle={() => setDeviceToggle(true)} onDeviceList={retrieveDeviceList} deviceList={deviceList} onOriginalDeviceList={retrieveOriginalDeviceList} onLabelList={retrieveLabelList} labelList={labelList}/>
+      <SensorTool onCanvasDevice={retrieveDevice} onDeviceToggle={() => setDeviceToggle(true)} onDeviceList={retrieveDeviceList} deviceList={deviceList} onOriginalDeviceList={retrieveOriginalDeviceList} onLabelList={retrieveLabelList} labelList={labelList} onDeviceRegistry={retrieveDeviceRegistry} onEntityRegistry={retrieveEntityRegistry}/>
       )} {activePopup === 'component' && (
       <ComponentTool onCanvasAction={retrieveAction}/>
       )}
@@ -140,7 +149,7 @@ function App() {
         <UserAuthentication onClose={closePopup} />
       )}
        {activePopup === 'account' && user  && (
-        <AccountPopup onClose={closePopup} onCanvasName={retrieveName} onCanvasID={retrieveID} onCanvasWidth={retrieveWidth} onCanvasHeight={retrieveHeight} onActive={retrieveActive} onLoadToggle={() => setLoadToggle(true)}  onRefreshToggle={()=> setRefreshToggle(true)} onDeviceList={retrieveDeviceList} deviceList={deviceList} onOriginalDeviceList={retrieveOriginalDeviceList} originalDeviceList={originalDeviceList} onLabelList={retrieveLabelList} labelList={labelList} user={user}/>
+        <AccountPopup onClose={closePopup} onCanvasName={retrieveName} onCanvasID={retrieveID} onCanvasWidth={retrieveWidth} onCanvasHeight={retrieveHeight} onActive={retrieveActive} onLoadToggle={() => setLoadToggle(true)}  onRefreshToggle={()=> setRefreshToggle(true)} onDeviceList={retrieveDeviceList} deviceList={deviceList} onOriginalDeviceList={retrieveOriginalDeviceList} originalDeviceList={originalDeviceList} onLabelList={retrieveLabelList} labelList={labelList} onDeviceRegistry={retrieveDeviceRegistry} onEntityRegistry={retrieveEntityRegistry} user={user}/>
       )}
     </div>
   );

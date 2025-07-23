@@ -28,7 +28,7 @@ fabric.FabricObject.prototype.toObject = (function(toObject) {
 })(fabric.FabricObject.prototype.toObject);
 
 function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImageData, canvasName, canvasID, onCanvasID, saveToggle, onSaveToggle, onSaveResult, loadToggle, onLoadToggle, refreshToggle, onRefreshToggle, 
-    canvasDevice, deviceToggle, onDeviceToggle, user, deviceList, onDeviceList, originalDeviceList, onHandlerToggle, drawWidth, labelList}) {
+    canvasDevice, deviceToggle, onDeviceToggle, user, deviceList, onDeviceList, originalDeviceList, onHandlerToggle, drawWidth, labelList, deviceRegistry, entityRegistry}) {
     const canvasRef = useRef(null);
     const fabricCanvas = useRef(null);
     const [isDrawing, setIsDrawing] = useState(false);
@@ -327,6 +327,8 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImageData,
                 devices: deviceList,
                 originalDevices: originalDeviceList,
                 labelList: labelList,
+                deviceRegistry: JSON.stringify(deviceRegistry),
+                entityRegistry: JSON.stringify(entityRegistry),
                 created: new Date(),
                 updated: new Date(),
                 });
@@ -352,6 +354,8 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImageData,
                 devices: deviceList,
                 originalDevices: originalDeviceList,
                 labelList: labelList,
+                deviceRegistry: deviceRegistry,
+                entityRegistry: entityRegistry,
                 updated: new Date()
                 });
                 onSaveResult('success')
@@ -422,7 +426,7 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImageData,
             onRefreshToggle()
         }
             
-    }, [canvasHeight, canvasWidth, canvasName, saveToggle, onSaveToggle, loadToggle, onLoadToggle, user, canvasID, onCanvasID, refreshToggle, onRefreshToggle, canvasAction, onSaveResult, deviceList, originalDeviceList, floorArray, floorData, labelList])
+    }, [canvasHeight, canvasWidth, canvasName, saveToggle, onSaveToggle, loadToggle, onLoadToggle, user, canvasID, onCanvasID, refreshToggle, onRefreshToggle, canvasAction, onSaveResult, deviceList, originalDeviceList, floorArray, floorData, labelList, entityRegistry, deviceRegistry])
 
     // Setting Background Images
     useEffect(()=> {

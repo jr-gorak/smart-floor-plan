@@ -4,7 +4,7 @@ import '../../css/Tools.css';
 import '../../css/Popup.css';
 import {Sensor, Lorawan, Zigbee} from '../../../icons/index'
 
-function SensorTool({onCanvasDevice, onDeviceToggle, onDeviceList, onOriginalDeviceList, deviceList, onLabelList, labelList}) {
+function SensorTool({onCanvasDevice, onDeviceToggle, onDeviceList, onOriginalDeviceList, deviceList, onLabelList, labelList, onDeviceRegistry, onEntityRegistry}) {
 
   const [devices, setDevices] = useState(null);
   const [entities, setEntities] = useState(null);
@@ -65,6 +65,7 @@ function SensorTool({onCanvasDevice, onDeviceToggle, onDeviceList, onOriginalDev
 
     deviceReader.onload = (e) => {
       const text = JSON.parse(e.target.result);
+      onDeviceRegistry(text)
       const deviceData = text.data.devices;
 
       const deviceMap = deviceData.filter(d => d.identifiers[0] && (d.identifiers[0][0] === 'thethingsnetwork' || d.identifiers[0][0] === 'zha'))
@@ -84,6 +85,7 @@ function SensorTool({onCanvasDevice, onDeviceToggle, onDeviceList, onOriginalDev
 
     entityReader.onload = (e) => {
       const text = JSON.parse(e.target.result);
+      onEntityRegistry(text)
       const entityData = text.data.entities;
 
       const entityMap = entityData.filter(en => en.platform === 'zha' || en.platform === 'thethingsnetwork')
@@ -152,11 +154,12 @@ function SensorTool({onCanvasDevice, onDeviceToggle, onDeviceList, onOriginalDev
       onDeviceList(joinDevices);
       onOriginalDeviceList(structuredClone(joinDevices));
       onLabelList(["", "location", "activity", "environment"])
+
       setActiveValue(null);
       setDevices(null);
       setEntities(null);
     }
-  }, [devices, entities, onDeviceList, onOriginalDeviceList, onLabelList]);
+  }, [devices, entities, onDeviceList, onOriginalDeviceList, onLabelList, coreDeviceFile, coreEntityFile, onDeviceRegistry, onEntityRegistry]);
 
   return (
     <div className="box">
