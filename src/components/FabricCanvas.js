@@ -27,7 +27,7 @@ fabric.FabricObject.prototype.toObject = (function(toObject) {
 })(fabric.FabricObject.prototype.toObject);
 
 function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImageData, canvasName, canvasID, onCanvasID, saveToggle, onSaveToggle, onSaveResult, loadToggle, onLoadToggle, refreshToggle, onRefreshToggle, 
-    canvasDevice, deviceToggle, onDeviceToggle, user, deviceList, onDeviceList, originalDeviceList, onHandlerToggle, drawWidth, onLabelList, labelList}) {
+    canvasDevice, deviceToggle, onDeviceToggle, user, deviceList, onDeviceList, originalDeviceList, onHandlerToggle, drawWidth, labelList}) {
     const canvasRef = useRef(null);
     const fabricCanvas = useRef(null);
     const [isDrawing, setIsDrawing] = useState(false);
@@ -325,6 +325,7 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImageData,
                 shared: [],
                 devices: deviceList,
                 originalDevices: originalDeviceList,
+                labelList: labelList,
                 created: new Date(),
                 updated: new Date(),
                 });
@@ -349,6 +350,7 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImageData,
                 floorArray: floorArray,
                 devices: deviceList,
                 originalDevices: originalDeviceList,
+                labelList: labelList,
                 updated: new Date()
                 });
                 onSaveResult('success')
@@ -419,7 +421,7 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImageData,
             onRefreshToggle()
         }
             
-    }, [canvasHeight, canvasWidth, canvasName, saveToggle, onSaveToggle, loadToggle, onLoadToggle, user, canvasID, onCanvasID, refreshToggle, onRefreshToggle, canvasAction, onSaveResult, deviceList, originalDeviceList, floorArray, floorData])
+    }, [canvasHeight, canvasWidth, canvasName, saveToggle, onSaveToggle, loadToggle, onLoadToggle, user, canvasID, onCanvasID, refreshToggle, onRefreshToggle, canvasAction, onSaveResult, deviceList, originalDeviceList, floorArray, floorData, labelList])
 
     // Setting Background Images
     useEffect(()=> {
@@ -1336,7 +1338,7 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImageData,
             <div>
 
                 {togglePopup && (
-                    <DeviceSettings settingsMode={settingsMode} activeDevice={activeDevice} deviceList={deviceList} onTogglePopup={() => setTogglePopup(false)} onUpdateDeviceToggle={() => setUpdateDeviceToggle(true)} onDeviceList={onDeviceList} onUpdatedDevice={retrieveUpdate} onLabelList={onLabelList} labelList={labelList}></DeviceSettings>
+                    <DeviceSettings settingsMode={settingsMode} activeDevice={activeDevice} deviceList={deviceList} onTogglePopup={() => setTogglePopup(false)} onUpdateDeviceToggle={() => setUpdateDeviceToggle(true)} onDeviceList={onDeviceList} onUpdatedDevice={retrieveUpdate} labelList={labelList}></DeviceSettings>
                 )
                 }
 

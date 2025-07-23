@@ -28,7 +28,6 @@ function App() {
   const [originalDeviceList, setOriginalDeviceList] = useState(() => JSON.parse(sessionStorage.getItem('original-sensors')));
   const [labelList, setLabelList] = useState(() => JSON.parse(sessionStorage.getItem('labels')));
   
-
   const [canvasAction, setCanvasAction] = useState('select');
   const [canvasImageData, setCanvasImageData] = useState(null);
   const [saveToggle, setSaveToggle] = useState(false);
@@ -120,7 +119,7 @@ function App() {
           <FabricCanvas canvasWidth={canvasWidth} canvasHeight={canvasHeight} canvasAction={canvasAction} canvasImageData={canvasImageData} canvasName={canvasName} canvasID={canvasID}
           onCanvasID={retrieveID} activeCanvas={activeCanvas} saveToggle={saveToggle} onSaveToggle={() => setSaveToggle(false)} onSaveResult={retrieveSave} loadToggle={loadToggle} onLoadToggle={() => setLoadToggle(false)} 
           refreshToggle={refreshToggle} onRefreshToggle={()=> setRefreshToggle(false)} canvasDevice={canvasDevice} deviceToggle={deviceToggle} onDeviceToggle={() => setDeviceToggle(false)} user={user} 
-          deviceList={deviceList} onDeviceList={retrieveDeviceList} originalDeviceList={originalDeviceList} onHandlerToggle={(toggle) => setHandlerToggle(toggle)} drawWidth={drawWidth} onLabelList={retrieveLabelList} labelList={labelList}/>
+          deviceList={deviceList} onDeviceList={retrieveDeviceList} originalDeviceList={originalDeviceList} onHandlerToggle={(toggle) => setHandlerToggle(toggle)} drawWidth={drawWidth} labelList={labelList}/>
         </div>
       </div>
 
@@ -141,7 +140,7 @@ function App() {
         <UserAuthentication onClose={closePopup} />
       )}
        {activePopup === 'account' && user  && (
-        <AccountPopup onClose={closePopup} onCanvasName={retrieveName} onCanvasID={retrieveID} onCanvasWidth={retrieveWidth} onCanvasHeight={retrieveHeight} onActive={retrieveActive} onLoadToggle={() => setLoadToggle(true)}  onRefreshToggle={()=> setRefreshToggle(true)} onDeviceList={retrieveDeviceList} deviceList={deviceList} onOriginalDeviceList={retrieveOriginalDeviceList} originalDeviceList={originalDeviceList} user={user}/>
+        <AccountPopup onClose={closePopup} onCanvasName={retrieveName} onCanvasID={retrieveID} onCanvasWidth={retrieveWidth} onCanvasHeight={retrieveHeight} onActive={retrieveActive} onLoadToggle={() => setLoadToggle(true)}  onRefreshToggle={()=> setRefreshToggle(true)} onDeviceList={retrieveDeviceList} deviceList={deviceList} onOriginalDeviceList={retrieveOriginalDeviceList} originalDeviceList={originalDeviceList} onLabelList={retrieveLabelList} labelList={labelList} user={user}/>
       )}
     </div>
   );

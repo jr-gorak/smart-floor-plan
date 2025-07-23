@@ -34,6 +34,17 @@
   z-index: 10000;
 }
 
+.new-label-frame {
+  width: 40%;
+  max-height: 80%;
+  min-width: 500px;
+  max-width: 90vw;
+  background: #fffffb;
+  border-radius: 6px;
+  overflow: auto;
+  z-index: 10000;
+}
+
 .exit {
   display: flex;
   justify-content: flex-end;

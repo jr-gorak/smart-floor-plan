@@ -4,13 +4,14 @@ import '../../css/Tools.css';
 import '../../css/Popup.css';
 import {Sensor, Lorawan, Zigbee, Thermometer, Battery, Person, LightOff, Co2, Voltage, Humidity, Pressure, Sound, Motion, WindowClosed, Component} from '../../../icons/index'
 
-function DeviceSettings({settingsMode, activeDevice, deviceList, onTogglePopup, onUpdateDeviceToggle, onCanvasDevice, onDeviceToggle, onDeviceList, onUpdatedDevice,
-  onLabelList, labelList}) {
-
-    console.log(labelList);
+function DeviceSettings({settingsMode, activeDevice, deviceList, onTogglePopup, onUpdateDeviceToggle, onCanvasDevice, onDeviceToggle, onDeviceList, onUpdatedDevice, labelList}) {
 
   const [activeInput, setActiveInput] = useState(null);
   const [device, setDevice] = useState(activeDevice);
+  const [inputToggle, setInputToggle] = useState(false);
+  const [activeEntity, setActiveEntity] = useState(null);
+  const [newLabel, setNewLabel] = useState("")
+  
   document.body.style.overflow = 'hidden';
   
   function toggleHandle() {
@@ -38,7 +39,13 @@ function DeviceSettings({settingsMode, activeDevice, deviceList, onTogglePopup, 
       entity.type = value;
       stacheDevice.entities[index].type = value;
       setDevice(stacheDevice);
-    } else if (classifier === 'label') {
+    } else if (classifier === 'label' && value === 'input') {
+      setInputToggle(true);
+      const entity = activeDevice.entities.find(e => e.id === id);
+      setActiveEntity(entity);
+      return;
+    }
+    else if (classifier === 'label') {
       const entity = activeDevice.entities.find(e => e.id === id)
       entity.label = value;
     }
@@ -92,6 +99,23 @@ function DeviceSettings({settingsMode, activeDevice, deviceList, onTogglePopup, 
     toggleHandle();
   };
 
+  function addNewLabel() {
+    if(newLabel && !labelList.includes(newLabel)) {
+      labelList.push(newLabel.toLowerCase());
+      const index = device.entities.findIndex(e => e.id === activeEntity.id)
+      const stacheDevice = {...device};
+      device.entities[index].label = newLabel;
+      setDevice(stacheDevice);
+      setInputToggle(false);
+      setActiveEntity(null);
+    } 
+  }
+
+  function resetLabel() {
+    setInputToggle(false)
+    setActiveEntity(null)
+  }
+
   return ReactDOM.createPortal(
     <div className="filter" onClick={() => toggleHandle()}>
       <div className="small-frame" onClick={e => e.stopPropagation()}>
@@ -141,8 +165,7 @@ function DeviceSettings({settingsMode, activeDevice, deviceList, onTogglePopup, 
                           {ent.type !== 'window' && (
                             <option value='window'>window</option>
                           )}
-                          
-                          
+                           
                         </select>
                         )}
                       </div>
@@ -153,14 +176,29 @@ function DeviceSettings({settingsMode, activeDevice, deviceList, onTogglePopup, 
                       {labelList.map((label) => (
                         <option value={label}>{label}</option>
                       ))}
+                        <option value='input'>...add label</option>
                       </select>
-
-
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+            {inputToggle && (
+              <div className="filter" onClick={() => resetLabel()}>
+                <div className="new-label-frame" onClick={e => e.stopPropagation()}>
+                  <div className='exit'>
+                    <button onClick={() => resetLabel()}>X</button>
+                  </div>
+                  <div className='popup-content'>
+                    <h2>Add New Label</h2> 
+                    <p>Please enter your new label name below.</p>
+                    <input type='text' value={newLabel} onChange={(e) => setNewLabel(e.target.value)}></input>
+                    <button onClick={() => addNewLabel()}>Save</button>
+                  </div>
+                </div>
+              </div>
+          )}
+            
           </div>
 
           {settingsMode === 'tool' &&
