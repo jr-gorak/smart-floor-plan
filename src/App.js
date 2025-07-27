@@ -70,9 +70,6 @@ function App() {
     sessionStorage.setItem('labels', JSON.stringify(labelList))
     sessionStorage.setItem('deviceRegistry', JSON.stringify(deviceRegistry))
     sessionStorage.setItem('entityRegistry', JSON.stringify(entityRegistry))
-    console.log(deviceRegistry);
-    console.log(entityRegistry);
-
   }, [canvasWidth, canvasHeight, canvasName, canvasID, activeCanvas, refreshToggle, deviceList, canvasDevice, originalDeviceList, drawWidth, labelList, deviceRegistry, entityRegistry]);
 
   const centerZoom = () => {
