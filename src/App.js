@@ -29,6 +29,7 @@ function App() {
   const [labelList, setLabelList] = useState(() => JSON.parse(sessionStorage.getItem('labels')));
   const [deviceRegistry, setDeviceRegistry] = useState(() => JSON.parse(sessionStorage.getItem('deviceRegistry')));
   const [entityRegistry, setEntityRegistry] = useState(() => JSON.parse(sessionStorage.getItem('entityRegistry')));
+  const [floorData, setFloorData] = useState(() => {const stored = sessionStorage.getItem("floorData"); return stored? JSON.parse(stored) : {}; });
   
   const [canvasAction, setCanvasAction] = useState('select');
   const [canvasImageData, setCanvasImageData] = useState(null);
@@ -58,6 +59,7 @@ function App() {
   const retrieveLabelList = (labels) => setLabelList(labels);
   const retrieveDeviceRegistry = (data) => setDeviceRegistry(data);
   const retrieveEntityRegistry = (data) => setEntityRegistry(data);
+  const retrieveFloorData = (data) => setFloorData(data);
 
   useEffect(() => {
     sessionStorage.setItem('canvasWidth', canvasWidth)
@@ -70,7 +72,9 @@ function App() {
     sessionStorage.setItem('labels', JSON.stringify(labelList))
     sessionStorage.setItem('deviceRegistry', JSON.stringify(deviceRegistry))
     sessionStorage.setItem('entityRegistry', JSON.stringify(entityRegistry))
-  }, [canvasWidth, canvasHeight, canvasName, canvasID, activeCanvas, refreshToggle, deviceList, canvasDevice, originalDeviceList, drawWidth, labelList, deviceRegistry, entityRegistry]);
+    sessionStorage.setItem("floorData", JSON.stringify(floorData));
+    console.log(floorData);
+  }, [canvasWidth, canvasHeight, canvasName, canvasID, activeCanvas, refreshToggle, deviceList, canvasDevice, originalDeviceList, drawWidth, labelList, deviceRegistry, entityRegistry, floorData]);
 
   const centerZoom = () => {
     window.scrollTo({
@@ -117,7 +121,7 @@ function App() {
 
       <header>
         <Menu onOpenPopup={openPopup} onCanvasWidth={retrieveWidth} onCanvasHeight={retrieveHeight} onCanvasImageData={retrieveImageData} onCanvasName={retrieveName} onActive={retrieveActive} onCanvasID={retrieveID} onSaveToggle={() => setSaveToggle(true)} 
-        onRefreshToggle={() => setRefreshToggle(true)} onSaveResult={retrieveSave} saveResult={saveResult} user={user} activeCanvas={activeCanvas} onDeviceList={retrieveDeviceList} onOriginalDeviceList={retrieveOriginalDeviceList} />
+        onRefreshToggle={() => setRefreshToggle(true)} onSaveResult={retrieveSave} saveResult={saveResult} user={user} activeCanvas={activeCanvas} onDeviceList={retrieveDeviceList} onOriginalDeviceList={retrieveOriginalDeviceList} floorData={floorData}/>
       </header>
        
        <div className='Canvas-State' style={{visibility: activeCanvas? 'visible' : 'hidden'}}>
@@ -125,7 +129,7 @@ function App() {
           <FabricCanvas canvasWidth={canvasWidth} canvasHeight={canvasHeight} canvasAction={canvasAction} canvasImageData={canvasImageData} canvasName={canvasName} canvasID={canvasID}
           onCanvasID={retrieveID} activeCanvas={activeCanvas} saveToggle={saveToggle} onSaveToggle={() => setSaveToggle(false)} onSaveResult={retrieveSave} loadToggle={loadToggle} onLoadToggle={() => setLoadToggle(false)} 
           refreshToggle={refreshToggle} onRefreshToggle={()=> setRefreshToggle(false)} canvasDevice={canvasDevice} deviceToggle={deviceToggle} onDeviceToggle={() => setDeviceToggle(false)} user={user} 
-          deviceList={deviceList} onDeviceList={retrieveDeviceList} originalDeviceList={originalDeviceList} onHandlerToggle={(toggle) => setHandlerToggle(toggle)} drawWidth={drawWidth} labelList={labelList} deviceRegistry={deviceRegistry} entityRegistry={entityRegistry}/>
+          deviceList={deviceList} onDeviceList={retrieveDeviceList} originalDeviceList={originalDeviceList} onHandlerToggle={(toggle) => setHandlerToggle(toggle)} drawWidth={drawWidth} labelList={labelList} deviceRegistry={deviceRegistry} entityRegistry={entityRegistry} floorData={floorData} onFloorData={retrieveFloorData}/>
         </div>
       </div>
 

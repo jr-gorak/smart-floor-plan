@@ -86,7 +86,7 @@ function CreateDropdown({activeDropdown, onCanvasWidth, onCanvasHeight, onActive
 
   function canvasImageCreate() {
     if (name === "") {
-      setError("Pleae ensure you have named your project");
+      setError("Please ensure you have named your project");
     } else {
     const img = new Image();
     img.src = imageData["GR"];

@@ -4,8 +4,7 @@ import * as fabric from "fabric";
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 
-function ExportDropdown({activeDropdown}) {
-  const [floorData, setFloorData] = useState(() => {const stored = sessionStorage.getItem("floorData"); return stored? JSON.parse(stored) : {}; });
+function ExportDropdown({activeDropdown, floorData}) {
   const [floorArray, setFloorArray] = useState(() => {const stored = sessionStorage.getItem("floorArray"); return stored? JSON.parse(stored) : ["GR"]; });
   const labelList = JSON.parse(sessionStorage.getItem('labels'));
   const deviceRegistry = JSON.parse(sessionStorage.getItem('deviceRegistry'));
@@ -18,7 +17,7 @@ function ExportDropdown({activeDropdown}) {
 
   async function generateImages(purpose) {
     const dataLength = Object.keys(floorData).length;
-    let processedFiles = 1;
+    let processedFiles = 0;
 
     return new Promise((resolve) => {
       Object.entries(floorData).forEach(([key, data]) => {

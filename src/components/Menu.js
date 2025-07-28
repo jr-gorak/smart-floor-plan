@@ -5,7 +5,7 @@ import {Draw, Sensor, Component, Create, Save, Account, Guide, About, Export} fr
 import CreateDropdown from './menu/filemanager/CreateDropdown';
 import ExportDropdown from './menu/filemanager/ExportDropdown';
 
-function Menu( {onOpenPopup, onCanvasWidth, onCanvasHeight, onCanvasImageData, onCanvasName, onActive, onCanvasID, onSaveToggle, onRefreshToggle, onSaveResult, saveResult, user, activeCanvas, onDeviceList, onOriginalDeviceList} ) {
+function Menu( {onOpenPopup, onCanvasWidth, onCanvasHeight, onCanvasImageData, onCanvasName, onActive, onCanvasID, onSaveToggle, onRefreshToggle, onSaveResult, saveResult, user, activeCanvas, onDeviceList, onOriginalDeviceList, floorData} ) {
 
     const [isActive, setIsActive] = useState(false);
     const [activeValue, setActiveValue] = useState(null);
@@ -77,7 +77,7 @@ function Menu( {onOpenPopup, onCanvasWidth, onCanvasHeight, onCanvasImageData, o
                 </div>
                 <button className={saveIndicator} onClick={() => checkSave()}><img src={Save} className="menu-icon" alt="logo"/> Save</button>
                 <div className='dropdown'> <button className={activeDropdown === 'export' ? 'button-on' : 'button-off'} onClick={() => toggleDropdown('export')}><img src={Export} className="menu-icon" alt="logo"/>Export</button>
-                    <ExportDropdown activeDropdown={activeDropdown}  />
+                    <ExportDropdown activeDropdown={activeDropdown} floorData={floorData} />
                 </div>
             </div>
 
