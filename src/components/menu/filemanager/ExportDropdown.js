@@ -43,10 +43,17 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
           if (dataLength === 1) {
             setTimeout(() => {
               const floorplanPNG = canvas.toDataURL({format: 'png'})
-              const link = document.createElement('a');
-              link.href = floorplanPNG;
-              link.download = `${canvasName.toLowerCase().replace(/ /g, '_')}_${key}.png`;
-              link.click();
+              const fileName =  `${canvasName.toLowerCase().replace(/ /g, '_')}_${key}.png`;
+
+              if (purpose === 'images') {
+                const link = document.createElement('a');
+                link.href = floorplanPNG;
+                link.download = fileName;
+                link.click();
+              } else if (purpose === 'home-assistant') {
+                zip.folder('media').file(fileName, floorplanPNG.split(',')[1], {base64: true})
+                resolve();
+              }
             }, 0)
           } else if (dataLength > 1) {
             setTimeout(() => {
@@ -54,6 +61,7 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
               const fileName =  `${canvasName.toLowerCase().replace(/ /g, '_')}_${key}.png`;
               zip.folder('media').file(fileName, floorplanPNG.split(',')[1], {base64: true})
               processedFiles++
+
               if (processedFiles === dataLength && purpose === 'images') {
                 zip.generateAsync({type: 'blob'}).then((blob) => {
                   saveAs(blob, `${canvasName.toLowerCase().replace(/ /g, '_')}_images.zip`)
