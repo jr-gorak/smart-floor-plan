@@ -1,18 +1,14 @@
 import '../../css/Dropdown.css';
-import { useState } from 'react';
 import * as fabric from "fabric";
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 
-function ExportDropdown({activeDropdown, floorData}) {
-  const [floorArray, setFloorArray] = useState(() => {const stored = sessionStorage.getItem("floorArray"); return stored? JSON.parse(stored) : ["GR"]; });
-  const labelList = JSON.parse(sessionStorage.getItem('labels'));
-  const deviceRegistry = JSON.parse(sessionStorage.getItem('deviceRegistry'));
-  const entityRegistry = JSON.parse(sessionStorage.getItem('entityRegistry'));
-  const canvasWidth = sessionStorage.getItem('canvasWidth');
-  const canvasHeight = sessionStorage.getItem('canvasHeight');
-  const canvasName = sessionStorage.getItem('canvasName');
-  const deviceList = JSON.parse(sessionStorage.getItem('sensors'));
+function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
+
+  const { canvasWidth, canvasHeight, canvasName, entityRegistry, deviceRegistry } = canvasInfo
+  const { deviceList, labelList, floorData, floorArray } = canvasData
+  const { activeCanvas } = canvasState
+
   var zip = new JSZip();
 
   async function generateImages(purpose) {
@@ -23,18 +19,22 @@ function ExportDropdown({activeDropdown, floorData}) {
       Object.entries(floorData).forEach(([key, data]) => {
         let finishedDownloading = false;
 
+        if (data.objects.length === 0) {
+          processedFiles++
+          return;
+        }
+
         const canvas = new fabric.Canvas(null, {
           width: canvasWidth,
           height: canvasHeight,
-          backgroundColor: "white",
         });
 
         canvas.loadFromJSON(data, () => {
           if (finishedDownloading) return;
           setTimeout(() => {
+            canvas.backgroundColor = "white";
             canvas.getObjects().filter(obj => obj.classifier === 'device' || obj.classifier === 'sensor').forEach(obj => {
               obj.visible = false;
-              console.log(obj);
             })
           }, 0)
 
@@ -45,26 +45,23 @@ function ExportDropdown({activeDropdown, floorData}) {
               const floorplanPNG = canvas.toDataURL({format: 'png'})
               const link = document.createElement('a');
               link.href = floorplanPNG;
-              link.download = canvasName + '_' + key + '.png';
+              link.download = `${canvasName.toLowerCase().replace(/ /g, '_')}_${key}.png`;
               link.click();
             }, 0)
           } else if (dataLength > 1) {
             setTimeout(() => {
               const floorplanPNG = canvas.toDataURL({format: 'png'})
-              const fileName =  canvasName + '_' + key + '.png';
+              const fileName =  `${canvasName.toLowerCase().replace(/ /g, '_')}_${key}.png`;
               zip.folder('media').file(fileName, floorplanPNG.split(',')[1], {base64: true})
               processedFiles++
-              console.log(processedFiles);
-
               if (processedFiles === dataLength && purpose === 'images') {
                 zip.generateAsync({type: 'blob'}).then((blob) => {
-                  saveAs(blob, 'image_export.zip')
+                  saveAs(blob, `${canvasName.toLowerCase().replace(/ /g, '_')}_images.zip`)
                   zip = new JSZip();
                   resolve();
                 });
 
               } else if (processedFiles === dataLength && purpose === 'home-assistant') {
-                console.log("test")
                 resolve();
               }
                 
@@ -97,8 +94,8 @@ function ExportDropdown({activeDropdown, floorData}) {
           icon: null,
           level: calculateLevel(floorArray[i]),
           name: floorArray[i],
-          created_at: Date(),
-          modified_at: Date(),
+          created_at: new Date().toISOString().replace("Z","+00:00"),
+          modified_at: new Date().toISOString().replace("Z","+00:00"),
         }
         dataArray.push(floorData)
         }
@@ -120,8 +117,8 @@ function ExportDropdown({activeDropdown, floorData}) {
           name: obj.area_id,
           picture: null,
           temperature_entity_id: null,
-          created_at: Date(),
-          modified_at: Date(),
+          created_at: new Date().toISOString().replace("Z","+00:00"),
+          modified_at: new Date().toISOString().replace("Z","+00:00"),
         }))
         dataArray.push(...areaData);
       }
@@ -139,8 +136,8 @@ function ExportDropdown({activeDropdown, floorData}) {
             icon: null,
             label_id: labelList[i].toLowerCase().replace(/ /g, '_'),
             name: labelList[i],
-            created_at: Date(),
-            modified_at: Date(),
+            created_at: new Date().toISOString().replace("Z","+00:00"),
+            modified_at: new Date().toISOString().replace("Z","+00:00"),
           }
           dataArray.push(labelData)
         } 
@@ -155,6 +152,7 @@ function ExportDropdown({activeDropdown, floorData}) {
         const coreDevice = deviceRegistry.data.devices.find(device => device.id === deviceId)
         coreDevice.area_id = deviceData.area_id;
         coreDevice.name_by_user = deviceData.name;
+        coreDevice.modified_at = new Date().toISOString().replace("Z","+00:00");
 
         for (const entity in deviceData.entities) {
           const entityData = deviceData.entities[entity]
@@ -163,6 +161,7 @@ function ExportDropdown({activeDropdown, floorData}) {
           coreEntity.area_id = deviceData.area_id;
           coreEntity.labels.push(entityData.label);
           coreEntity.name = entityData.name;
+          coreEntity.modified_at = new Date().toISOString().replace("Z","+00:00");
         }
       }
     }
@@ -210,20 +209,23 @@ function ExportDropdown({activeDropdown, floorData}) {
     await generateJsonFiles();
 
     await zip.generateAsync({type: 'blob'}).then((blob) => {
-        saveAs(blob, 'file_export.zip')
+        saveAs(blob, `${canvasName.toLowerCase().replace(/ /g, '_')}_export.zip`)
         zip = new JSZip();
     });
 
 
   }
 
+  console.log(deviceRegistry)
+  console.log(entityRegistry)
+
   return (
     <div>
     {activeDropdown === 'export' &&
     <div className="dropdown-container">
         <div className='dropdown-content'>
-        <button onClick={() => exportData()}>Export to Home Assistant</button>
-        <button onClick={() => generateImages("images")}>Export as png</button>
+        <button onClick={() => exportData()} disabled={!activeCanvas || !deviceRegistry || !entityRegistry}>Export to Home Assistant</button>
+        <button onClick={() => generateImages("images")} disabled={!activeCanvas}>Export as png</button>
         </div>
     </div>
     }

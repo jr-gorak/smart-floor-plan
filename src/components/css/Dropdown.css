@@ -33,3 +33,8 @@
     background-color: #efefef;
     cursor: pointer;
 }
+
+.dropdown-content button:disabled {
+    background-color: #fffffb;
+    cursor: default
+}

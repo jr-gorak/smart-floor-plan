@@ -27,8 +27,13 @@ fabric.FabricObject.prototype.toObject = (function(toObject) {
   };
 })(fabric.FabricObject.prototype.toObject);
 
-function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImageData, canvasName, canvasID, onCanvasID, saveToggle, onSaveToggle, onSaveResult, loadToggle, onLoadToggle, refreshToggle, onRefreshToggle, 
-    canvasDevice, deviceToggle, onDeviceToggle, user, deviceList, onDeviceList, originalDeviceList, onHandlerToggle, drawWidth, labelList, deviceRegistry, entityRegistry, floorData, onFloorData}) {
+function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveToggle, onSaveResult, onLoadToggle, onRefreshToggle, 
+    onDeviceToggle, user, onDeviceList, onHandlerToggle, onFloorData, onFloorArray}) {
+    
+    const { canvasWidth, canvasHeight, canvasName, canvasID, drawWidth, entityRegistry, deviceRegistry } = canvasInfo
+    const { deviceList, originalDeviceList, labelList, floorData, canvasImageData, canvasDevice, floorArray } = canvasData
+    const { canvasAction, saveToggle, loadToggle, refreshToggle, deviceToggle } = canvasState
+    
     const canvasRef = useRef(null);
     const fabricCanvas = useRef(null);
     const [isDrawing, setIsDrawing] = useState(false);
@@ -48,13 +53,11 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImageData,
     const [hideRooms, setHideRooms] = useState(false);
     const [hideLabels, setHideLabels] = useState(false);
     const [hideDevices, setHideDevices] = useState(false);
-    const [floorArray, setFloorArray] = useState(() => {const stored = sessionStorage.getItem("floorArray"); return stored? JSON.parse(stored) : ["GR"]; });
-    const [activeFloor, setActiveFloor] = useState(() => {const stored = sessionStorage.getItem("activeFloor"); return stored? JSON.parse(stored) : floorArray[0]; });
     const [deleteWarning, setDeleteWarning] = useState(false);
     const [deleteConfirmation, setDeleteConfirmation] = useState(false);
     const [stachedFloor, setStachedFloor] = useState(null);
     const [imageLoading, setImageLoading] = useState(true);
-
+    const [activeFloor, setActiveFloor] = useState(() => {const stored = sessionStorage.getItem("activeFloor"); return stored? JSON.parse(stored) : floorArray[0]; });
     const retrieveUpdate = (update) => setUpdatedDevice(update);
 
     const settingsMode = 'canvas';
@@ -68,7 +71,7 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImageData,
                 }
             })
             if (floorArray.length < 5) {
-                setFloorArray(floors => [((floorArray.length - floorCount) + "F"), ...floors])
+                onFloorArray(floors => [((floorArray.length - floorCount) + "F"), ...floors])
             }
         }
         if (direction === 'down') {
@@ -79,7 +82,7 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImageData,
                 }
             })
             if (floorArray.length < 5) {
-            setFloorArray(floors => [...floors, ((floorArray.length - floorCount) + "B")])
+            onFloorArray(floors => [...floors, ((floorArray.length - floorCount) + "B")])
             }
         }
     }
@@ -137,12 +140,10 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImageData,
             setStachedFloor(floor);
             return;
         } else if (floorData[floor]){
-            console.log("this one?")
             const existingData = {...floorData}
             delete existingData[floor];
             onFloorData(existingData)
         } else if (fabricCanvas.current._objects.length > 0 && stachedFloor === null) {
-            console.log("after that one?")
             setDeleteWarning(true);
             setStachedFloor(floor);
             return;
@@ -158,11 +159,11 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImageData,
             SwitchFloor(nextFloor)
         }
 
-        setFloorArray(original => original.filter(floorID => floorID !== floor))
+        onFloorArray(original => original.filter(floorID => floorID !== floor))
         setStachedFloor(null);
         setDeleteConfirmation(null);
 
-    }, [SwitchFloor, activeFloor, floorArray, floorData, stachedFloor, onFloorData])
+    }, [SwitchFloor, activeFloor, floorArray, floorData, stachedFloor, onFloorData, onFloorArray])
 
         const AssignAreaIDs = useCallback((room) => {
         const x1 = room.left;
@@ -301,6 +302,7 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImageData,
         fabricCanvas.current.on('selection:created', checkObjects)
         fabricCanvas.current.on('selection:updated', checkObjects)
 
+
         return () =>
         {
             window.removeEventListener("beforeunload", triggerSave);
@@ -384,7 +386,7 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImageData,
 
                 refreshCanvas();
                 
-                setFloorArray(retrieve.floorArray);
+                onFloorArray(retrieve.floorArray);
                 onFloorData(retrieve.floorplanData);
                 setActiveFloor("GR");
                 fabricCanvas.current.loadFromJSON(json, () => {
@@ -409,7 +411,7 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImageData,
             requestAnimationFrame(() => {
                 fabricCanvas.current.renderAll();
             });
-            setFloorArray(["GR"])
+            onFloorArray(["GR"])
             setActiveFloor("GR")
             onFloorData({})
         };
@@ -429,7 +431,7 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImageData,
             onRefreshToggle()
         }
             
-    }, [canvasHeight, canvasWidth, canvasName, saveToggle, onSaveToggle, loadToggle, onLoadToggle, user, canvasID, onCanvasID, refreshToggle, onRefreshToggle, canvasAction, onSaveResult, deviceList, originalDeviceList, floorArray, floorData, labelList, entityRegistry, deviceRegistry, onFloorData])
+    }, [canvasHeight, canvasWidth, canvasName, saveToggle, onSaveToggle, loadToggle, onLoadToggle, user, canvasID, onCanvasID, refreshToggle, onRefreshToggle, canvasAction, onSaveResult, deviceList, originalDeviceList, floorArray, floorData, labelList, entityRegistry, deviceRegistry, onFloorData, onFloorArray])
 
     // Setting Background Images
     useEffect(()=> {
@@ -438,7 +440,7 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImageData,
             const defaultKey = data.find(key => key === "GR");
             const fKeys = data.filter(key => key.includes("F"));
             const bKeys = data.filter(key => key.includes("B"));
-            setFloorArray([...fKeys.reverse(), defaultKey, ...bKeys])
+            onFloorArray([...fKeys.reverse(), defaultKey, ...bKeys])
         }
 
         async function addImageData(data) {
@@ -478,7 +480,7 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImageData,
                 setImageLoading(false);
             })();
         }
-    }, [canvasImageData, canvasHeight, canvasWidth, imageLoading, floorData, onFloorData]);
+    }, [canvasImageData, canvasHeight, canvasWidth, imageLoading, floorData, onFloorData, onFloorArray]);
 
     // Create Devices
     useEffect(() => {
@@ -952,11 +954,13 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImageData,
                 sessionSave(fabricCanvas.current);
             }
 
+            updateFloor();
             setIsDrawing(false);
             setShape(null);
         };
 
         const mouseUpShape = () => {
+            updateFloor();
             shape.setCoords()
             setIsDrawing(false);
             setShape(null);
@@ -1001,6 +1005,7 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImageData,
                 fabricCanvas.current.renderAll();
 
                 AssignAreaIDs(mark)
+                updateFloor();
             }
         };
 
@@ -1173,8 +1178,6 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImageData,
                     setControls(obj);
                     fabricCanvas.current.renderAll();
             }
-            console.log(obj);
-            
         }
 
         function roomInformation(_eventData, transform) {
@@ -1219,12 +1222,24 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImageData,
             }
         };
 
+         function updateFloor() {
+            const floorSnapshot = fabricCanvas.current.toJSON();
+            onFloorData(files => ({
+                ...files, 
+                [activeFloor]: floorSnapshot
+            }))
+        }
+
         document.removeEventListener('keydown', keyDown);
         document.addEventListener('keydown', keyDown);
 
         fabricCanvas.current.on('mouse:down', mouseDown);
         fabricCanvas.current.on('mouse:move', mouseMove);
         fabricCanvas.current.on('mouse:up', mouseUp);
+
+        fabricCanvas.current.on('object:added', updateFloor)
+        fabricCanvas.current.on('object:modified', updateFloor)
+        fabricCanvas.current.on('object:removed', updateFloor)
         
 
         return () => {
@@ -1236,7 +1251,7 @@ function FabricCanvas({canvasWidth, canvasHeight, canvasAction, canvasImageData,
                 fabricCanvas.current.off('mouse:up', mouseUp);
             }
         }
-    }, [tempObject, setTempObject, deviceList, onDeviceList, isDrawing, shape, actionType, canvasAction, x1, y1, originalDeviceList, activeDevice, drawWidth, polygonVertices, updatedRoom, roomLabel, AssignAreaIDs, AssignAreaIDsOnMove]);
+    }, [tempObject, setTempObject, deviceList, onDeviceList, isDrawing, shape, actionType, canvasAction, x1, y1, originalDeviceList, activeDevice, drawWidth, polygonVertices, updatedRoom, roomLabel, AssignAreaIDs, AssignAreaIDsOnMove, activeFloor, onFloorData]);
 
     useEffect(() => {
         
