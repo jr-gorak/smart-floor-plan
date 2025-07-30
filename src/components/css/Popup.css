@@ -23,6 +23,16 @@
   scrollbar-width: thin;
 }
 
+.guide-frame {
+  width: 80%;
+  min-width: 500px;
+  height: 80%;
+  max-width: 90vw;
+  background: #fffffb;
+  border-radius: 6px;
+  z-index: 10000;
+}
+
 .small-frame {
   width: 50%;
   max-height: 80%;
@@ -321,4 +331,40 @@ td {
 .sensor-display img {
   margin-top: 5px;
   width: 30px
+}
+
+.guide-container {
+  display: flex;
+  flex-direction: row;
+}
+
+.guide-container .popup-content {
+  border: 1px solid #d3d3d3;
+  border-radius: 5px;
+  margin: 15px;
+  padding: 15px;
+  overflow: auto;
+  max-height: 400px;
+  scrollbar-width: thin;
+}
+
+.tab-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  text-align: center;
+  width: 100px;
+  margin: 0 0 0 10px;
+}
+
+.tab-menu .button-on {
+    background-color: #efefef !important;
+}
+
+.tab-menu button {
+  display: flex;
+  justify-content: center;
+  width: 90px;
+  
 }
