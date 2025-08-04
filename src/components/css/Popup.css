@@ -137,6 +137,12 @@ input[type=number]::-webkit-outer-spin-button {
   padding-right: 10px;
 }
 
+button:disabled {
+  background-color: #fffffb !important;
+  cursor: default !important
+
+}
+
 .create-button button:disabled {
   background-color: #fffffb;
   cursor: default;

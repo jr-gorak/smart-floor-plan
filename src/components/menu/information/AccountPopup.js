@@ -234,7 +234,7 @@ function Account({ onClose, onCanvasName, onCanvasID, onCanvasWidth, onCanvasHei
           <h2>Account</h2>
           <p>Welcome to your account!</p>
 
-          <button>Change Password</button>
+          <button disabled={true}>Change Password</button>
           <button onClick={userSignOut}>Sign Out</button>
           {errorMessage && (
             <p style={{color: 'red'}}>{errorMessage}</p>

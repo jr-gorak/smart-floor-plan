@@ -88,6 +88,7 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
     }
 
     const SwitchFloor = useCallback(async (floor) => {
+        removeTemporaryObjects();
         const file = fabricCanvas.current.toJSON();
         const objArray = [];
 
@@ -165,7 +166,7 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
 
     }, [SwitchFloor, activeFloor, floorArray, floorData, stachedFloor, onFloorData, onFloorArray])
 
-        const AssignAreaIDs = useCallback((room) => {
+    const AssignAreaIDs = useCallback((room) => {
         const x1 = room.left;
         const x2 = room.left + room.width;
         const y1 = room.top;
@@ -232,6 +233,11 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
                 });
             });
         }
+    }
+
+    function removeTemporaryObjects() {
+        const tempObjects = fabricCanvas.current.getObjects().filter(obj => obj.classifier === "temporary")
+        tempObjects.forEach(obj => fabricCanvas.current.remove(obj))
     }
 
     //Save Floor List
@@ -301,11 +307,11 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
 
         fabricCanvas.current.on('selection:created', checkObjects)
         fabricCanvas.current.on('selection:updated', checkObjects)
-
+        window.addEventListener("beforeunload", removeTemporaryObjects)
 
         return () =>
         {
-            window.removeEventListener("beforeunload", triggerSave);
+            window.removeEventListener("beforeunload", removeTemporaryObjects);
             fabricCanvas.current?.dispose();
             fabricCanvas.current = null;
         }}, [canvasWidth, canvasHeight, refreshToggle, loadToggle]);
