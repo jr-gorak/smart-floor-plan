@@ -36,6 +36,7 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
     
     const canvasRef = useRef(null);
     const fabricCanvas = useRef(null);
+    const selectFlag = useRef(false);
     const [isDrawing, setIsDrawing] = useState(false);
     const [shape, setShape] = useState(null);
     const [actionType, setActionType] = useState(null);
@@ -112,6 +113,32 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
         }
     }, [hideDevices, hideLabels, hideRooms])
 
+    const checkObjects = useCallback(() => {
+        if (selectFlag.current) return;
+        selectFlag.current = true;
+
+        const activeGroup = fabricCanvas.current.getActiveObject()
+
+        if (activeGroup.classifier === 'device') return;
+
+        if (activeGroup && activeGroup._objects) {
+            const unlockedObjects = activeGroup.getObjects().filter(obj => obj.classifier !== 'locked' && obj.classifier !== 'mark')
+                
+            fabricCanvas.current.discardActiveObject()
+                
+            if (unlockedObjects.length > 0) {
+                const selection = new fabric.ActiveSelection(unlockedObjects, {
+                canvas: fabricCanvas.current          
+                })
+                fabricCanvas.current.setActiveObject(selection);
+                fabricCanvas.current.renderAll();
+            } else {
+                fabricCanvas.current.discardActiveObject()
+            }
+        }
+        selectFlag.current = false;
+    }, [])
+
     function AddFloor(direction) {
         if (direction === 'up') {
             let floorCount = 0;
@@ -176,6 +203,8 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
         }
 
         fabricCanvas.current = blankCanvas;
+        fabricCanvas.current.on('selection:created', checkObjects)
+        fabricCanvas.current.on('selection:updated', checkObjects)
          setTimeout(() => {
                 requestAnimationFrame(() => {
             viewpointToggle();
@@ -185,7 +214,7 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
 
         setActiveFloor(floor)
         setActionType(null);  
-    }, [activeFloor, canvasHeight, canvasWidth, floorData, onFloorData, viewpointToggle])
+    }, [activeFloor, canvasHeight, canvasWidth, floorData, onFloorData, viewpointToggle, checkObjects])
 
     const RemoveFloor = useCallback((floor) => {
         if (floorData[floor] && floorData[floor].objects.length > 0 && stachedFloor === null) {
@@ -328,45 +357,15 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
         };
 
         window.addEventListener("beforeunload", triggerSave);
-
-        let selectFlag = false;
-
-        function checkObjects() {
-            if (selectFlag) return;
-            selectFlag = true;
-
-            const activeGroup = fabricCanvas.current.getActiveObject()
-
-            if (activeGroup.classifier === 'device') return;
-
-            if (activeGroup && activeGroup._objects) {
-                const unlockedObjects = activeGroup.getObjects().filter(obj => obj.classifier !== 'locked')
-                
-                fabricCanvas.current.discardActiveObject()
-                
-                if (unlockedObjects.length > 0) {
-                    const selection = new fabric.ActiveSelection(unlockedObjects, {
-                        canvas: fabricCanvas.current          
-                    })
-                    fabricCanvas.current.setActiveObject(selection);
-                    fabricCanvas.current.renderAll();
-                } else {
-                    fabricCanvas.current.discardActiveObject()
-                }
-            }
-            selectFlag = false;
-        }
-
+        window.addEventListener("beforeunload", removeTemporaryObjects)
         fabricCanvas.current.on('selection:created', checkObjects)
         fabricCanvas.current.on('selection:updated', checkObjects)
-        window.addEventListener("beforeunload", removeTemporaryObjects)
 
         return () =>
         {
-            window.removeEventListener("beforeunload", removeTemporaryObjects);
             fabricCanvas.current?.dispose();
             fabricCanvas.current = null;
-        }}, [canvasWidth, canvasHeight, refreshToggle, loadToggle]);
+        }}, [canvasWidth, canvasHeight, refreshToggle, loadToggle, checkObjects]);
 
     //Canvas File Handling
     useEffect(() => {
@@ -776,6 +775,10 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
                     obj.cursorStyle = 'default';
                     obj.cornerColor = 'rgba(0, 0, 0, 0)';
                     obj.hasBorders = false;
+                }
+
+                if (obj.classifier === 'text') {
+                    obj.perPixelTargetFind = false;
                 }
             });
 
@@ -1219,7 +1222,6 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
                     obj.cursorStyle = 'default';
                     obj.cornerColor = 'rgba(0, 0, 0, 0)';
                     obj.hasBorders = false;
-                    obj.isSelectableForGroup = () => false;
                     setControls(obj);
                     fabricCanvas.current.renderAll();
             } else {
