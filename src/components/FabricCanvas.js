@@ -62,6 +62,56 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
 
     const settingsMode = 'canvas';
 
+    const viewpointToggle = useCallback(() => {
+        if (hideRooms) {
+            fabricCanvas.current.getObjects().forEach(obj => {
+                if(obj.classifier === 'mark') {
+                    obj.visible = false
+                }
+            })
+            fabricCanvas.current.renderAll();
+        } else {
+            fabricCanvas.current.getObjects().forEach(obj => {
+                if(obj.classifier === 'mark') {
+                    obj.visible = true
+                }
+            })
+            fabricCanvas.current.renderAll();
+        }
+
+        if (hideLabels) {
+            fabricCanvas.current.getObjects().forEach(obj => {
+                if(obj.classifier === 'text') {
+                    obj.visible = false
+                }
+            })
+            fabricCanvas.current.renderAll();
+        } else {
+            fabricCanvas.current.getObjects().forEach(obj => {
+                if(obj.classifier === 'text') {
+                    obj.visible = true
+                }
+            })
+            fabricCanvas.current.renderAll();
+        } 
+
+        if (hideDevices) {
+            fabricCanvas.current.getObjects().forEach(obj => {
+                if(obj.classifier === 'device') {
+                    obj.visible = false
+                }
+            })
+            fabricCanvas.current.renderAll();
+        } else {
+            fabricCanvas.current.getObjects().forEach(obj => {
+                if(obj.classifier === 'device') {
+                    obj.visible = true
+                }
+            })
+            fabricCanvas.current.renderAll();
+        }
+    }, [hideDevices, hideLabels, hideRooms])
+
     function AddFloor(direction) {
         if (direction === 'up') {
             let floorCount = 0;
@@ -117,6 +167,7 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
 
         if (floorData[floor]) {   
             blankCanvas.loadFromJSON(floorData[floor]);
+            
             setActionType(null);       
         } else if (objArray.length) {
             objArray.forEach(obj => {
@@ -127,13 +178,14 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
         fabricCanvas.current = blankCanvas;
          setTimeout(() => {
                 requestAnimationFrame(() => {
+            viewpointToggle();
             fabricCanvas.current.renderAll();
         });
          }, 0)
 
         setActiveFloor(floor)
         setActionType(null);  
-    }, [activeFloor, canvasHeight, canvasWidth, floorData, onFloorData])
+    }, [activeFloor, canvasHeight, canvasWidth, floorData, onFloorData, viewpointToggle])
 
     const RemoveFloor = useCallback((floor) => {
         if (floorData[floor] && floorData[floor].objects.length > 0 && stachedFloor === null) {
@@ -1271,55 +1323,8 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
 
     //Hidden View Toggles
     useEffect(() => {
-        if (hideRooms) {
-            fabricCanvas.current.getObjects().forEach(obj => {
-                if(obj.classifier === 'mark') {
-                    obj.visible = false
-                }
-            })
-            fabricCanvas.current.renderAll();
-        } else {
-            fabricCanvas.current.getObjects().forEach(obj => {
-                if(obj.classifier === 'mark') {
-                    obj.visible = true
-                }
-            })
-            fabricCanvas.current.renderAll();
-        }
-
-        if (hideLabels) {
-            fabricCanvas.current.getObjects().forEach(obj => {
-                if(obj.classifier === 'text') {
-                    obj.visible = false
-                }
-            })
-            fabricCanvas.current.renderAll();
-        } else {
-            fabricCanvas.current.getObjects().forEach(obj => {
-                if(obj.classifier === 'text') {
-                    obj.visible = true
-                }
-            })
-            fabricCanvas.current.renderAll();
-        }
-
-        if (hideDevices) {
-            fabricCanvas.current.getObjects().forEach(obj => {
-                if(obj.classifier === 'device') {
-                    obj.visible = false
-                }
-            })
-            fabricCanvas.current.renderAll();
-        } else {
-            fabricCanvas.current.getObjects().forEach(obj => {
-                if(obj.classifier === 'device') {
-                    obj.visible = true
-                }
-            })
-            fabricCanvas.current.renderAll();
-        }
-
-    }, [hideRooms, hideLabels, hideDevices]);
+        viewpointToggle();
+    }, [viewpointToggle]);
 
     return (
         <div className="canvas-container">
