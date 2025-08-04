@@ -2,7 +2,7 @@ import {useState, useEffect} from 'react';
 import '../../css/Dropdown.css';
 import '../../css/Popup.css'
 
-function CreateDropdown({activeDropdown, onCanvasWidth, onCanvasHeight, onActiveDropdown, onCanvasImageData, onCanvasName, onCanvasID, onActive, onRefreshToggle, onDeviceList, onOriginalDeviceList}) {
+function CreateDropdown({activeDropdown, onCanvasWidth, onCanvasHeight, onActiveDropdown, onCanvasImageData, onCanvasName, onCanvasID, onActive, onRefreshToggle, onDeviceList, onOriginalDeviceList, onDeviceRegistry, onEntityRegistry, onFloorData, onFloorArray}) {
 
   const [activeValue, setActiveValue] = useState(null);
   const [width, setWidth] = useState(1000);
@@ -65,11 +65,14 @@ function CreateDropdown({activeDropdown, onCanvasWidth, onCanvasHeight, onActive
     onActiveDropdown(null);
     onDeviceList(null);
     onOriginalDeviceList(null);
+    onDeviceRegistry(null);
+    onEntityRegistry(null);
+    onFloorData({});
+    onFloorArray(["GR"]);
     }
   }
 
     const imageUpload = (e, floor) => {
-      console.log(e);
       const file = e.target.files[0];
       if (file) {
         const reader = new FileReader();
@@ -81,7 +84,6 @@ function CreateDropdown({activeDropdown, onCanvasWidth, onCanvasHeight, onActive
         }
         reader.readAsDataURL(file)
       }
-      console.log(imageData)
     }
 
   function canvasImageCreate() {
@@ -90,6 +92,7 @@ function CreateDropdown({activeDropdown, onCanvasWidth, onCanvasHeight, onActive
     } else {
     const img = new Image();
     img.src = imageData["GR"];
+    console.log(imageData)
     img.onload = () => {
       onCanvasWidth(img.width);
       onCanvasHeight(img.height);
@@ -104,6 +107,10 @@ function CreateDropdown({activeDropdown, onCanvasWidth, onCanvasHeight, onActive
       setButtonToggle(!buttonToggle);
       onDeviceList(null);
       onOriginalDeviceList(null);
+      onDeviceRegistry(null);
+      onEntityRegistry(null);
+      onFloorData({});
+      onFloorArray(["GR"]);
     }
     }
   }
@@ -116,7 +123,9 @@ function CreateDropdown({activeDropdown, onCanvasWidth, onCanvasHeight, onActive
           setActiveValue(value)
       }  else if (activeValue === value) {
           setActiveValue(null)
-      }  
+      }
+      setFloorArray(["GR"])
+      setImageData({})
   }
 
   useEffect(() => {

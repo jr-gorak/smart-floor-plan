@@ -28,7 +28,7 @@ fabric.FabricObject.prototype.toObject = (function(toObject) {
 })(fabric.FabricObject.prototype.toObject);
 
 function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveToggle, onSaveResult, onLoadToggle, onRefreshToggle, 
-    onDeviceToggle, user, onDeviceList, onHandlerToggle, onFloorData, onFloorArray}) {
+    onDeviceToggle, user, onDeviceList, onHandlerToggle, onFloorData, onFloorArray, onCanvasImageData}) {
     
     const { canvasWidth, canvasHeight, canvasName, canvasID, drawWidth, entityRegistry, deviceRegistry } = canvasInfo
     const { deviceList, originalDeviceList, labelList, floorData, canvasImageData, canvasDevice, floorArray } = canvasData
@@ -57,7 +57,6 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
     const [deleteWarning, setDeleteWarning] = useState(false);
     const [deleteConfirmation, setDeleteConfirmation] = useState(false);
     const [stachedFloor, setStachedFloor] = useState(null);
-    const [imageLoading, setImageLoading] = useState(true);
     const [activeFloor, setActiveFloor] = useState(() => {const stored = sessionStorage.getItem("activeFloor"); return stored? JSON.parse(stored) : floorArray[0]; });
     const retrieveUpdate = (update) => setUpdatedDevice(update);
 
@@ -527,17 +526,17 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
             return mapImageToCanvas
         };
         
-        if(canvasImageData && imageLoading) {
+        if(canvasImageData) {
 
             sortKeys(Object.keys(canvasImageData));
 
             (async () => {
                 const initializedCanvases = await addImageData(canvasImageData)
                 onFloorData(initializedCanvases)
-                setImageLoading(false);
+                onCanvasImageData(null);
             })();
         }
-    }, [canvasImageData, canvasHeight, canvasWidth, imageLoading, floorData, onFloorData, onFloorArray]);
+    }, [canvasImageData, canvasHeight, canvasWidth, floorData, onFloorData, onFloorArray, onCanvasImageData]);
 
     // Create Devices
     useEffect(() => {
