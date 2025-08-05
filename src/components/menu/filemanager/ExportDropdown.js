@@ -172,6 +172,106 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
           coreEntity.modified_at = new Date().toISOString().replace("Z","+00:00");
         }
       }
+      const doorsTable = {
+          aliases: [],
+          area_id: null,
+          categories: {},
+          capabilities: null,
+          config_entry_id: null,
+          config_subentry_id: null,
+          created_at: new Date().toISOString().replace("Z","+00:00"),
+          device_class: null,
+          device_id: null,
+          disabled_by: null,
+          entity_category: null,
+          entity_id: "input_boolean.show_doors_table",
+          hidden_by: null,
+          id: "e44fbf1da0e11fc4d18a90739b3fe5a7",
+          has_entity_name: false,
+          labels: [],
+          modified_at: new Date().toISOString().replace("Z","+00:00"),
+          name: null,
+          options: {"conversation":{"should_expose":false}},
+          original_device_class: null,
+          original_icon: null,
+          original_name: "Doors",
+          platform: "input_boolean",
+          supported_features: 0,
+          translation_key: null,
+          unique_id: "show_doors_table",
+          previous_unique_id: null,
+          unit_of_measurement: null,
+        }
+        const celsiusTable = {
+          aliases: [],
+          area_id: null,
+          categories: {},
+          capabilities: null,
+          config_entry_id: null,
+          config_subentry_id: null,
+          created_at: new Date().toISOString().replace("Z","+00:00"),
+          device_class: null,
+          device_id: null,
+          disabled_by: null,
+          entity_category: null,
+          entity_id: "input_boolean.show_celsius_table",
+          hidden_by: null,
+          id: "cba6c988d04d015e3c2602e9883273c5",
+          has_entity_name: false,
+          labels: [],
+          modified_at: new Date().toISOString().replace("Z","+00:00"),
+          name: null,
+          options: {"conversation":{"should_expose":false}},
+          original_device_class: null,
+          original_icon: null,
+          original_name: "Show Temperature Table",
+          platform: "input_boolean",
+          supported_features: 0,
+          translation_key: null,
+          unique_id: "show_celsius_table",
+          previous_unique_id: null,
+          unit_of_measurement: null,
+        }
+
+        const lampTable = {
+          aliases: [],
+          area_id: null,
+          categories: {},
+          capabilities: null,
+          config_entry_id: null,
+          config_subentry_id: null,
+          created_at: new Date().toISOString().replace("Z","+00:00"),
+          device_class: null,
+          device_id: null,
+          disabled_by: null,
+          entity_category: null,
+          entity_id: "input_boolean.show_lamps_table",
+          hidden_by: null,
+          id: "0d480b61efb50b36d89bb6b166fe8e38",
+          has_entity_name: false,
+          labels: [],
+          modified_at: new Date().toISOString().replace("Z","+00:00"),
+          name: null,
+          options: {"conversation":{"should_expose":false}},
+          original_device_class: null,
+          original_icon: null,
+          original_name: "Lamps",
+          platform: "input_boolean",
+          supported_features: 0,
+          translation_key: null,
+          unique_id: "show_lamps_table",
+          previous_unique_id: null,
+          unit_of_measurement: null,
+        }
+
+        const customEntityCheck = entityRegistry.data.entities.find(entity => entity.entity_id === "input_boolean.show_doors_table");
+        console.log(customEntityCheck)
+        if (customEntityCheck === undefined)
+        {
+          entityRegistry.data.entities.push(doorsTable)
+          entityRegistry.data.entities.push(celsiusTable)
+          entityRegistry.data.entities.push(lampTable)
+        }
     }
 
     const floorRegistryExport = {
@@ -510,7 +610,7 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
         <div className='dropdown-content'>
         <button onClick={() => exportData()} disabled={!activeCanvas || !deviceRegistry || !entityRegistry}>Export to Home Assistant</button>
         <button onClick={() => generateImages("images")} disabled={!activeCanvas}>Export as png</button>
-        <button onClick={() => generateDashboard()}>test</button>
+        <button onClick={() => generateJsonFiles()}>test</button>
         </div>
     </div>
     }
