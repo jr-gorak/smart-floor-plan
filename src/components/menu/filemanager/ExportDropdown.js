@@ -222,11 +222,11 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
           const temperatureSensor = deviceData.entities.find(entity => entity.type === "temperature" && entity.visible === true)
           const lightSensor = deviceData.entities.find(entity => entity.type.includes("light") && entity.visible === true)
           if (doorSensor) {
-            doorSensorIDArray.push({device_id: doorSensor.device_id, id: doorSensor.id, area_id: deviceData.area_id, type: doorSensor.type})
+            doorSensorIDArray.push({device_id: doorSensor.device_id, id: doorSensor.id, area_id: deviceData.area_id, type: doorSensor.type, original_name: doorSensor.original_name})
           } if (temperatureSensor) {
-            temperatureSensorIDArray.push({device_id: temperatureSensor.device_id, id: temperatureSensor.id, area_id: deviceData.area_id, type: temperatureSensor.type})
+            temperatureSensorIDArray.push({device_id: temperatureSensor.device_id, id: temperatureSensor.id, area_id: deviceData.area_id, type: temperatureSensor.type, original_name: temperatureSensor.original_name})
           } if (lightSensor) {
-            lightSensorIDArray.push({device_id: lightSensor.device_id, id: lightSensor.id, area_id: deviceData.area_id, type: lightSensor.type})
+            lightSensorIDArray.push({device_id: lightSensor.device_id, id: lightSensor.id, area_id: deviceData.area_id, type: lightSensor.type, original_name: lightSensor.original_name})
           }
     }
 
@@ -240,12 +240,11 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
             elements: [
               {
                 type: "state-icon",
-                entity: entity.id,
+                entity: entity.original_name,
                 icon: entity.type === "door" ? "mdi:door-closed" : "mdi:window-closed-variant",
                 style: {
                   left: Math.round((obj.left / canvasWidth) * 100) + "%",
                   top: Math.round((obj.top / canvasHeight) * 100) + "%",
-                  transform: "scale(2,2)"
                 },
                 title: entity.type === "door" ? (entity.area_id ? `${entity.area_id} Door` : "Door") : (entity.area_id ? `${entity.area_id} Window` : "Window"),
               }
@@ -253,7 +252,7 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
             conditions: [
               {
                 condition: "state",
-                entity: entity.id,
+                entity: entity.original_name,
                 state: "Closed"
               }
             ],
@@ -264,19 +263,18 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
             elements: [
               {
                 type: "state-icon",
-                entity: entity.id,
+                entity: entity.original_name,
                 icon: entity.type === "door" ? "mdi:door-open" : "mdi:window-open-variant",
                 style: {
                   left: (Math.round((obj.left / canvasWidth) * 100)-1) + "%",
                   top: Math.round((obj.top / canvasHeight) * 100) + "%",
-                  transform: "scale(2,2)"
                 },
               }
              ],
             conditions: [
               {
                 condition: "state",
-                entity: entity.id,
+                entity: entity.original_name,
                 state: "Open"
               }
             ],
@@ -295,7 +293,7 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
           temperatureElement.forEach(obj => {
           const temperatureObject = {
             type: "state-badge",
-            entity: entity.id,
+            entity: entity.original_name,
             title: entity.area_id ? `${entity.area_id.replace(/^./, entity.area_id[0].toUpperCase()).replace(/_/g, " ")}` : "No Room",
             style: {
               left: (Math.round((obj.left / canvasWidth) * 100)-1) + "%",
@@ -319,19 +317,18 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
             conditions: [
               {
                 condition: "numeric_state",
-                entity: entity.id,
+                entity: entity.original_name,
                 above: 200
               }
             ],
             elements: [
               {
                 type: "state-icon",
-                entity: entity.id,
+                entity: entity.original_name,
                 icon: "mdi:lightbulb-on",
                 style: {
                   left: Math.round((obj.left / canvasWidth) * 100) + "%",
                   top: Math.round((obj.top / canvasHeight) * 100) + "%",
-                  transform: "scale(2,2)"
                 },
               }
             ],
@@ -342,19 +339,18 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
             conditions: [
               {
                 condition: "numeric_state",
-                entity: entity.id,
+                entity: entity.original_name,
                 below: 200
               }
             ],
             elements: [
               {
                 type: "state-icon",
-                entity: entity.id,
+                entity: entity.original_name,
                 icon: "mdi:lightbulb-outline",
                 style: {
                   left: Math.round((obj.left / canvasWidth) * 100) + "%",
                   top: Math.round((obj.top / canvasHeight) * 100) + "%",
-                  transform: "scale(2,2)"
                 },
               }
             ],
@@ -366,7 +362,6 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
     }
 
     function generateFloorDashboard() {
-      
       const floorDashboardArray = []
       for (const key in floorData) {
         const data = floorData[key];
@@ -436,7 +431,7 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
                     }
                   ],
                   elements: generateDoorEntities(data),
-                  image: "imgURLhere"
+                  image: `/local/${canvasName.toLowerCase().replace(/ /g, '_')}_${key}.png`
                 },
                 {
                   type: "picture-elements",
@@ -449,7 +444,7 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
                     }
                   ],
                   elements: generateTemperatureEntities(data),
-                  image: "imgURLhere"
+                  image: `/local/${canvasName.toLowerCase().replace(/ /g, '_')}_${key}.png`
                 }, 
                 {
                   type: "picture-elements",
@@ -462,7 +457,7 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
                     }
                   ],
                   elements: generateLightEntities(data),
-                  image: "imgURLhere"
+                  image: `/local/${canvasName.toLowerCase().replace(/ /g, '_')}_${key}.png`
                 }, 
               ]
             }
@@ -515,6 +510,7 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
         <div className='dropdown-content'>
         <button onClick={() => exportData()} disabled={!activeCanvas || !deviceRegistry || !entityRegistry}>Export to Home Assistant</button>
         <button onClick={() => generateImages("images")} disabled={!activeCanvas}>Export as png</button>
+        <button onClick={() => generateDashboard()}>test</button>
         </div>
     </div>
     }
