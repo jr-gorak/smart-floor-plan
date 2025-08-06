@@ -188,20 +188,11 @@ input {
   border-radius: 2px;
 }
 
-.floor-plan-grid li {
-  list-style: none;
-}
-
-.upper-bar {
-  display: flex;
-  gap: 15px;
-}
-
-ul {
+.floor-plan-grid {
   border-top: solid 1px #d3d3d3;
 }
 
-li {
+.floor-plan-grid li {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -214,9 +205,14 @@ li {
   padding: 10px 0 10px 0;
 }
 
-li:hover {
+.floor-plan-grid li:hover {
   background-color: #efefef;
   cursor: pointer;
+}
+
+.upper-bar {
+  display: flex;
+  gap: 15px;
 }
 
 .round-icon {
@@ -352,6 +348,18 @@ td {
   overflow: auto;
   max-height: 400px;
   scrollbar-width: thin;
+}
+
+.guide-section {
+  border: 1px solid #d3d3d3;
+  border-radius: 3px;
+  margin: 0px 0px 10px 0px;
+  padding: 15px;
+}
+
+.guide-section img {
+  display: block;
+  margin: 0 auto;
 }
 
 .tab-menu {

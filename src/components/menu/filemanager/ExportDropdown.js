@@ -610,7 +610,6 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
         <div className='dropdown-content'>
         <button onClick={() => exportData()} disabled={!activeCanvas || !deviceRegistry || !entityRegistry}>Export to Home Assistant</button>
         <button onClick={() => generateImages("images")} disabled={!activeCanvas}>Export as png</button>
-        <button onClick={() => generateJsonFiles()}>test</button>
         </div>
     </div>
     }
