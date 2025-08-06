@@ -171,7 +171,7 @@ function DeviceSettings({settingsMode, activeDevice, deviceList, onTogglePopup, 
                       </div>
                     </td>
                     <td style={{width: `${15}%`}}>
-                      <select  defaultValue={ent.label} onChange={(e) => updateDevice('label', ent.id, e.target.value)}>
+                      <select defaultValue={ent.label} onChange={(e) => updateDevice('label', ent.id, e.target.value)}>
     
                       {labelList.map((label) => (
                         <option key={label} value={label}>{label}</option>

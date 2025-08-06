@@ -1017,6 +1017,7 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
             updateFloor();
             setIsDrawing(false);
             setShape(null);
+
         };
 
         const mouseUpShape = () => {
@@ -1066,6 +1067,8 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
 
                 AssignAreaIDs(mark)
                 updateFloor();
+                setRoomLabel(text.text)
+                setActiveRoom(mark);
             }
         };
 
@@ -1274,7 +1277,7 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
             }
 
             if (e.key === 'Delete' || e.key === 'Backspace') {
-                if(activeObject && !activeDevice) {
+                if(activeObject && !activeDevice && !activeRoom) {
                     deleteObject(null, { target: activeObject})
                     
                 }
@@ -1310,7 +1313,7 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
                 fabricCanvas.current.off('mouse:up', mouseUp);
             }
         }
-    }, [tempObject, setTempObject, deviceList, onDeviceList, isDrawing, shape, actionType, canvasAction, x1, y1, originalDeviceList, activeDevice, drawWidth, polygonVertices, updatedRoom, roomLabel, AssignAreaIDs, AssignAreaIDsOnMove, activeFloor, onFloorData]);
+    }, [tempObject, setTempObject, deviceList, onDeviceList, isDrawing, shape, actionType, canvasAction, x1, y1, originalDeviceList, activeDevice, activeRoom, drawWidth, polygonVertices, updatedRoom, roomLabel, AssignAreaIDs, AssignAreaIDsOnMove, activeFloor, onFloorData]);
 
     useEffect(() => {
         
