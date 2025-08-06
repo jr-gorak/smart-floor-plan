@@ -176,12 +176,17 @@ function SensorTool({onCanvasDevice, onDeviceToggle, onDeviceList, onOriginalDev
       {deviceList &&
         <div>
           <div className='content-grid'>
-              <p><b>LoRaWAN Sensors</b></p>
-              {deviceList.filter(device => device.platform === "thethingsnetwork").map((device) => (
-                <button key={device.id} className={device.isActive ? "input-off" : "input-on "} onClick={() => togglePopup('device-config', device)} disabled={device.isActive}>
-                  <img src={Lorawan} className="menu-icon" alt="logo"/>{device.name} {device.isActive && <p style={{color: 'green'}}>active</p>}
-                </button>
-              ))}
+            <p><b>LoRaWAN Sensors</b></p>
+            {deviceList.filter(device => device.platform === "thethingsnetwork").map((device) => (
+              <button key={device.id} className={device.isActive ? "input-off" : "input-on "} onClick={() => togglePopup('device-config', device)} disabled={device.isActive}>
+                <img src={Lorawan} className="menu-icon" alt="logo"/>{device.name} {device.isActive && <div style={{color: 'green'}}>active</div>}
+              </button>
+            ))}
+            {deviceList.filter(device => device.platform === "thethingsnetwork").length === 0 &&
+            <div className='content'>
+              <b>none</b>
+            </div>
+            }
           </div>
           <div className='content-grid'>
             <p><b>ZigBee Sensors</b></p>
@@ -190,6 +195,11 @@ function SensorTool({onCanvasDevice, onDeviceToggle, onDeviceList, onOriginalDev
                 <img src={Zigbee} className="menu-icon" alt="logo"/>{device.name} {device.isActive && <p style={{color: 'green'}}>active</p>}
               </button>
             ))}
+            {deviceList.filter(device => device.platform === "zha").length === 0 &&
+            <div className='content'>
+              <b>none</b>
+            </div>
+            }
           </div>
         </div>
       }

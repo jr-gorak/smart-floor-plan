@@ -1277,7 +1277,7 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
             }
 
             if (e.key === 'Delete' || e.key === 'Backspace') {
-                if(activeObject && !activeDevice && !activeRoom) {
+                if(activeObject && (!activeDevice || !activeRoom)) {
                     deleteObject(null, { target: activeObject})
                     
                 }
