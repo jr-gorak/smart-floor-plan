@@ -58,26 +58,68 @@ function Guide({ onClose }) {
             {tabMode === 'step1' && 
               <div>
                 <b>Step 1: Create the Floorplan</b>
-                <p>You will have the option to either upload an image or design a floorplan by scratch.
+
+                <p>You can create a floorplan through the in-app functionality or by uploading your own images of your floor plan. This guide will
+                  detail the process of developing your floor plan in regards towards Home Assistant. 
                 </p>
 
-                <b>Create a Canvas</b>
+                <ul><b>Navigation:</b>
+                  <li><b>A: Create Canvas</b> - Creating a new blank or image-based canvas</li>
+                  <li><b>B: Draw Floorplan</b> - Draw tools for developing floorplan: lines, squares, and circles.</li>
+                  <li><b>C: Add Components and Furniture</b> - doorways, windows, and furniture</li>
+                  <li><b>D: Marking Rooms</b> - labeling Rooms <b>NOTE:</b> Important for Home Assistant!</li>
+                </ul>
 
-                <p>You can create a canvas by selecting the "create new" button. This will prompt you to create 
-                a new base canvas, or upload an image as the base for a canvas. You enter your desired dimensions, name the floorplan, and then you can begin creating!</p>
+                <div className='guide-section'>
+                  <b>A: Create Canvas</b>
+                  <p>You can create a canvas by selecting the <i>Create New</i> button in the top menu. You will be prompting to create a blank
+                  canvas or create canvas from images. </p>
+                  <u>Blank Canvas</u>
+                  <p>By selecting blank canvas, you will be prompted to enter the dimensions and name for your floor plan. Once entered, you can select
+                  Create Canvas and your blank canvas will be generated!</p>
+                  <u>Canvas from Image</u>
+                  <p>To upload a floorplan, you must have an image of each individual floor. Preferably, these images should be around the same size. In the popup screen,
+                    you can add floors above and below the ground floor. The ground floor is considered the main floor for the home. If you have multiple floors, add the proper number
+                    of floors and select the corresponding image for each floor. Once each image is selected, name the floorplan and create. If you do not need to draw your floor plan,
+                    please refer to <b>Section D</b> which details marking rooms. This is an important process for Home Assistant.
+                  </p>
+                  <u>Floors</u>
+                  <p>The left side of the canvas are the canvas controls. You can toggle the viewpoint of the existing floors and devices. You can also add or delete floors.
+                    floors. As stated above, the "GR" is the ground or main floor. You can add up to four floors maximum above or below the main floor, for a total of five floors.
+                    You can switch the view by clicking on each floor.
+                  </p>
+                </div>
 
-                <b> Creating a Floor Plan </b>
+                <div className='guide-section'>
+                  <b>B: Draw Floorplan</b>
+                  <p>There are three main draw tools available: lines, squares, and circles. When opening the draw menu, clicking on each button will toggle your draw mode.
+                    When you select one, it will affect how you interact with the canvas. You can use this to draw lines and squares on the canvas. This will allow you to draw different rooms or walls.
+                    You can also adjust the thickness of the line at the bottom of the draw menu. 
+                  </p>
+                  <p>
+                    Once you draw a component, click the selected draw mode button to deactive it. You can now select on the object you drew in order to move, resize, rotate, and transform it.
+                  </p>
+                  <p>
+                    <b>Tip:</b> Once you draw a circle, you can transform it to shape to to become an ellipse. You can also drag the resize option and flip the axis to mirror an image.
+                  </p>
+                </div>
 
-                <p> The left side of the menu contains the toolset necessary to create a floor plan. Each button will create a popup menu with different functionalities. </p>
+                <div className='guide-section'>
+                  <b>C: Add Components and Furniture</b>
+                  <p>The components dropdown menu consists of various images that can be placed on the floor plan. The components help build the floor plan into
+                    a home by utilizing doorways, windows, and furniture. By clicking on the desired object, it will be placed in the middle of the canvas. This can also be moved, rotated,
+                    transformed, and resized. 
+                  </p>
+                </div>
 
-                <b>Drawing</b>
-                <p> With the draw menu, you have the options to create lines, rectangles, circles, and marking rooms. These will be the foundations to your floorplan. This will allow you to create the different walls for the home.
-                  Through marking rooms, you simply click the "mark rooms" button and begin tracing the rooms you wish to label. On successful tracing, the room will be colored red and given a room label.
-                  You can configure the color of the room and it's designated label. </p>
-
-                <b>Components</b>
-                <p> The components menu contains any miscellaneous elements necessary for building a floor
-                plan. This contains doorways, windows, stairways, and furniture </p>
+                <div className='guide-section'>
+                  <b>D: Marking Rooms</b>
+                  <p>Marking rooms is an important feature found inside the <i>draw</i> menu. To begin, click on the mark room to active the canvas mode. Now, simply trace each room on the 
+                  floor plan. A red line will appear over the path that is traced. When you connect back to the start point, the room selection will be created.</p>
+                  <p>Once you create a room, you can access it's settings by clicking on the room and selecting the gear icon. From here, you can change the color of the space
+                    and set it's name. It is important to label all rooms, especially where there are devices, as these will help assign the area id to each device.
+                  </p>
+                </div>
               </div> 
             }
 
@@ -201,9 +243,9 @@ function Guide({ onClose }) {
                   back into Home Assistant. </p>
 
                 <ul><b>Navigation:</b>
-                  <li><b>A: Export Structure</b> - devices to Home Assistant</li>
-                  <li><b>B: Import Config and Dashboard Files</b> - files necessary for Smart Floor Planner</li>
-                  <li><b>C: Import Image Files</b> - upload files to generate sensors </li>
+                  <li><b>A: Export Structure</b> - the structure of the exported zip file</li>
+                  <li><b>B: Import Config and Dashboard Files</b> - configuration files necessary for Home Assistant</li>
+                  <li><b>C: Import Image Files</b> - adding floor plan images to Home Assistant</li>
                 </ul>
                 
                 <div className='guide-section'>

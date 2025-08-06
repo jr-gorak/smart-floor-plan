@@ -36,6 +36,14 @@
     row-gap: 5px;
 }
 
+.content-grid p {
+    display: flex;
+    justify-content: center;
+    border-bottom: 1px solid black;
+    padding: 0px 0px 10px 0px;
+    margin-bottom: -8px;
+}
+
 .content {
     padding: 5px 5px 0px 5px;
     display: flex;
