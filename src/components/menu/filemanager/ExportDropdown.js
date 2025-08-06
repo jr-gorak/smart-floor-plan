@@ -353,7 +353,7 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
               {
                 condition: "state",
                 entity: entity.original_name,
-                state: "Closed"
+                state: 1
               }
             ],
             title: entity.type === "door" ?  (entity.area_id ? `${entity.area_id} Door Closed` : "Door Closed") : (entity.area_id ? `${entity.area_id} Window Closed` : "Window Closed")
@@ -375,7 +375,7 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
               {
                 condition: "state",
                 entity: entity.original_name,
-                state: "Open"
+                state: 0
               }
             ],
             title: entity.type === "door" ? (entity.area_id ? `${entity.area_id.replace(/^./, entity.area_id[0].toUpperCase()).replace(/_/g, " ")} Door Open` : "Door Open") : (entity.area_id ? `${entity.area_id.replace(/^./, entity.area_id[0].toUpperCase()).replace(/_/g, " ")} Window Open` : "Window Open")

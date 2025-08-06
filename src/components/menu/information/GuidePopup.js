@@ -196,11 +196,47 @@ function Guide({ onClose }) {
             {tabMode === 'step3' && 
               <div>
                 <b>Step 3: Exporting your files</b>
-                <p>There are various types of exports available. You can keep it simple by creating a PDF or PNG of your floorplan. You can also export the files necessary to generate a dashboard in Home Assistant.</p>
-                <b> Exporting a Floor Plan to Home Assistant </b>
-                <p> Start by clicking on the "export" button in the menu, and select "Export to Home Assistant". This will download a zip file containing the necessary images and config files for generating a dashboard.
-                  Go to your Home Assistant software, and access the file manager. Once here, you can upload the config files which should override the currently existing files. Lastly, a lovelace dashboard file will be utilized To
-                  create the dashboard in the application. </p>
+                <p>There are two main options for exporting your files. Through the export dropdown, you can choose to export for Home Assistant or export the PNGs. </p>
+                <p>This guide will go over exporting your files for the purpose of Home Assistant. It will go over the structure of the export folder, and how to handle importing 
+                  back into Home Assistant. </p>
+
+                <ul><b>Navigation:</b>
+                  <li><b>A: Export Structure</b> - devices to Home Assistant</li>
+                  <li><b>B: Import Config and Dashboard Files</b> - files necessary for Smart Floor Planner</li>
+                  <li><b>C: Import Image Files</b> - upload files to generate sensors </li>
+                </ul>
+                
+                <div className='guide-section'>
+                  <b>A: Export Structure</b>
+                  <p>
+                  The exported file is a zip folder. Inside the folder are three folders titled <b>media, core-registry-files, and yaml-files</b>. The media contains the exported
+                  images of the floor plan. Each floor has its own image generated, and each floor will generate its own dashboard. The core-registry files are as described in
+                  Step 2, the various configuration files necessary for controlling Home Assistant data. These will be utilized to assign labels and area-ids to specific devices based 
+                  on your configurations made within Smart Floor Planner. </p>
+                </div>
+
+                <div className='guide-section'>
+                  <b>B: Import Config and Dashboard Files</b>
+                  <p>Once you have exported and downloaded the export zip file, right click the file and select <i>extract all</i>. This will exctract the contents of the zip folder
+                  and create an export folder. Have this ready to individually upload files into Home Assistant. </p>
+                  <p>To import the core configuration files, access Home Assistant and go to the <i>File Editor</i> add-on. Ensure that you can view the <b>.storage</b> folder by clicking on the folder
+                  icon in the top-left of the Home Assistant OS screen. If you do not have the add-on, or you cannot find the .storage folder, please
+                  reference <b>Step 2, Section B</b>. Click on the .storage file, and then click <i>Add File</i> button, which is the arrow up icon at the top of the screen.
+                  Once you enter the add file popup, go to the Smart Floor Home export folder, <b>core-registry-files</b>, and select each file to upload. You may have
+                  to upload one file at a time, so be sure you add all six files into Home Assistant.</p>
+                  <p>For the Home Assistant yaml files, <b>press the back arrow to access the main folder.</b> Go to add files, and select the each file inside the
+                  <b>yaml-files</b> folder. These are titled <b>scripts.yaml</b> and <b>configuration.yaml</b>. Once these files have been added, move to section C to add the images.</p>
+                </div>
+
+                <div className='guide-section'>
+                  <b>C: Import Image Files</b>
+                  <p>To import the floorplan images for the dashboard, you must select <i>add folder</i> at the top of the main directory inside the <i>file editor</i>.
+                  Name the folder <b>www</b> and add the folder. Once added, navigate to the www folder and select it. Go to add files, and select on the <i>media</i> folder inside the exported
+                  Smart Floor Planner folder. Select each individual image and upload it into home assistant.</p>
+                </div>
+                <p><b>NOTE:</b> Once you have completed sections B and C by adding the core configuration, lovelace, yaml files, and media images, click on the settings icon in the upper-right corner of the
+                file editor. Navigate to Restart Home Assistant, and click restart. This will restart the software and utilize the new files you have uploaded. There should be a dashboard titled 
+                <b>Smart Home</b> with a home icon in the sidebar. This is the dashboard generated for your smart home!</p>
               </div> 
             }
           </div> 
