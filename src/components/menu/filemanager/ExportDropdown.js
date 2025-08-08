@@ -2,6 +2,7 @@ import '../../css/Dropdown.css';
 import * as fabric from "fabric";
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
+import yaml from 'js-yaml';
 
 function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
 
@@ -10,6 +11,18 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
   const { activeCanvas } = canvasState
 
   var zip = new JSZip();
+
+  const floorMap = {
+    "4B" : "Basement Four",
+    "3B" : "Basement Three",
+    "2B" : "Basement Two",
+    "1B" : "Basement One",
+    "GR" : "Ground",
+    "1F" : "Floor One",
+    "2F" : "Floor Two",
+    "3F" : "Floor Three",
+    "4F" : "Floor Four"
+  }
 
   async function generateImages(purpose) {
     const dataLength = Object.keys(floorData).length;
@@ -79,6 +92,12 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
         })
       })
     })
+  }
+
+  async function fetchScriptYaml() {
+    const file = await fetch('/files/scripts.yaml')
+    const yamlText = file.text();
+    zip.folder('yaml-files').file('scripts.yaml', yamlText);
   }
 
   async function generateJsonFiles() {
@@ -172,106 +191,49 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
           coreEntity.modified_at = new Date().toISOString().replace("Z","+00:00");
         }
       }
-      const doorsTable = {
-          aliases: [],
-          area_id: null,
-          categories: {},
-          capabilities: null,
-          config_entry_id: null,
-          config_subentry_id: null,
-          created_at: new Date().toISOString().replace("Z","+00:00"),
-          device_class: null,
-          device_id: null,
-          disabled_by: null,
-          entity_category: null,
-          entity_id: "input_boolean.show_doors_table",
-          hidden_by: null,
-          id: "e44fbf1da0e11fc4d18a90739b3fe5a7",
-          has_entity_name: false,
-          labels: [],
-          modified_at: new Date().toISOString().replace("Z","+00:00"),
-          name: null,
-          options: {"conversation":{"should_expose":false}},
-          original_device_class: null,
-          original_icon: null,
-          original_name: "Doors",
-          platform: "input_boolean",
-          supported_features: 0,
-          translation_key: null,
-          unique_id: "show_doors_table",
-          previous_unique_id: null,
-          unit_of_measurement: null,
-        }
-        const celsiusTable = {
-          aliases: [],
-          area_id: null,
-          categories: {},
-          capabilities: null,
-          config_entry_id: null,
-          config_subentry_id: null,
-          created_at: new Date().toISOString().replace("Z","+00:00"),
-          device_class: null,
-          device_id: null,
-          disabled_by: null,
-          entity_category: null,
-          entity_id: "input_boolean.show_celsius_table",
-          hidden_by: null,
-          id: "cba6c988d04d015e3c2602e9883273c5",
-          has_entity_name: false,
-          labels: [],
-          modified_at: new Date().toISOString().replace("Z","+00:00"),
-          name: null,
-          options: {"conversation":{"should_expose":false}},
-          original_device_class: null,
-          original_icon: null,
-          original_name: "Show Temperature Table",
-          platform: "input_boolean",
-          supported_features: 0,
-          translation_key: null,
-          unique_id: "show_celsius_table",
-          previous_unique_id: null,
-          unit_of_measurement: null,
-        }
+    }
 
-        const lampTable = {
-          aliases: [],
-          area_id: null,
-          categories: {},
-          capabilities: null,
-          config_entry_id: null,
-          config_subentry_id: null,
-          created_at: new Date().toISOString().replace("Z","+00:00"),
-          device_class: null,
-          device_id: null,
-          disabled_by: null,
-          entity_category: null,
-          entity_id: "input_boolean.show_lamps_table",
-          hidden_by: null,
-          id: "0d480b61efb50b36d89bb6b166fe8e38",
-          has_entity_name: false,
-          labels: [],
-          modified_at: new Date().toISOString().replace("Z","+00:00"),
-          name: null,
-          options: {"conversation":{"should_expose":false}},
-          original_device_class: null,
-          original_icon: null,
-          original_name: "Lamps",
-          platform: "input_boolean",
-          supported_features: 0,
-          translation_key: null,
-          unique_id: "show_lamps_table",
-          previous_unique_id: null,
-          unit_of_measurement: null,
-        }
+    function generateConfigYaml() {
+      const floorYamlArray = [];
+      for (const floor in floorArray) {
+        console.log(floor)
+        floorYamlArray.push(floorMap[floorArray[floor]])
+      }
 
-        const customEntityCheck = entityRegistry.data.entities.find(entity => entity.entity_id === "input_boolean.show_doors_table");
-        console.log(customEntityCheck)
-        if (customEntityCheck === undefined)
-        {
-          entityRegistry.data.entities.push(doorsTable)
-          entityRegistry.data.entities.push(celsiusTable)
-          entityRegistry.data.entities.push(lampTable)
-        }
+      const configObject = {
+        default_config: '',
+        frontend: {
+          themes: "!include_dir_merge_named themes"
+        },
+
+        input_boolean: {
+          show_celsius_table: {
+            name: "Temperature",
+            initial: true
+          },
+          show_doors_table: {
+            name: "Doors",
+            initial: false
+          },
+          show_lamps_table: {
+            name: "Lamps",
+            initial: false
+          }
+        },
+
+        input_select: {
+          floor_view_select: {
+            name: "Select Floor",
+            options: floorYamlArray.reverse(),
+            initial: "Ground"
+          }
+        },
+
+        automation: "!include automations.yaml",
+        script: "!include scripts.yaml",
+        scene: "!include scenes.yaml",
+      }
+      return yaml.dump(configObject).replace(/'/g, '')
     }
 
     const floorRegistryExport = {
@@ -302,13 +264,35 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
 
     }
 
+    const lovelaceDashboards = {
+      version: 1,
+      minor_version: 1,
+      key: "lovelace_dashboards",
+      data: {
+        items: [
+          {
+            id: "smart_home",
+            icon: "mdi:home-circle",
+            title: "Smart Home",
+            url_path: "smart_home",
+            mode: "storage",
+            show_in_sidebar: true,
+            require_admin: false
+          }
+        ]
+      }
+    }
+
+    const configFile = generateConfigYaml();
     updateRegistries();
 
-    zip.folder('core-registry-files').file('core.floor_registry', JSON.stringify(floorRegistryExport, null, 2))
-    zip.folder('core-registry-files').file('core.area_registry', JSON.stringify(areaRegistryExport, null, 2))
-    zip.folder('core-registry-files').file('core.label_registry', JSON.stringify(labelRegistryExport, null, 2))
-    zip.folder('core-registry-files').file('core.device_registry', JSON.stringify(deviceRegistry, null, 2))
-    zip.folder('core-registry-files').file('core.entity_registry', JSON.stringify(entityRegistry, null, 2))
+    zip.folder('core-registry-files').file('core.floor_registry', JSON.stringify(floorRegistryExport, null, 2));
+    zip.folder('core-registry-files').file('core.area_registry', JSON.stringify(areaRegistryExport, null, 2));
+    zip.folder('core-registry-files').file('core.label_registry', JSON.stringify(labelRegistryExport, null, 2));
+    zip.folder('core-registry-files').file('core.device_registry', JSON.stringify(deviceRegistry, null, 2));
+    zip.folder('core-registry-files').file('core.entity_registry', JSON.stringify(entityRegistry, null, 2));
+    zip.folder('core-registry-files').file('lovelace_dashboards', JSON.stringify(lovelaceDashboards, null, 2));
+    zip.folder('yaml-files').file('configuration.yaml', configFile);
   }
 
   async function generateDashboard() {
@@ -481,7 +465,7 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
                   show_name: false,
                   show_icon: true,
                   entity: "input_boolean.show_celsius_table",
-                  icon: "mdi:temperature_celsius",
+                  icon: "mdi:temperature-celsius",
                   show_state: false,
                   tap_action: {
                     action: "call-service",
@@ -578,9 +562,6 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
             {
               title: "Floorplans",
               cards: generateFloorDashboard()
-            },
-            {
-              //More dashboards here
             }
           ]
         }
@@ -594,13 +575,12 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
     await generateImages("home-assistant");
     await generateJsonFiles();
     await generateDashboard();
-
+    await fetchScriptYaml();
+    
     await zip.generateAsync({type: 'blob'}).then((blob) => {
         saveAs(blob, `${canvasName.toLowerCase().replace(/ /g, '_')}_export.zip`)
         zip = new JSZip();
     });
-
-
   }
 
   return (
