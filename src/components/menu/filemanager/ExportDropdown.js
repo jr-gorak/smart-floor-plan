@@ -120,7 +120,7 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
           floor_id: floorArray[i],
           icon: null,
           level: calculateLevel(floorArray[i]),
-          name: floorArray[i],
+          name: floorMap[floorArray[i]],
           created_at: new Date().toISOString().replace("Z","+00:00"),
           modified_at: new Date().toISOString().replace("Z","+00:00"),
         }
@@ -141,7 +141,7 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
           icon: null,
           id: obj.area_id,
           labels: [],
-          name: obj.area_id,
+          name: data.objects.find(room => room.classifier === 'text' && room.area_id === obj.id).text,
           picture: null,
           temperature_entity_id: null,
           created_at: new Date().toISOString().replace("Z","+00:00"),
@@ -196,7 +196,6 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
     function generateConfigYaml() {
       const floorYamlArray = [];
       for (const floor in floorArray) {
-        console.log(floor)
         floorYamlArray.push(floorMap[floorArray[floor]])
       }
 
@@ -318,7 +317,15 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
       const doorElementArray = [];
       for (const entity of doorSensorIDArray) {
         const doorElement = data.objects.filter(obj => obj.id === entity.device_id)
+        
           doorElement.forEach(obj => {
+            
+          const room = data.objects.find(o => o.classifier === 'mark' && o.area_id === obj.area_id)
+          let roomText = undefined;
+          if (room) {
+            roomText = data.objects.find(o => o.classifier === 'text' && o.area_id === room.id).text
+          }
+
           const closedState = {
             type: "conditional",
             elements: [
@@ -330,17 +337,17 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
                   left: Math.round((obj.left / canvasWidth) * 100) + "%",
                   top: Math.round((obj.top / canvasHeight) * 100) + "%",
                 },
-                title: entity.type === "door" ? (entity.area_id ? `${entity.area_id} Door` : "Door") : (entity.area_id ? `${entity.area_id} Window` : "Window"),
+                title: entity.type === "door" ? (roomText ? `${roomText} Door` : "Door") : (roomText ? `${roomText} Window` : "Window"),
               }
              ],
             conditions: [
               {
                 condition: "state",
                 entity: entity.original_name,
-                state: 1
+                state: "1"
               }
             ],
-            title: entity.type === "door" ?  (entity.area_id ? `${entity.area_id} Door Closed` : "Door Closed") : (entity.area_id ? `${entity.area_id} Window Closed` : "Window Closed")
+            title: entity.type === "door" ?  (roomText ? `${roomText} Door Closed` : "Door Closed") : (roomText ? `${roomText} Window Closed` : "Window Closed")
           };
           const openedState = {
             type: "conditional",
@@ -359,10 +366,10 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
               {
                 condition: "state",
                 entity: entity.original_name,
-                state: 0
+                state: "0"
               }
             ],
-            title: entity.type === "door" ? (entity.area_id ? `${entity.area_id.replace(/^./, entity.area_id[0].toUpperCase()).replace(/_/g, " ")} Door Open` : "Door Open") : (entity.area_id ? `${entity.area_id.replace(/^./, entity.area_id[0].toUpperCase()).replace(/_/g, " ")} Window Open` : "Window Open")
+            title: entity.type === "door" ? (roomText ? `${roomText} Door Open` : "Door Open") : (roomText ? `${roomText} Window Open` : "Window Open")
           }
           doorElementArray.push(closedState, openedState);
         })  
@@ -375,10 +382,13 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
       for (const entity of temperatureSensorIDArray) {
         const temperatureElement = data.objects.filter(obj => obj.id === entity.device_id)
           temperatureElement.forEach(obj => {
+          const room = data.objects.find(o => o.classifier === 'mark' && o.area_id === obj.area_id)
+          const roomText = data.objects.find(o => o.classifier === 'text' && o.area_id === room.id).text
+
           const temperatureObject = {
             type: "state-badge",
             entity: entity.original_name,
-            title: entity.area_id ? `${entity.area_id.replace(/^./, entity.area_id[0].toUpperCase()).replace(/_/g, " ")}` : "No Room",
+            title: roomText ? `${roomText}` : "No Room",
             style: {
               left: (Math.round((obj.left / canvasWidth) * 100)-1) + "%",
               top: Math.round((obj.top / canvasHeight) * 100) + "%",
@@ -395,9 +405,12 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
       for (const entity of lightSensorIDArray) {
         const lightElement = data.objects.filter(obj => obj.id === entity.device_id)
           lightElement.forEach(obj => {
+          const room = data.objects.find(o => o.classifier === 'mark' && o.area_id === obj.area_id)
+          const roomText = data.objects.find(o => o.classifier === 'text' && o.area_id === room.id).text
+
           const onState = {
             type: "conditional",
-            title: entity.area_id ? `${entity.area_id.replace(/^./, entity.area_id[0].toUpperCase()).replace(/_/g, " ")} light on` : "Light on",
+            title: roomText ? `${roomText} Light On` : "Light On",
             conditions: [
               {
                 condition: "numeric_state",
@@ -409,7 +422,7 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
               {
                 type: "state-icon",
                 entity: entity.original_name,
-                icon: "mdi:lightbulb-on",
+                icon: "mdi:lightbulb-on-outline",
                 style: {
                   left: Math.round((obj.left / canvasWidth) * 100) + "%",
                   top: Math.round((obj.top / canvasHeight) * 100) + "%",
@@ -419,7 +432,7 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
           };
           const offState = {
             type: "conditional",
-            title: entity.area_id ? `${entity.area_id.replace(/^./, entity.area_id[0].toUpperCase()).replace(/_/g, " ")} light off` : "Light off",
+            title: roomText ? `${roomText} Light Off` : "Light Off",
             conditions: [
               {
                 condition: "numeric_state",
@@ -447,105 +460,125 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
 
     function generateFloorDashboard() {
       const floorDashboardArray = []
+
+      const floorSelect = {
+        type: "entities",
+        entities: [
+          "input_select.floor_view_select"
+        ]
+      }
+
+      floorDashboardArray.push(floorSelect)
+
+
       for (const key in floorData) {
         const data = floorData[key];
         const floorDashboard = {
-          type: "vertical-stack",
-          cards:  [
+          type: "conditional",
+          conditions: [
             {
-            type: "markdown",
-            content: "# Select a floor plan\n"
-            },
-            {
-              type: "horizontal-stack",
-              cards: [
-                {
-                  type: "button",
-                  name: "Temperature",
-                  show_name: false,
-                  show_icon: true,
-                  entity: "input_boolean.show_celsius_table",
-                  icon: "mdi:temperature-celsius",
-                  show_state: false,
-                  tap_action: {
-                    action: "call-service",
-                    service: "script.only_celsius_table"
-                  }
-                },
-                {
-                  type: "button",
-                  name: "Doors",
-                  show_name: false,
-                  show_icon: true,
-                  entity: "input_boolean.show_doors_table",
-                  icon: "mdi:door",
-                  show_state: false,
-                  tap_action: {
-                  action: "call-service",
-                  service: "script.only_doors_table"
-                  }
-                },
-                {
-                  type: "button",
-                  name: "Lamps",
-                  show_name: false,
-                  show_icon: true,
-                  entity: "input_boolean.show_lamps_table",
-                  icon: "mdi:lightbulb",
-                  show_state: false,
-                  tap_action: {
-                    action: "call-service",
-                    service: "script.only_lamps_table"
-                  }
-                }
-              ]
-            },
-            {
-              type: "grid",
-              columns: 1,
-              cards: [
-                {
-                  type: "picture-elements",
-                  title: "Doors",
-                  visibility: [
-                    {
-                      condition: null,
-                      entity: "input_boolean.show_doors_table",
-                      state: "on"
-                    }
-                  ],
-                  elements: generateDoorEntities(data),
-                  image: `/local/${canvasName.toLowerCase().replace(/ /g, '_')}_${key}.png`
-                },
-                {
-                  type: "picture-elements",
-                  title: "Temperature",
-                  visibility: [
-                    {
-                      condition: null,
-                      entity: "input_boolean.show_celsius_table",
-                      state: "on"
-                    }
-                  ],
-                  elements: generateTemperatureEntities(data),
-                  image: `/local/${canvasName.toLowerCase().replace(/ /g, '_')}_${key}.png`
-                }, 
-                {
-                  type: "picture-elements",
-                  title: "Lights",
-                  visibility: [
-                    {
-                      condition: null,
-                      entity: "input_boolean.show_lamps_table",
-                      state: "on"
-                    }
-                  ],
-                  elements: generateLightEntities(data),
-                  image: `/local/${canvasName.toLowerCase().replace(/ /g, '_')}_${key}.png`
-                }, 
-              ]
+              entity: "input_select.floor_view_select",
+              state: floorMap[key]
             }
-          ]
+          ],
+          card: {
+            type: "vertical-stack",
+            cards: [
+              {
+              type: "markdown",
+              content: floorMap[key]
+              },
+              {
+                type: "horizontal-stack",
+                cards: [
+                  {
+                    type: "button",
+                    name: "Temperature",
+                    show_name: false,
+                    show_icon: true,
+                    entity: "input_boolean.show_celsius_table",
+                    icon: "mdi:temperature-celsius",
+                    show_state: false,
+                    tap_action: {
+                      action: "call-service",
+                      service: "script.only_celsius_table"
+                    }
+                  },
+                  {
+                    type: "button",
+                    name: "Doors",
+                    show_name: false,
+                    show_icon: true,
+                    entity: "input_boolean.show_doors_table",
+                    icon: "mdi:door",
+                    show_state: false,
+                    tap_action: {
+                    action: "call-service",
+                    service: "script.only_doors_table"
+                    }
+                  },
+                  {
+                    type: "button",
+                    name: "Lamps",
+                    show_name: false,
+                    show_icon: true,
+                    entity: "input_boolean.show_lamps_table",
+                    icon: "mdi:lightbulb",
+                    show_state: false,
+                    tap_action: {
+                      action: "call-service",
+                      service: "script.only_lamps_table"
+                    }
+                  }
+                ]
+              },
+              {
+                type: "grid",
+                columns: 1,
+                cards: [
+                  {
+                    type: "picture-elements",
+                    title: "Doors",
+                    visibility: [
+                      {
+                        condition: null,
+                        entity: "input_boolean.show_doors_table",
+                        state: "on"
+                      }
+                    ],
+                    elements: generateDoorEntities(data),
+                    image: `/local/${canvasName.toLowerCase().replace(/ /g, '_')}_${key}.png`
+                  },
+                  {
+                    type: "picture-elements",
+                    title: "Temperature",
+                    visibility: [
+                      {
+                        condition: null,
+                        entity: "input_boolean.show_celsius_table",
+                        state: "on"
+                      }
+                    ],
+                    elements: generateTemperatureEntities(data),
+                    image: `/local/${canvasName.toLowerCase().replace(/ /g, '_')}_${key}.png`
+                  }, 
+                  {
+                    type: "picture-elements",
+                    title: "Lights",
+                    visibility: [
+                      {
+                        condition: null,
+                        entity: "input_boolean.show_lamps_table",
+                        state: "on"
+                      }
+                    ],
+                    elements: generateLightEntities(data),
+                    image: `/local/${canvasName.toLowerCase().replace(/ /g, '_')}_${key}.png`
+                  }, 
+                ]
+              }
+            ]
+          }
         }
         floorDashboardArray.push(floorDashboard)
       }
@@ -561,13 +594,18 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
           views: [
             {
               title: "Floorplans",
-              cards: generateFloorDashboard()
+              cards: [ 
+                {
+                  type: "vertical-stack",
+                  cards: generateFloorDashboard()
+                }
+              ]
             }
           ]
         }
       }
     }
-    zip.file('lovelace.smart_home', JSON.stringify(lovelaceDashboardExport, null, 2))
+    zip.folder('core-registry-files').file('lovelace.smart_home', JSON.stringify(lovelaceDashboardExport, null, 2))
   }
 
   async function exportData() {
