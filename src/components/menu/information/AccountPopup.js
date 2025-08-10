@@ -3,7 +3,7 @@ import { signOut, deleteUser } from 'firebase/auth';
 import '../../css/Popup.css';
 import { collection, query, where, getDoc, getDocs, doc, deleteDoc, addDoc, or, updateDoc, arrayUnion, arrayRemove,  } from 'firebase/firestore';
 import { useState, useEffect } from 'react';
-import { Delete, Copy, Share } from '../../../icons';
+import { Delete, Copy, Share, Settings } from '../../../icons';
 
 function Account({ onClose, onCanvasName, onCanvasID, onCanvasWidth, onCanvasHeight, onActive, onLoadToggle, onRefreshToggle, deviceList, onDeviceList, onOriginalDeviceList, originalDeviceList, onLabelList, labelList, onDeviceRegistry, onEntityRegistry, user }) {
 
@@ -91,6 +91,21 @@ function Account({ onClose, onCanvasName, onCanvasID, onCanvasWidth, onCanvasHei
           labelList: labelList,
           shared: [],
           created: new Date(),
+          updated: new Date()
+        });
+        togglePopup(null);
+      } catch (error) {
+        setErrorMessage(error.message)
+      }
+    }
+  };
+
+  async function changeName(e) {
+    e.preventDefault();
+    if(activeName !== nameCopy) {
+      try{
+        await updateDoc(doc(db, "canvases", activeID), {
+          canvasName: nameCopy,
           updated: new Date()
         });
         togglePopup(null);
@@ -252,6 +267,7 @@ function Account({ onClose, onCanvasName, onCanvasID, onCanvasWidth, onCanvasHei
                 <img className="round-icon" onClick={() => togglePopup('copy', file.canvasName, file.id, file.canvasData, file.shared)} src={Copy} alt='Copy Button'/>
                 <img className="round-icon" onClick={() => togglePopup('share', file.canvasName, file.id, file.canvasData, file.shared)} src={Share} alt='Share Button'/>
                 <img className="round-icon" onClick={() => togglePopup('delete', file.canvasName, file.id, file.canvasData, file.shared)} src={Delete} alt='Delete Button'/>
+                <img className="round-icon" onClick={() => togglePopup('settings', file.canvasName, file.id, file.canvasData, file.shared)} src={Settings} alt='Settings Button'/>
               </div>
                 <p>{file.canvasName}</p>
               </li>
@@ -338,6 +354,28 @@ function Account({ onClose, onCanvasName, onCanvasID, onCanvasWidth, onCanvasHei
                     </div>
                   ))}
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeValue === 'settings' && (
+          <div className="filter" onClick={() => togglePopup(null)}>
+            <div className="small-frame" onClick={e => e.stopPropagation()}>
+              <div className='exit'>
+                <button onClick={() => togglePopup(null)}>X</button>
+              </div>
+
+              <h2>"<i>{activeName}</i>" Settings</h2>
+              <div className='popup-content'>
+                <p>Enter a new name for "<i>{activeName}</i>"</p>
+                <form onSubmit={changeName}>
+                  <input type='text' defaultValue={activeName} onChange={(e) => setNameCopy(e.target.value)} placeholder='canvas name' />
+                  {errorMessage && (
+                    <p style={{color: 'red'}}>{errorMessage}</p>
+                  )}
+                  <button type='submit'>Save</button>
+                </form>
               </div>
             </div>
           </div>
