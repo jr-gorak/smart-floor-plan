@@ -96,7 +96,7 @@ function SensorTool({onCanvasDevice, onDeviceToggle, onDeviceList, onOriginalDev
         name: en.entity_id,
         platform: en.platform,
         type: en.original_name? en.original_name : generateType(en.entity_id),
-        label: generateLabel(en.original_name? en.original_name : generateType(en.entity_id)),
+        label: [generateLabel(en.original_name? en.original_name : generateType(en.entity_id))],
         visible: false,
         tag: null,
       }));
@@ -153,7 +153,7 @@ function SensorTool({onCanvasDevice, onDeviceToggle, onDeviceList, onOriginalDev
 
       onDeviceList(joinDevices);
       onOriginalDeviceList(structuredClone(joinDevices));
-      onLabelList(["", "location", "activity", "environment"])
+      onLabelList(["location", "activity", "environment"])
 
       setActiveValue(null);
       setDevices(null);

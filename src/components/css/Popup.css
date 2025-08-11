@@ -273,6 +273,8 @@ label input {
   box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
   padding: 0 20px 20px 10px;
   margin-bottom: 10px;
+  overflow-x: auto;
+  scrollbar-width: thin;
 }
 
 .sensor-list select {
@@ -285,7 +287,7 @@ label input {
 h2 input {
   font-size: 18px;
   font-weight: bold;
-  width: auto;
+  width: fit-content;
 }
 
 tr {
@@ -380,5 +382,58 @@ td {
   display: flex;
   justify-content: center;
   width: 90px;
-  
+}
+
+.upper-device-buttons {
+  display: flex;
+  gap: 70%;
+  margin: -15px 0px 5px 0px;
+}
+
+.label-view {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.add-label button {
+  background-color: #efefef;
+  border: 1px solid #d3d3d3;
+  padding: 5px 10px 5px 10px;
+}
+
+.bubble {
+  display: flex;
+  align-items: center;
+  border: 2px solid #efefef;
+  border-radius: 10px;
+  padding: 2px 5px 2px 5px;
+  width: fit-content;
+  gap: 5px;
+}
+
+.bubble button {
+  padding: 0px 5px 0px 5px;
+  background-color: #ff6767;
+}
+
+.select-dropdown {
+  display: inline-block;
+  position: relative;
+  background-color: #fffffb;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px #00000033;
+  width: 100px;
+  height: 120px;
+  overflow: auto;
+  scrollbar-width: thin;
+  margin: -100px -45px -100px -100px;
+  top: 95px;
+  left: 65px;
+  z-index: 1000;
+}
+
+.select-dropdown button {
+  padding: 5px 10px 10px 10px;
 }

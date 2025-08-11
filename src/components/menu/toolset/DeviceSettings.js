@@ -9,7 +9,10 @@ function DeviceSettings({settingsMode, activeDevice, deviceList, onTogglePopup, 
   const [activeInput, setActiveInput] = useState(null);
   const [device, setDevice] = useState(activeDevice);
   const [inputToggle, setInputToggle] = useState(false);
+  const [helpToggle, setHelpToggle] = useState(false);
   const [activeEntity, setActiveEntity] = useState(null);
+  const [selectLabel, setSelectLabel] = useState(false);
+  const [selectLabelID, setSelectLabelID] = useState(null)
   const [newLabel, setNewLabel] = useState("")
   
   document.body.style.overflow = 'hidden';
@@ -103,17 +106,51 @@ function DeviceSettings({settingsMode, activeDevice, deviceList, onTogglePopup, 
     if(newLabel && !labelList.includes(newLabel)) {
       labelList.push(newLabel.toLowerCase());
       const index = device.entities.findIndex(e => e.id === activeEntity.id)
-      const stacheDevice = {...device};
-      device.entities[index].label = newLabel;
-      setDevice(stacheDevice);
+      activeDevice.entities[index].label.push(newLabel);
+      setDevice(structuredClone(activeDevice));
       setInputToggle(false);
       setActiveEntity(null);
+      setNewLabel("");
+      setSelectLabel(false);
+      setSelectLabelID(null);
     } 
   }
 
   function resetLabel() {
     setInputToggle(false)
     setActiveEntity(null)
+  }
+
+  function selectToggle(id, activeID) {
+    if (id === activeID) {
+      setSelectLabel(false);
+      setSelectLabelID(null);
+      return;
+    }
+    setSelectLabel(true);
+    setSelectLabelID(id);
+
+  }
+
+  function checkLabel(label, labelList) {
+    if (labelList.includes(label)) {
+      return true;
+    }
+  }
+
+  function addLabel(value, id) {
+    const entity = activeDevice.entities.find(e => e.id === id)
+    entity.label.push(value);
+    setDevice(structuredClone(activeDevice));
+    setSelectLabel(false);
+    setSelectLabelID(null);
+  }
+
+  function removeLabel(value, id) {
+    const entity = activeDevice.entities.find(e => e.id === id)
+    const index = entity.label.indexOf(value);
+    entity.label.splice(index, 1);
+    setDevice(structuredClone(activeDevice))
   }
 
   return ReactDOM.createPortal(
@@ -124,14 +161,29 @@ function DeviceSettings({settingsMode, activeDevice, deviceList, onTogglePopup, 
         </div>
 
         <h2 style={{alignItems: 'center'}}>
-        {activeDevice.platform === "thethingsnetwork" && <img style={{width: 40}} src={Lorawan} className="menu-icon" alt="logo"/>}
-        {activeDevice.platform === "zha" && <img style={{width: 40}} src={Zigbee} className="menu-icon" alt="logo"/>}
-        <input className={activeInput === activeDevice.id ? 'input-on' : 'input-off'} onFocus={() => setActiveInput(activeDevice.id)} onBlur={() => setActiveInput(null)} type='text' defaultValue={activeDevice.name} onChange={(e) => updateDevice('device', activeDevice.id, e.target.value)}></input></h2>
+        {device.platform === "thethingsnetwork" && <img style={{width: 40}} src={Lorawan} className="menu-icon" alt="logo"/>}
+        {device.platform === "zha" && <img style={{width: 40}} src={Zigbee} className="menu-icon" alt="logo"/>}
+        <input className={activeInput === device.id ? 'input-on' : 'input-off'} onFocus={() => setActiveInput(device.id)} onBlur={() => setActiveInput(null)} type='text' defaultValue={device.name} onChange={(e) => updateDevice('device', device.id, e.target.value)}></input></h2>
         <div className='popup-content'>
 
-          <div className='device-info'><div className='info-tooltip' title='The original name of the sensor. Click on header name above to change the name of the device.'>🛈</div><b>Original Name: </b>{activeDevice.original_name}</div>
-          <div className='device-info'><div className='info-tooltip' title='The device branding. This application only supports LoRaWAN and Zigbee sensors.'>🛈</div><b>Platform:</b> {activeDevice.platform}</div>
-          <div className='device-info'><div className='info-tooltip' title='The marked room that the device is located. Use "mark room" in the "Draw" menu to trace and label rooms. Then, drag the device to the desired position'>🛈</div><b>Area ID:</b> {activeDevice.area_id}</div>
+          <div className='device-info'><div className='info-tooltip' title='The original name of the sensor. Click on header name above to change the name of the device.'>🛈</div><b>Original Name: </b>{device.original_name}</div>
+          <div className='device-info'><div className='info-tooltip' title='The device branding. This application only supports LoRaWAN and Zigbee sensors.'>🛈</div><b>Platform:</b> {device.platform}</div>
+          <div className='device-info'><div className='info-tooltip' title='The marked room that the device is located. Use "mark room" in the "Draw" menu to trace and label rooms. Then, drag the device to the desired position'>🛈</div><b>Area ID:</b> {device.area_id}</div>
+          <div className='upper-device-buttons'>
+            <div>
+              {settingsMode === 'tool' &&
+                <button onClick={() => addDevice()}>Add Device</button>
+              }
+
+              {settingsMode === 'canvas' &&
+                <button onClick={() => saveUpdateDevice()}>Update Device</button>
+              }
+            </div>
+            <div>
+              <button onClick={() => setHelpToggle(true)}>Help</button>
+            </div>
+          </div>
+
 
           <div className='sensor-list'>
             <p><b>Sensors:</b></p>
@@ -141,13 +193,13 @@ function DeviceSettings({settingsMode, activeDevice, deviceList, onTogglePopup, 
                   <th><div className='sensor-header'><div className='info-tooltip' title='Click on the name of a sensor to edit it.'>🛈</div><p>Name</p></div></th>
                   <th><div className='sensor-header'><div className='info-tooltip' title='Click on the checkbox for the sensors you wish to use for the device.'>🛈</div><p>Active</p></div></th>
                   <th><div className='sensor-header'><div className='info-tooltip' title='The type of sensor, for binary based readings you can specify their purpose.'>🛈</div><p>Type</p></div></th>
-                  <th><div className='sensor-header'><div className='info-tooltip' title='Select a label type for tracking data. Location: timeline of where an individual has been. Activity: measures an activity an individual is performing. Environment: measures the environment of the room'>🛈</div><p>Label</p></div></th>
+                  <th><div className='sensor-header'><div className='info-tooltip' title='Select a label type for tracking data. Location: timeline of where an individual has been. Activity: measures an activity an individual is performing. Environment: measures the environment of the room'>🛈</div><p>Labels</p></div></th>
                 </tr> 
               </thead>
               <tbody>
-                {activeDevice.entities.map((ent) => (
+                {device.entities.map((ent) => (
                   <tr key={ent.id}>
-                    <td style={{width: `${45}%`}}><input style={{width: `${100}%`}} className={activeInput === ent.id ? 'input-on' : 'input-off'} onFocus={() => setActiveInput(ent.id)} onBlur={() => setActiveInput(null)} type='text' defaultValue={ent.name} onChange={(e) => updateDevice('entity-label', ent.id, e.target.value)}></input></td>
+                    <td style={{width: `${35}%`}}><input style={{width: `${100}%`}} className={activeInput === ent.id ? 'input-on' : 'input-off'} onFocus={() => setActiveInput(ent.id)} onBlur={() => setActiveInput(null)} type='text' defaultValue={ent.name} onChange={(e) => updateDevice('entity-label', ent.id, e.target.value)}></input></td>
                     <td style={{width: `${10}%`}}><input className='checkbox' type="checkbox" defaultChecked={ent.visible} onChange={(e) => updateDevice('entity-visible', ent.id, e.target.checked)}/></td>
                     <td style={{width: `${20}%`}}>
                       <div className='sensor-display'>
@@ -170,14 +222,35 @@ function DeviceSettings({settingsMode, activeDevice, deviceList, onTogglePopup, 
                         )}
                       </div>
                     </td>
-                    <td style={{width: `${15}%`}}>
-                      <select defaultValue={ent.label} onChange={(e) => updateDevice('label', ent.id, e.target.value)}>
-    
-                      {labelList.map((label) => (
-                        <option key={label} value={label}>{label}</option>
-                      ))}
-                        <option value='input'>...add label</option>
-                      </select>
+
+                    <td style={{width: `${25}%`}}>
+                      <div className='label-view'>
+                        <div className='add-label'>
+                          <button title='Add Label' onClick={() => selectToggle(ent.id, selectLabelID)}>+</button>
+                        </div>
+                        
+                        {selectLabel && (selectLabelID === ent.id) && (
+                          <div className='select-dropdown'>
+                            <div>
+                              {labelList.map((label) => (
+                                <button onClick={() => addLabel(label, ent.id)} disabled={checkLabel(label, ent.label)}>{label}</button>
+                              ))}
+                                <button onClick={() => {setInputToggle(true); setActiveEntity(ent)}}>new label...</button>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {ent.label.map((text) => (
+                          <div>
+                            {text && (
+                            <div className='bubble'>
+                              {text}
+                                <button onClick={() => removeLabel(text, ent.id)} title='Remove Label'>x</button>                    
+                            </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>  
                     </td>
                   </tr>
                 ))}
@@ -198,7 +271,29 @@ function DeviceSettings({settingsMode, activeDevice, deviceList, onTogglePopup, 
                 </div>
               </div>
           )}
-            
+          {helpToggle && (
+              <div className="filter" onClick={() => setHelpToggle(false)}>
+                <div className="new-label-frame" onClick={e => e.stopPropagation()}>
+                  <div className='exit'>
+                    <button onClick={() => setHelpToggle(false)}>X</button>
+                  </div>
+                  <div className='popup-content'>
+                    <h2>Device Settings Help</h2> 
+                    <p>Device settings are important for configuring relevant settings for generating smart home dashboards on Home Assistant.</p>
+                    <p>For a more in-depth guide, please view the <i>How to Use</i> guide, step 2.</p>
+                    <p><b>Header: </b> Device name. Click on the header to rename the device.</p>
+                    <p><b>Original Name: </b> Device's original name.</p>
+                    <p><b>Platform: </b> Platform where device is hosted.</p>
+                    <p><b>Area ID: </b> Location where device is placed on the floor plan.</p>
+                    <p><b>Sensor Name: </b>Name for a sensor, or entity, of a device. <u>Double click the name to change</u></p>
+                    <p><b>Active: </b> Only sensors marked as active will be used for dashboard generation on export.</p>
+                    <p><b>Type: </b> The type of data the sensor collects.</p>
+                    <p><b>Label: </b> Labels which can be used for further customization in Home Assistant. <u>Location</u> tracks the location of individuals. 
+                    <u> Activity</u> monitors activities performed. <u> Ambient</u> monitors the conditions of the rooms.</p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {settingsMode === 'tool' &&
