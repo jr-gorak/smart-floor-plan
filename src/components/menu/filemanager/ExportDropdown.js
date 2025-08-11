@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import '../../css/Dropdown.css';
 import * as fabric from "fabric";
 import JSZip from 'jszip';
@@ -9,6 +10,9 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
   const { canvasWidth, canvasHeight, canvasName, entityRegistry, deviceRegistry } = canvasInfo
   const { deviceList, labelList, floorData, floorArray } = canvasData
   const { activeCanvas } = canvasState
+
+  const [hideRooms, setHideRooms] = useState(false);
+  const [hideLabels, setHideLabels] = useState(false);
 
   var zip = new JSZip();
 
@@ -49,6 +53,17 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
             canvas.getObjects().filter(obj => obj.classifier === 'device' || obj.classifier === 'sensor').forEach(obj => {
               obj.visible = false;
             })
+            if (hideRooms) {
+            canvas.getObjects().filter(obj => obj.classifier === 'mark').forEach(obj => {
+              obj.visible = false;
+            })
+
+            }
+            if (hideLabels) {
+            canvas.getObjects().filter(obj => obj.classifier === 'text').forEach(obj => {
+              obj.visible = false;
+            })
+          }
           }, 0)
 
           canvas.renderAll();
@@ -626,8 +641,18 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
     {activeDropdown === 'export' &&
     <div className="dropdown-container">
         <div className='dropdown-content'>
-        <button onClick={() => exportData()} disabled={!activeCanvas || !deviceRegistry || !entityRegistry}>Export to Home Assistant</button>
-        <button onClick={() => generateImages("images")} disabled={!activeCanvas}>Export as png</button>
+          <div className='export-settings'>
+            <div className="export-checkbox">
+              <input className='checkbox' type="checkbox" defaultChecked={hideRooms} onChange={(e) => setHideRooms(e.target.checked)}/>
+              <p>Hide Rooms on Export</p>
+            </div>
+            <div className="export-checkbox">
+              <input className='checkbox' type="checkbox" defaultChecked={hideLabels} onChange={(e) => setHideLabels(e.target.checked)}/>
+              <p>Hide Labels on Export</p>
+            </div>
+          </div>
+          <button onClick={() => exportData()} disabled={!activeCanvas || !deviceRegistry || !entityRegistry}>Export to Home Assistant</button>
+          <button onClick={() => generateImages("images")} disabled={!activeCanvas}>Export as png</button>
         </div>
     </div>
     }

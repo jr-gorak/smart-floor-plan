@@ -38,3 +38,24 @@
     background-color: #fffffb;
     cursor: default
 }
+
+.export-settings {
+    border-bottom: 1px solid black;
+    padding-bottom: 10px;
+}
+
+.export-checkbox {
+    display: flex;
+    flex-direction: row;
+    align-content: center;
+    height: 60px;
+    margin-top: -15px;
+}
+
+.export-checkbox input {
+    margin-top: 0px;
+}
+
+.export-checkbox .checkbox {
+    width: 12px;
+}
