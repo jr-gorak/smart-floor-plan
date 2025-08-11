@@ -1226,19 +1226,32 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
                     obj.hasBorders = false;
                     setControls(obj);
                     fabricCanvas.current.renderAll();
+            } else if (transform.target._element?.currentSrc?.includes("stair")) {
+                obj.classifier = 'stairs';
+                obj.lockMovementX = false;
+                obj.lockMovementY = false;
+                obj.lockRotation = false;
+                obj.lockScalingX = false;
+                obj.lockScalingFlip = false;
+                obj.lockScalingY = false;
+                obj.cursorStyle = 'default';
+                obj.cornerColor = 'rgb(178,204,255)';
+                obj.hasBorders = true;
+                setControls(obj);
+                fabricCanvas.current.renderAll();
             } else {
                 obj.classifier = 'draw';
-                    obj.lockMovementX = false;
-                    obj.lockMovementY = false;
-                    obj.lockRotation = false;
-                    obj.lockScalingX = false;
-                    obj.lockScalingFlip = false;
-                    obj.lockScalingY = false;
-                    obj.cursorStyle = 'default';
-                    obj.cornerColor = 'rgb(178,204,255)';
-                    obj.hasBorders = true;
-                    setControls(obj);
-                    fabricCanvas.current.renderAll();
+                obj.lockMovementX = false;
+                obj.lockMovementY = false;
+                obj.lockRotation = false;
+                obj.lockScalingX = false;
+                obj.lockScalingFlip = false;
+                obj.lockScalingY = false;
+                obj.cursorStyle = 'default';
+                obj.cornerColor = 'rgb(178,204,255)';
+                obj.hasBorders = true;
+                setControls(obj);
+                fabricCanvas.current.renderAll();
             }
         }
 
@@ -1249,6 +1262,7 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
         }
         
         function keyDown(e){
+
             const activeObject = fabricCanvas.current.getActiveObject()
 
             if (((activeObject && (activeObject.classifier === 'draw' || activeObject.classifier === 'stairs' || activeObject.classifier === 'locked'))) || ((tempObject && (tempObject.classifier === 'draw' || tempObject.classifier === 'stairs' || tempObject.classifier === 'locked')))) {
