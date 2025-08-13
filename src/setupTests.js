@@ -9,5 +9,6 @@ HTMLCanvasElement.prototype.getContext = function () {
         textBaseline: '',
         measureText: () => ({ width: 0, height: 0 }),
         fillText: () => { },
+        scale: () => { }
     };
 };

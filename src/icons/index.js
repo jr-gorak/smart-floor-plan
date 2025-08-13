@@ -96,15 +96,15 @@ unlockImg.src = Unlock;
 lorawanImg.src = Lorawan;
 zigbeeImg.src = Zigbee;
 personImg.src = Person;
-batteryImg.src =  Battery;
-lightoffImg.src =  LightOff;
+batteryImg.src = Battery;
+lightoffImg.src = LightOff;
 co2Img.src = Co2;
 voltageImg.src = Voltage;
 humidityImg.src = Humidity;
 thermometerImg.src = Thermometer;
 pressureImg.src = Pressure;
 soundImg.src = Sound;
-motionImg.src =  Motion;
+motionImg.src = Motion;
 sensorImg.src = Sensor;
 doorwayImg.src = Door;
 doorImg.src = Component;
@@ -121,10 +121,15 @@ stoveImg.src = Stove;
 threesofaImg.src = ThreeSofa;
 toiletImg.src = Toilet;
 
+const componentImages = {
+    door: doorwayImg, stairs: stairsImg, bed: bedImg, chair: chairImg, sofa: sofaImg, window: windowImg, threesofa: threesofaImg, stove: stoveImg,
+    kitchensink: kitchensinkImg, bathtub: bathtubImg, roundsink: roundsinkImg, toilet: toiletImg
+}
+
 export {
-    Draw, Sensor ,Component, Create, Save, Export, Account, Guide, About, DrawLine, Square, DoorOpen, DoorClose, Upstairs, Downstairs ,WindowClosed, WindowOpen, Delete,
-    Copy,Share, Move, Settings, Lorawan, Zigbee, Person, Battery, LightOff, LightOn, Co2, Voltage, Humidity, Thermometer, Pressure, Sound, Motion, 
+    Draw, Sensor, Component, Create, Save, Export, Account, Guide, About, DrawLine, Square, DoorOpen, DoorClose, Upstairs, Downstairs, WindowClosed, WindowOpen, Delete,
+    Copy, Share, Move, Settings, Lorawan, Zigbee, Person, Battery, LightOff, LightOn, Co2, Voltage, Humidity, Thermometer, Pressure, Sound, Motion,
     Door, Bathtub, Bed, Chair, KitchenSink, RoundSink, Sofa, Stairs, Stove, ThreeSofa, Toilet, Window, Map, CircleOutline,
     deleteImg, copyImg, moveImg, settingsImg, lockImg, unlockImg, lorawanImg, zigbeeImg, batteryImg, lightoffImg, co2Img, voltageImg, humidityImg, thermometerImg, pressureImg, soundImg, motionImg,
-    doorwayImg, doorImg, windowImg, windowClosedImg, personImg, sensorImg, bathtubImg, bedImg, chairImg, kitchensinkImg, roundsinkImg, sofaImg, stairsImg,stoveImg, threesofaImg, toiletImg,
+    doorwayImg, doorImg, windowImg, windowClosedImg, personImg, sensorImg, bathtubImg, bedImg, chairImg, kitchensinkImg, roundsinkImg, sofaImg, stairsImg, stoveImg, threesofaImg, toiletImg, componentImages
 };

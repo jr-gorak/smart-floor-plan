@@ -2,11 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import * as fabric from "fabric";
 import {
     deleteImg, copyImg, settingsImg, lockImg, unlockImg, lorawanImg, batteryImg, lightoffImg, co2Img, voltageImg, humidityImg, thermometerImg, pressureImg, soundImg, motionImg,
-    doorwayImg, windowImg, personImg, sensorImg, stairsImg, bedImg, sofaImg, chairImg, threesofaImg, stoveImg, kitchensinkImg, bathtubImg, roundsinkImg, toiletImg,
-
-    windowClosedImg,
-    doorImg,
-    zigbeeImg
+    personImg, sensorImg, windowClosedImg, doorImg, zigbeeImg, componentImages
 } from './../../icons/index';
 
 import { db } from "./../../firebase";
@@ -17,6 +13,7 @@ import './../css/FabricCanvas.css';
 import DeleteWarning from "./../DeleteWarning";
 
 import { mouseDownLine, drawLine, mouseUpLine, mouseDownRect, drawRect, mouseDownCircle, drawCircle, mouseDownMark, mouseUpMark } from "./DrawShapes";
+import { filterComponent } from "./CreateComponents";
 
 fabric.FabricObject.prototype.toObject = (function (toObject) {
     return function (propertyArray = []) {
@@ -700,52 +697,9 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
 
     //Create Components
     useEffect(() => {
-
-        function createComponent(type) {
-            var component = new fabric.FabricImage(type, {
-                left: canvasWidth / 2,
-                top: canvasHeight / 2,
-                originX: 'center',
-                originY: 'center',
-                scaleX: 0.1,
-                scaleY: 0.1,
-                selectable: true,
-                strokeUniform: true,
-                id: null,
-                classifier: canvasAction === 'stairs' ? 'stairs' : 'draw',
-                area_id: null,
-            });
-
-            fabricCanvas.current.add(component);
-            fabricCanvas.current.renderAll();
-        };
-
-        if (canvasAction === 'doorway') {
-            createComponent(doorwayImg);
-        } else if (canvasAction === 'window') {
-            createComponent(windowImg);
-        } else if (canvasAction === 'stairs') {
-            createComponent(stairsImg);
-        } else if (canvasAction === 'bed') {
-            createComponent(bedImg);
-        } else if (canvasAction === 'chair') {
-            createComponent(chairImg);
-        } else if (canvasAction === 'sofa') {
-            createComponent(sofaImg);
-        } else if (canvasAction === 'three-sofa') {
-            createComponent(threesofaImg);
-        } else if (canvasAction === 'stove') {
-            createComponent(stoveImg);
-        } else if (canvasAction === 'kitchen-sink') {
-            createComponent(kitchensinkImg);
-        } else if (canvasAction === 'bathtub') {
-            createComponent(bathtubImg);
-        } else if (canvasAction === 'round-sink') {
-            createComponent(roundsinkImg);
-        } else if (canvasAction === 'toilet') {
-            createComponent(toiletImg);
-        }
-
+        filterComponent(fabricCanvas.current, componentImages, canvasAction, canvasWidth, canvasHeight)
+        fabricCanvas.current.add();
+        fabricCanvas.current.renderAll();
     }, [canvasAction, canvasHeight, canvasWidth]);
 
     // Drawing Shapes
@@ -789,8 +743,6 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
                 o.selectable = false;
             });
         }
-
-
 
         function setControls(object) {
 
