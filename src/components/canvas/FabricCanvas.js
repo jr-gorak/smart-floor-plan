@@ -1,39 +1,41 @@
-import {useCallback, useEffect, useRef, useState} from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import * as fabric from "fabric";
 import {
-deleteImg, copyImg, settingsImg, lockImg, unlockImg, lorawanImg, batteryImg, lightoffImg, co2Img, voltageImg, humidityImg, thermometerImg, pressureImg, soundImg, motionImg,
-doorwayImg, windowImg, personImg, sensorImg, stairsImg, bedImg, sofaImg, chairImg, threesofaImg, stoveImg, kitchensinkImg, bathtubImg, roundsinkImg, toiletImg,
+    deleteImg, copyImg, settingsImg, lockImg, unlockImg, lorawanImg, batteryImg, lightoffImg, co2Img, voltageImg, humidityImg, thermometerImg, pressureImg, soundImg, motionImg,
+    doorwayImg, windowImg, personImg, sensorImg, stairsImg, bedImg, sofaImg, chairImg, threesofaImg, stoveImg, kitchensinkImg, bathtubImg, roundsinkImg, toiletImg,
 
-windowClosedImg,
-doorImg,
-zigbeeImg} from '../icons/index';
+    windowClosedImg,
+    doorImg,
+    zigbeeImg
+} from './../../icons/index';
 
-import { db } from "../firebase";
+import { db } from "./../../firebase";
 import { addDoc, collection, doc, updateDoc, query, getDoc } from "firebase/firestore";
-import DeviceSettings from "./menu/toolset/DeviceSettings";
-import RoomSettings from "./menu/toolset/RoomSettings";
-import { v4 as uuidv4 } from 'uuid';
-import './css/FabricCanvas.css';
-import DeleteWarning from "./DeleteWarning";
+import DeviceSettings from "./../menu/toolset/DeviceSettings";
+import RoomSettings from "./../menu/toolset/RoomSettings";
+import './../css/FabricCanvas.css';
+import DeleteWarning from "./../DeleteWarning";
 
-fabric.FabricObject.prototype.toObject = (function(toObject) {
-  return function(propertyArray = []) {
-    return {
-      ...toObject.call(this, propertyArray),
-      classifier: this.classifier,
-      id: this.id,
-      area_id: this.area_id
+import { mouseDownLine, drawLine, mouseUpLine, mouseDownRect, drawRect, mouseDownCircle, drawCircle, mouseDownMark, mouseUpMark } from "./DrawShapes";
+
+fabric.FabricObject.prototype.toObject = (function (toObject) {
+    return function (propertyArray = []) {
+        return {
+            ...toObject.call(this, propertyArray),
+            classifier: this.classifier,
+            id: this.id,
+            area_id: this.area_id
+        };
     };
-  };
 })(fabric.FabricObject.prototype.toObject);
 
-function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveToggle, onSaveResult, onLoadToggle, onRefreshToggle, 
-    onDeviceToggle, user, onDeviceList, onHandlerToggle, onFloorData, onFloorArray, onCanvasImageData}) {
-    
+function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveToggle, onSaveResult, onLoadToggle, onRefreshToggle,
+    onDeviceToggle, user, onDeviceList, onHandlerToggle, onFloorData, onFloorArray, onCanvasImageData }) {
+
     const { canvasWidth, canvasHeight, canvasName, canvasID, drawWidth, entityRegistry, deviceRegistry } = canvasInfo
     const { deviceList, originalDeviceList, labelList, floorData, canvasImageData, canvasDevice, floorArray } = canvasData
     const { canvasAction, saveToggle, loadToggle, refreshToggle, deviceToggle } = canvasState
-    
+
     const canvasRef = useRef(null);
     const fabricCanvas = useRef(null);
     const selectFlag = useRef(false);
@@ -57,7 +59,7 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
     const [deleteWarning, setDeleteWarning] = useState(false);
     const [deleteConfirmation, setDeleteConfirmation] = useState(false);
     const [stachedFloor, setStachedFloor] = useState(null);
-    const [activeFloor, setActiveFloor] = useState(() => {const stored = sessionStorage.getItem("activeFloor"); return stored? JSON.parse(stored) : floorArray[0]; });
+    const [activeFloor, setActiveFloor] = useState(() => { const stored = sessionStorage.getItem("activeFloor"); return stored ? JSON.parse(stored) : floorArray[0]; });
     const retrieveUpdate = (update) => setUpdatedDevice(update);
 
     const settingsMode = 'canvas';
@@ -65,14 +67,14 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
     const viewpointToggle = useCallback(() => {
         if (hideRooms) {
             fabricCanvas.current.getObjects().forEach(obj => {
-                if(obj.classifier === 'mark') {
+                if (obj.classifier === 'mark') {
                     obj.visible = false
                 }
             })
             fabricCanvas.current.renderAll();
         } else {
             fabricCanvas.current.getObjects().forEach(obj => {
-                if(obj.classifier === 'mark') {
+                if (obj.classifier === 'mark') {
                     obj.visible = true
                 }
             })
@@ -81,30 +83,30 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
 
         if (hideLabels) {
             fabricCanvas.current.getObjects().forEach(obj => {
-                if(obj.classifier === 'text') {
+                if (obj.classifier === 'text') {
                     obj.visible = false
                 }
             })
             fabricCanvas.current.renderAll();
         } else {
             fabricCanvas.current.getObjects().forEach(obj => {
-                if(obj.classifier === 'text') {
+                if (obj.classifier === 'text') {
                     obj.visible = true
                 }
             })
             fabricCanvas.current.renderAll();
-        } 
+        }
 
         if (hideDevices) {
             fabricCanvas.current.getObjects().forEach(obj => {
-                if(obj.classifier === 'device') {
+                if (obj.classifier === 'device') {
                     obj.visible = false
                 }
             })
             fabricCanvas.current.renderAll();
         } else {
             fabricCanvas.current.getObjects().forEach(obj => {
-                if(obj.classifier === 'device') {
+                if (obj.classifier === 'device') {
                     obj.visible = true
                 }
             })
@@ -122,12 +124,12 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
 
         if (activeGroup && activeGroup._objects) {
             const unlockedObjects = activeGroup.getObjects().filter(obj => obj.classifier !== 'locked' && obj.classifier !== 'mark')
-                
+
             fabricCanvas.current.discardActiveObject()
-                
+
             if (unlockedObjects.length > 0) {
                 const selection = new fabric.ActiveSelection(unlockedObjects, {
-                canvas: fabricCanvas.current          
+                    canvas: fabricCanvas.current
                 })
                 fabricCanvas.current.setActiveObject(selection);
                 fabricCanvas.current.renderAll();
@@ -158,7 +160,7 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
                 }
             })
             if (floorArray.length < 5) {
-            onFloorArray(floors => [...floors, ((floorArray.length - floorCount) + "B")])
+                onFloorArray(floors => [...floors, ((floorArray.length - floorCount) + "B")])
             }
         }
     }
@@ -179,7 +181,7 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
         await cloneObjects();
 
         onFloorData(files => ({
-            ...files, 
+            ...files,
             [activeFloor]: file
         }))
 
@@ -191,10 +193,10 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
             backgroundColor: 'white',
         });
 
-        if (floorData[floor]) {   
+        if (floorData[floor]) {
             blankCanvas.loadFromJSON(floorData[floor]);
-            
-            setActionType(null);       
+
+            setActionType(null);
         } else if (objArray.length) {
             objArray.forEach(obj => {
                 blankCanvas.add(obj)
@@ -204,15 +206,15 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
         fabricCanvas.current = blankCanvas;
         fabricCanvas.current.on('selection:created', checkObjects)
         fabricCanvas.current.on('selection:updated', checkObjects)
-         setTimeout(() => {
-                requestAnimationFrame(() => {
-            viewpointToggle();
-            fabricCanvas.current.renderAll();
-        });
-         }, 0)
+        setTimeout(() => {
+            requestAnimationFrame(() => {
+                viewpointToggle();
+                fabricCanvas.current.renderAll();
+            });
+        }, 0)
 
         setActiveFloor(floor)
-        setActionType(null);  
+        setActionType(null);
     }, [activeFloor, canvasHeight, canvasWidth, floorData, onFloorData, viewpointToggle, checkObjects])
 
     const RemoveFloor = useCallback((floor) => {
@@ -220,8 +222,8 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
             setDeleteWarning(true);
             setStachedFloor(floor);
             return;
-        } else if (floorData[floor]){
-            const existingData = {...floorData}
+        } else if (floorData[floor]) {
+            const existingData = { ...floorData }
             delete existingData[floor];
             onFloorData(existingData)
         } else if (fabricCanvas.current._objects.length > 0 && stachedFloor === null) {
@@ -229,13 +231,13 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
             setStachedFloor(floor);
             return;
         }
-  
+
         if (activeFloor === floor) {
             fabricCanvas.current.clear();
             fabricCanvas.current.backgroundColor = 'white';
-            let nextFloor = floorArray[floorArray.indexOf(floor)+1]
-            if(activeFloor.includes("B")) {
-                nextFloor = floorArray[floorArray.indexOf(floor)-1]
+            let nextFloor = floorArray[floorArray.indexOf(floor) + 1]
+            if (activeFloor.includes("B")) {
+                nextFloor = floorArray[floorArray.indexOf(floor) - 1]
             }
             SwitchFloor(nextFloor)
         }
@@ -253,8 +255,8 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
         const y2 = room.top + room.height;
 
         fabricCanvas.current.getObjects().forEach(obj => {
-            if(obj.classifier === 'device' && obj.left > x1 && obj.left < x2 && obj.top > y1 && obj.top < y2) {
-                obj.set({area_id: room.area_id})
+            if (obj.classifier === 'device' && obj.left > x1 && obj.left < x2 && obj.top > y1 && obj.top < y2) {
+                obj.set({ area_id: room.area_id })
                 const findDevice = deviceList.find(d => d.id === obj.id)
                 if (findDevice) {
                     findDevice.area_id = room.area_id;
@@ -268,8 +270,8 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
     const AssignAreaIDsOnMove = useCallback((device) => {
         let matchedID = false;
         fabricCanvas.current.getObjects().forEach(room => {
-            if(room.classifier === 'mark' && device.left > room.left && device.left < room.left + room.width && device.top > room.top && device.top < room.top + room.height) {
-                device.set({area_id: room.area_id})
+            if (room.classifier === 'mark' && device.left > room.left && device.left < room.left + room.width && device.top > room.top && device.top < room.top + room.height) {
+                device.set({ area_id: room.area_id })
                 const findDevice = deviceList.find(d => d.id === device.id)
                 if (findDevice) {
                     findDevice.area_id = room.area_id;
@@ -278,11 +280,11 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
                 }
                 matchedID = true;
                 return;
-            } 
+            }
         });
 
         if (!matchedID) {
-            device.set({area_id: null})
+            device.set({ area_id: null })
             const findDevice = deviceList.find(d => d.id === device.id)
             if (findDevice) {
                 findDevice.area_id = null;
@@ -296,12 +298,12 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
         fabricCanvas.current.getObjects().forEach(obj => {
             obj.visible = true;
         });
-        
+
         setTimeout(() => {
             const file = canvas.toJSON();
             sessionStorage.setItem('fabricCanvas', JSON.stringify(file));
-            }, 0)
-        }
+        }, 0)
+    }
 
     function sessionLoad() {
         const retrieve = sessionStorage.getItem('fabricCanvas');
@@ -343,12 +345,12 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
         });
 
         if (!refreshToggle) {
-        setTimeout(() => {
-            sessionLoad();
+            setTimeout(() => {
+                sessionLoad();
                 requestAnimationFrame(() => {
                     fabricCanvas.current.renderAll();
                 });
-        }, 100);
+            }, 100);
         }
 
         const triggerSave = () => {
@@ -360,38 +362,38 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
         fabricCanvas.current.on('selection:created', checkObjects)
         fabricCanvas.current.on('selection:updated', checkObjects)
 
-        return () =>
-        {
+        return () => {
             fabricCanvas.current?.dispose();
             fabricCanvas.current = null;
-        }}, [canvasWidth, canvasHeight, refreshToggle, loadToggle, checkObjects]);
+        }
+    }, [canvasWidth, canvasHeight, refreshToggle, loadToggle, checkObjects]);
 
     //Canvas File Handling
     useEffect(() => {
 
         async function saveCanvas(canvas) {
-            
+
             if (!user) return;
 
             const file = canvas.toJSON();
             file.height = canvas.getHeight();
             file.width = canvas.getWidth();
 
-            try{
-            const docRef = await addDoc(collection(db, "canvases"), {
-                owner: user.uid,
-                canvasName: canvasName,
-                canvasData: file,
-                floorplanData: floorData,
-                floorArray: floorArray,
-                shared: [],
-                devices: deviceList,
-                originalDevices: originalDeviceList,
-                labelList: labelList,
-                deviceRegistry: JSON.stringify(deviceRegistry),
-                entityRegistry: JSON.stringify(entityRegistry),
-                created: new Date(),
-                updated: new Date(),
+            try {
+                const docRef = await addDoc(collection(db, "canvases"), {
+                    owner: user.uid,
+                    canvasName: canvasName,
+                    canvasData: file,
+                    floorplanData: floorData,
+                    floorArray: floorArray,
+                    shared: [],
+                    devices: deviceList,
+                    originalDevices: originalDeviceList,
+                    labelList: labelList,
+                    deviceRegistry: JSON.stringify(deviceRegistry),
+                    entityRegistry: JSON.stringify(entityRegistry),
+                    created: new Date(),
+                    updated: new Date(),
                 });
 
                 onCanvasID(docRef.id);
@@ -407,17 +409,17 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
             file.height = canvas.getHeight();
             file.width = canvas.getWidth();
 
-            try{
-            await updateDoc(doc(db, "canvases", canvasID), {
-                canvasData: file,
-                floorplanData: floorData,
-                floorArray: floorArray,
-                devices: deviceList,
-                originalDevices: originalDeviceList,
-                labelList: labelList,
-                deviceRegistry: JSON.stringify(deviceRegistry),
-                entityRegistry: JSON.stringify(entityRegistry),
-                updated: new Date()
+            try {
+                await updateDoc(doc(db, "canvases", canvasID), {
+                    canvasData: file,
+                    floorplanData: floorData,
+                    floorArray: floorArray,
+                    devices: deviceList,
+                    originalDevices: originalDeviceList,
+                    labelList: labelList,
+                    deviceRegistry: JSON.stringify(deviceRegistry),
+                    entityRegistry: JSON.stringify(entityRegistry),
+                    updated: new Date()
                 });
                 onSaveResult('success')
             } catch (error) {
@@ -429,33 +431,33 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
         async function loadCanvas() {
 
             const q = query(
-            doc(db, "canvases", canvasID)
+                doc(db, "canvases", canvasID)
             );
 
-            try{ 
-            
+            try {
+
                 const querySnapshot = await getDoc(q);
                 const retrieve = querySnapshot.data();
                 const json = retrieve.canvasData;
 
                 if (retrieve) {
 
-                refreshCanvas();
-                
-                onFloorArray(retrieve.floorArray);
-                onFloorData(retrieve.floorplanData);
-                setActiveFloor("GR");
-                fabricCanvas.current.loadFromJSON(json, () => {
-                    
-                    sessionSave(fabricCanvas.current)
-                    requestAnimationFrame(() => {
-                        fabricCanvas.current.renderAll();
+                    refreshCanvas();
+
+                    onFloorArray(retrieve.floorArray);
+                    onFloorData(retrieve.floorplanData);
+                    setActiveFloor("GR");
+                    fabricCanvas.current.loadFromJSON(json, () => {
+
+                        sessionSave(fabricCanvas.current)
+                        requestAnimationFrame(() => {
+                            fabricCanvas.current.renderAll();
+                        });
                     });
-                });
-                    setActionType(null);                   
+                    setActionType(null);
                 }
 
-            } catch(error) {
+            } catch (error) {
                 console.log(error);
             }
         };
@@ -473,7 +475,7 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
         };
 
 
-        if (saveToggle && (canvasID === null || canvasID ==='null' || canvasID === 'load')) {
+        if (saveToggle && (canvasID === null || canvasID === 'null' || canvasID === 'load')) {
             saveCanvas(fabricCanvas.current);
             onSaveToggle();
         } if (saveToggle && canvasID) {
@@ -486,11 +488,11 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
             refreshCanvas();
             onRefreshToggle()
         }
-            
+
     }, [canvasHeight, canvasWidth, canvasName, saveToggle, onSaveToggle, loadToggle, onLoadToggle, user, canvasID, onCanvasID, refreshToggle, onRefreshToggle, canvasAction, onSaveResult, deviceList, originalDeviceList, floorArray, floorData, labelList, entityRegistry, deviceRegistry, onFloorData, onFloorArray])
 
     // Setting Background Images
-    useEffect(()=> {
+    useEffect(() => {
 
         function sortKeys(data) {
             const defaultKey = data.find(key => key === "GR");
@@ -503,30 +505,30 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
 
             const mapImageToCanvas = {}
 
-            for (const key of Object.keys(data)) { 
+            for (const key of Object.keys(data)) {
                 fabric.FabricImage.fromURL(data[key]).then((img) => {
                     fabricCanvas.current.backgroundImage = img;
                     fabricCanvas.current.backgroundImage.classifier = 'background';
                     fabricCanvas.current.backgroundImage.id = null;
                     fabricCanvas.current.backgroundImage.area_id = null;
                     fabricCanvas.current.renderAll();
-                    if(key === 'GR') {
+                    if (key === 'GR') {
                         sessionStorage.setItem('fabricCanvas', JSON.stringify(fabricCanvas.current.toJSON()));
                     }
                     mapImageToCanvas[key] = fabricCanvas.current.toJSON();
-                    
+
                     fabricCanvas.current.dispose();
                     fabricCanvas.current = new fabric.Canvas(canvasRef.current, {
                         width: canvasWidth,
                         height: canvasHeight,
                         backgroundColor: 'white',
                     });
-                }) ;  
+                });
             };
             return mapImageToCanvas
         };
-        
-        if(canvasImageData) {
+
+        if (canvasImageData) {
 
             sortKeys(Object.keys(canvasImageData));
 
@@ -542,15 +544,15 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
     useEffect(() => {
         function createDevice(device) {
 
-            let l = canvasWidth/2;
-            let t = canvasHeight/2;
+            let l = canvasWidth / 2;
+            let t = canvasHeight / 2;
             let sx = 1;
             let sy = 1;
             let area_id = null;
 
-            if(updateDeviceToggle) {
-                
-                const oldDevice =  fabricCanvas.current.getObjects().find(obj => obj.id === updatedDevice.id)
+            if (updateDeviceToggle) {
+
+                const oldDevice = fabricCanvas.current.getObjects().find(obj => obj.id === updatedDevice.id)
                 if (oldDevice) {
                     l = oldDevice.left;
                     t = oldDevice.top;
@@ -587,7 +589,7 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
             });
 
             deviceArray.push(deviceImg);
-            
+
 
             const deviceText = new fabric.FabricText(device.name, {
                 fontSize: 12,
@@ -643,7 +645,7 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
                         imgHolder = doorImg;
                     } else if (sensor.type.toLowerCase().includes('window')) {
                         imgHolder = windowClosedImg;
-                    } 
+                    }
 
                     var sensorObject = new fabric.FabricImage(imgHolder, {
                         left: x,
@@ -655,14 +657,14 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
                         id: sensor.id,
                         classifier: 'sensor',
                         area_id: area_id,
-                });
+                    });
 
                     angleScaler++;
-                    deviceArray.push(sensorObject); 
+                    deviceArray.push(sensorObject);
                 }
             });
 
-                const group = new fabric.Group(deviceArray, {
+            const group = new fabric.Group(deviceArray, {
                 left: l,
                 top: t,
                 scaleX: sx,
@@ -683,14 +685,14 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
                 AssignAreaIDsOnMove(group)
             })
 
-            }
+        }
 
-        if(deviceToggle) {
+        if (deviceToggle) {
             createDevice(canvasDevice);
             onDeviceToggle();
         }
 
-        if(updateDeviceToggle) {
+        if (updateDeviceToggle) {
             createDevice(updatedDevice);
         }
 
@@ -701,8 +703,8 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
 
         function createComponent(type) {
             var component = new fabric.FabricImage(type, {
-                left: canvasWidth/2,
-                top: canvasHeight/2,
+                left: canvasWidth / 2,
+                top: canvasHeight / 2,
                 originX: 'center',
                 originY: 'center',
                 scaleX: 0.1,
@@ -722,7 +724,7 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
             createComponent(doorwayImg);
         } else if (canvasAction === 'window') {
             createComponent(windowImg);
-        }  else if (canvasAction === 'stairs') {
+        } else if (canvasAction === 'stairs') {
             createComponent(stairsImg);
         } else if (canvasAction === 'bed') {
             createComponent(bedImg);
@@ -736,7 +738,7 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
             createComponent(stoveImg);
         } else if (canvasAction === 'kitchen-sink') {
             createComponent(kitchensinkImg);
-        }  else if (canvasAction === 'bathtub') {
+        } else if (canvasAction === 'bathtub') {
             createComponent(bathtubImg);
         } else if (canvasAction === 'round-sink') {
             createComponent(roundsinkImg);
@@ -788,6 +790,8 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
             });
         }
 
+
+
         function setControls(object) {
 
             if (object.classifier === 'text') {
@@ -813,8 +817,8 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
                     offsetX: -16,
                     cursorStyle: 'pointer',
                     mouseUpHandler: lockObject,
-                    render: renderIcon(object.classifier === 'locked' ?  lockImg : unlockImg),
-                    cornersize: 24, 
+                    render: renderIcon(object.classifier === 'locked' ? lockImg : unlockImg),
+                    cornersize: 24,
                 })
             }
 
@@ -823,7 +827,7 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
                     x: -0.5,
                     y: -0.5,
                     offsetY: -16,
-                    offsetX: 16, 
+                    offsetX: 16,
                     cursorStyle: 'pointer',
                     mouseUpHandler: deviceSettings,
                     render: renderIcon(settingsImg),
@@ -836,7 +840,7 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
                     x: -0.5,
                     y: -0.5,
                     offsetY: -16,
-                    offsetX: 16, 
+                    offsetX: 16,
                     cursorStyle: 'pointer',
                     mouseUpHandler: roomInformation,
                     render: renderIcon(settingsImg),
@@ -855,236 +859,43 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
                 cornersize: 24,
             });
         };
-        
+
         if (shape) {
             setControls(shape);
-        };
-
-        const mouseDownLine = (event) => {
-            const pointer = fabricCanvas.current.getPointer(event.e)
-            setX1(pointer.x);
-            setY1(pointer.y);
-            const newLine = new fabric.Line([pointer.x, pointer.y, pointer.x, pointer.y], {
-                stroke: 'black',
-                strokeWidth: drawWidth,
-                strokeUniform: true,
-                objectCaching: false,
-                classifier: 'draw',
-                id: null,
-                area_id: null,
-                })
-            fabricCanvas.current.add(newLine);
-            setShape(newLine);
-            setIsDrawing(true);
-        };
-
-        const mouseDownRect = (event) => {
-            const pointer = fabricCanvas.current.getPointer(event.e)
-            setX1(pointer.x);
-            setY1(pointer.y);
-            const newRect = new fabric.Rect({
-                left: pointer.x,
-                top: pointer.y,
-                originX: 'center',
-                originY: 'center',
-                width: 0,
-                height: 0,
-                fill: null,
-                stroke: 'black',
-                strokeWidth: drawWidth,
-                strokeUniform: true,
-                objectCaching: false,
-                classifier: 'draw',
-                id: null,
-                area_id: null,
-            });
-            fabricCanvas.current.add(newRect);
-            setShape(newRect);
-            setIsDrawing(true);
-        }
-
-        const mouseDownCircle = (event) => {
-            const pointer = fabricCanvas.current.getPointer(event.e)
-            setX1(pointer.x);
-            setY1(pointer.y);
-            const newCircle = new fabric.Circle({
-                left: pointer.x,
-                top: pointer.y,
-                originX: 'left',
-                originY: 'top',
-                fill: null,
-                radius: 0,
-                stroke: 'black',
-                strokeWidth: drawWidth,
-                strokeUniform: true,
-                objectCaching: false,
-                classifier: 'draw',
-                id: null,
-                area_id: null,
-            });
-            fabricCanvas.current.add(newCircle);
-            setShape(newCircle);
-            setIsDrawing(true);
-        }    
-
-        const mouseDownMark = (event) => {
-            const pointer = fabricCanvas.current.getPointer(event.e);
-            const point = {x: pointer.x, y: pointer.y};
-            setPolygonVertices([...polygonVertices, point])
-
-            const newLine = new fabric.Line([pointer.x, pointer.y, pointer.x, pointer.y], {
-                stroke: 'red',
-                strokeWidth: 5,
-                strokeUniform: true,
-                objectCaching: false,
-                classifier: 'temporary',
-                id: null,
-                area_id: null,
-                })
-
-            fabricCanvas.current.add(newLine);
-            setShape(newLine);
-            setIsDrawing(true);
-        }
-
-        const drawLine = (event) => {
-            if (isDrawing && shape) {
-                const pointer = fabricCanvas.current.getPointer(event.e);
-                shape.set({x2: pointer.x, y2: pointer.y});
-                const dx = (pointer.x - x1);
-                const dy = (pointer.y - y1);
-                const rad = Math.atan2(dy, dx);
-                const deg = rad * (180/Math.PI);
-
-                if ((deg < 2 && deg > -2) || (deg > 178 || deg < -178))  {
-                    shape.set({x2: pointer.x, y2: y1});
-                };
-
-                if ((deg < -88 && deg > -92) || (deg > 88 && deg < 92)) {
-                    shape.set({x2: x1, y2: pointer.y});
-                };
-
-                if ((polygonVertices.length > 2 && pointer.x < polygonVertices[0].x + 5 && pointer.x > polygonVertices[0].x - 5) && (pointer.y < polygonVertices[0].y + 5 && pointer.y > polygonVertices[0].y - 5)) {
-                    shape.set({x2: polygonVertices[0].x, y2: polygonVertices[0].y})
-                }
-
-                fabricCanvas.current.renderAll();
-            };
-        };
-
-        const drawRect = (event) => {
-            if (isDrawing && shape) {
-                const pointer = fabricCanvas.current.getPointer(event.e);
-
-                const width = Math.abs(x1 - pointer.x);
-                const height = Math.abs(y1 - pointer.y);
-                const left = Math.min(pointer.x, x1)
-                const top = Math.min(pointer.y, y1)
-
-                shape.set({
-                    left: left + width / 2,
-                    top: top + height / 2,
-                    width, 
-                    height
-                });
-
-                fabricCanvas.current.renderAll();
-            }
-        }
-        
-        const drawCircle = (event) => {
-            if (isDrawing && shape) {
-                const pointer = fabricCanvas.current.getPointer(event.e);
-                const radius = Math.hypot(pointer.x - x1, pointer.y - y1) / 2;
-                shape.set({radius});
-                fabricCanvas.current.renderAll();
-            }
-        }
-
-        const mouseUpLine = (event) => {
-            const pointer = fabricCanvas.current.getPointer(event.e)
-            const dx = (pointer.x - x1)
-            const dy = (pointer.y - y1)
-            const dist = Math.sqrt(dx*dx + dy*dy)
-
-            if (dist < 5) {
-                fabricCanvas.current.remove(shape);
-            } else {
-                shape.setCoords();
-                sessionSave(fabricCanvas.current);
-            }
-
-            updateFloor();
-            setIsDrawing(false);
-            setShape(null);
-
-        };
-
-        const mouseUpShape = () => {
-            updateFloor();
-            shape.setCoords()
-            setIsDrawing(false);
-            setShape(null);
-        }
-
-        const mouseUpMark = () => {
-
-            if (polygonVertices.length > 2 && (shape.x1 < polygonVertices[0].x + 5 && shape.x1 > polygonVertices[0].x - 5) && (shape.y1 < polygonVertices[0].y + 5 && shape.y1> polygonVertices[0].y - 5)) {
-                const id = uuidv4();
-                const mark = new fabric.Polygon(polygonVertices, {
-                    fill:  '#ff00000d',
-                    stroke: '#ff00000d',
-                    strokeWidth: 1,
-                    id: id,
-                    classifier: 'mark',
-                    area_id: id,
-                })
-
-                const text = new fabric.FabricText('Room Label', {
-                    fontSize: 24,
-                    id: mark.id,
-                    classifier: 'text',
-                    path: null,
-                    area_id: mark.area_id,
-                })
-
-                text.set({
-                    left: mark.left + (mark.height/2),
-                    top: mark.top + (mark.height/2),
-                })
-                fabricCanvas.current.add(mark)
-                fabricCanvas.current.add(text)
-                setPolygonVertices([]);
-                setShape(null);
-                setIsDrawing(false);
-
-                fabricCanvas.current.getObjects().forEach(o => {
-                    if (o.classifier === 'temporary') {
-                        fabricCanvas.current.remove(o);
-                    }
-                });
-                fabricCanvas.current.renderAll();
-
-                AssignAreaIDs(mark)
-                updateFloor();
-                setRoomLabel(text.text)
-                setActiveRoom(mark);
-            }
         };
 
         const mouseDown = (event) => {
             switch (actionType) {
                 case 'line':
-                    mouseDownLine(event);
+                    const { line, lineX1, lineY1 } = mouseDownLine(event, fabricCanvas.current, drawWidth);
+                    fabricCanvas.current.add(line);
+                    setShape(line);
+                    setIsDrawing(true);
+                    setX1(lineX1);
+                    setY1(lineY1);
                     break;
                 case 'square':
-                    mouseDownRect(event);
+                    const { rect, rectX1, rectY1 } = mouseDownRect(event, fabricCanvas.current, drawWidth);
+                    fabricCanvas.current.add(rect);
+                    setShape(rect);
+                    setIsDrawing(true);
+                    setX1(rectX1);
+                    setY1(rectY1);
                     break;
                 case 'circle':
-                    mouseDownCircle(event);
+                    const { circle, circleX1, circleY1 } = mouseDownCircle(event, fabricCanvas.current, drawWidth);
+                    fabricCanvas.current.add(circle);
+                    setShape(circle);
+                    setIsDrawing(true);
+                    setX1(circleX1);
+                    setY1(circleY1);
                     break;
                 case 'mark':
-                    mouseDownMark(event);
+                    const { markLine, vertex } = mouseDownMark(event, fabricCanvas.current);
+                    fabricCanvas.current.add(markLine);
+                    setPolygonVertices([...polygonVertices, vertex]);
+                    setShape(markLine);
+                    setIsDrawing(true);
                     break;
                 default:
                     break;
@@ -1094,16 +905,20 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
         const mouseMove = (event) => {
             switch (actionType) {
                 case 'line':
-                    drawLine(event);
+                    setShape(drawLine(event, fabricCanvas.current, shape, isDrawing, x1, y1, polygonVertices));
+                    fabricCanvas.current.renderAll();
                     break;
                 case 'square':
-                    drawRect(event);
+                    setShape(drawRect(event, fabricCanvas.current, shape, isDrawing, x1, y1));
+                    fabricCanvas.current.renderAll();
                     break;
                 case 'circle':
-                    drawCircle(event);
+                    setShape(drawCircle(event, fabricCanvas.current, shape, isDrawing, x1, y1));
+                    fabricCanvas.current.renderAll();
                     break;
                 case 'mark':
-                    drawLine(event);
+                    setShape(drawLine(event, fabricCanvas.current, shape, isDrawing, x1, y1, polygonVertices));
+                    fabricCanvas.current.renderAll();
                     break;
                 default:
                     break;
@@ -1113,16 +928,43 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
         const mouseUp = (event) => {
             switch (actionType) {
                 case 'line':
-                    mouseUpLine(event);
+                    mouseUpLine(event, fabricCanvas.current, shape, x1, y1);
+                    setIsDrawing(false);
+                    sessionSave(fabricCanvas.current);
                     break;
                 case 'square':
-                    mouseUpShape();
+                    updateFloor();
+                    shape.setCoords()
+                    setIsDrawing(false);
+                    setShape(null);
                     break;
                 case 'circle':
-                    mouseUpShape();
+                    updateFloor();
+                    shape.setCoords()
+                    setIsDrawing(false);
+                    setShape(null);
                     break;
                 case 'mark':
-                    mouseUpMark();
+                    const { mark, text } = mouseUpMark(polygonVertices, shape);
+                    if (polygonVertices.length > 2 && (shape.x1 < polygonVertices[0].x + 5 && shape.x1 > polygonVertices[0].x - 5) && (shape.y1 < polygonVertices[0].y + 5 && shape.y1 > polygonVertices[0].y - 5)) {
+                        fabricCanvas.current.add(mark);
+                        fabricCanvas.current.add(text);
+
+                        fabricCanvas.current.getObjects().forEach(o => {
+                            if (o.classifier === 'temporary') {
+                                fabricCanvas.current.remove(o);
+                            }
+                        });
+
+                        fabricCanvas.current.renderAll();
+                        setPolygonVertices([]);
+                        setShape(null);
+                        setIsDrawing(false);
+                        AssignAreaIDs(mark)
+                        updateFloor();
+                        setRoomLabel(text.text)
+                        setActiveRoom(mark);
+                    }
                     break;
                 default:
                     break;
@@ -1140,21 +982,21 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
                 }
             });
             fabricCanvas.current.renderAll();
-         };
+        };
 
-         if (updatedRoom) {
+        if (updatedRoom) {
             const oldRoom = fabricCanvas.current.getObjects().find(obj => obj.id === updatedRoom.id && obj.classifier === 'mark')
             const oldText = fabricCanvas.current.getObjects().find(obj => obj.id === updatedRoom.id && obj.classifier === 'text')
             if (oldRoom && oldText) {
-                oldRoom.set({area_id: updatedRoom.area_id, fill: updatedRoom.fill, stroke: updatedRoom.fill})
-                oldText.set({text: roomLabel})
+                oldRoom.set({ area_id: updatedRoom.area_id, fill: updatedRoom.fill, stroke: updatedRoom.fill })
+                oldText.set({ text: roomLabel })
                 fabricCanvas.current.renderAll();
                 AssignAreaIDs(updatedRoom)
             }
             setUpdatedRoom(null);
-         }
-    
-    function renderIcon(icon) {
+        }
+
+        function renderIcon(icon) {
             return function (ctx, left, top, _styleOverride, fabricObject) {
                 const size = 24;
                 ctx.save();
@@ -1162,7 +1004,8 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
                 ctx.rotate(fabric.util.degreesToRadians(fabricObject.angle));
                 ctx.drawImage(icon, -size / 2, -size / 2, size, size);
                 ctx.restore();
-            }};
+            }
+        };
 
         function deleteObject(_eventData, transform) {
             const canvas = transform.target.canvas;
@@ -1215,17 +1058,17 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
             const obj = transform.target;
             if (obj.classifier !== 'locked') {
                 obj.classifier = 'locked';
-                    obj.lockMovementX = true;
-                    obj.lockMovementY = true;
-                    obj.lockRotation = true;
-                    obj.lockScalingX = true;
-                    obj.lockScalingFlip = true;
-                    obj.lockScalingY = true;
-                    obj.cursorStyle = 'default';
-                    obj.cornerColor = 'rgba(0, 0, 0, 0)';
-                    obj.hasBorders = false;
-                    setControls(obj);
-                    fabricCanvas.current.renderAll();
+                obj.lockMovementX = true;
+                obj.lockMovementY = true;
+                obj.lockRotation = true;
+                obj.lockScalingX = true;
+                obj.lockScalingFlip = true;
+                obj.lockScalingY = true;
+                obj.cursorStyle = 'default';
+                obj.cornerColor = 'rgba(0, 0, 0, 0)';
+                obj.hasBorders = false;
+                setControls(obj);
+                fabricCanvas.current.renderAll();
             } else if (transform.target._element?.currentSrc?.includes("stair")) {
                 obj.classifier = 'stairs';
                 obj.lockMovementX = false;
@@ -1260,23 +1103,23 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
             setRoomLabel(roomText.text)
             setActiveRoom(transform.target);
         }
-        
-        function keyDown(e){
+
+        function keyDown(e) {
 
             const activeObject = fabricCanvas.current.getActiveObject()
 
             if (((activeObject && (activeObject.classifier === 'draw' || activeObject.classifier === 'stairs' || activeObject.classifier === 'locked'))) || ((tempObject && (tempObject.classifier === 'draw' || tempObject.classifier === 'stairs' || tempObject.classifier === 'locked')))) {
                 if ((e.ctrlKey) && e.key === 'c') {
-                    if(activeObject) {
+                    if (activeObject) {
                         setTempObject(activeObject);
                     }
                 } else if ((e.ctrlKey) && e.key === 'x') {
-                    if(activeObject) {
+                    if (activeObject) {
                         setTempObject(activeObject)
-                        deleteObject(null, { target: activeObject})
+                        deleteObject(null, { target: activeObject })
                     }
                 } else if ((e.ctrlKey) && e.key === 'v') {
-                    if(tempObject) {
+                    if (tempObject) {
                         tempObject.clone().then((cloned) => {
                             cloned.left += 10;
                             cloned.top += 10;
@@ -1287,21 +1130,21 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
                             fabricCanvas.current.renderAll();
                         });
                     }
-                } 
+                }
             }
 
             if (e.key === 'Delete' || e.key === 'Backspace') {
-                if(activeObject && (!activeDevice || !activeRoom)) {
-                    deleteObject(null, { target: activeObject})
-                    
+                if (activeObject && (!activeDevice || !activeRoom)) {
+                    deleteObject(null, { target: activeObject })
+
                 }
             }
         };
 
-         function updateFloor() {
+        function updateFloor() {
             const floorSnapshot = fabricCanvas.current.toJSON();
             onFloorData(files => ({
-                ...files, 
+                ...files,
                 [activeFloor]: floorSnapshot
             }))
         }
@@ -1316,7 +1159,7 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
         fabricCanvas.current.on('object:added', updateFloor)
         fabricCanvas.current.on('object:modified', updateFloor)
         fabricCanvas.current.on('object:removed', updateFloor)
-        
+
 
         return () => {
             document.removeEventListener('keydown', keyDown);
@@ -1330,8 +1173,8 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
     }, [tempObject, setTempObject, deviceList, onDeviceList, isDrawing, shape, actionType, canvasAction, x1, y1, originalDeviceList, activeDevice, activeRoom, drawWidth, polygonVertices, updatedRoom, roomLabel, AssignAreaIDs, AssignAreaIDsOnMove, activeFloor, onFloorData]);
 
     useEffect(() => {
-        
-    onHandlerToggle(togglePopup);
+
+        onHandlerToggle(togglePopup);
 
     }, [onHandlerToggle, togglePopup]);
 
@@ -1351,45 +1194,45 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
                     <b>Viewpoint</b>
                     <div className="view-checkbox">
                         <p>Hide Rooms</p>
-                        <input className='checkbox' type="checkbox" defaultChecked={hideRooms} onChange={(e) => setHideRooms(e.target.checked)}/>
+                        <input className='checkbox' type="checkbox" defaultChecked={hideRooms} onChange={(e) => setHideRooms(e.target.checked)} />
                     </div>
                     <div className="view-checkbox">
                         <p>Hide Labels</p>
-                        <input className='checkbox' type="checkbox" defaultChecked={hideLabels} onChange={(e) => setHideLabels(e.target.checked)}/>
+                        <input className='checkbox' type="checkbox" defaultChecked={hideLabels} onChange={(e) => setHideLabels(e.target.checked)} />
                     </div>
                     <div className="view-checkbox">
                         <p>Hide Devices</p>
-                        <input className='checkbox' type="checkbox" defaultChecked={hideDevices} onChange={(e) => setHideDevices(e.target.checked)}/>
+                        <input className='checkbox' type="checkbox" defaultChecked={hideDevices} onChange={(e) => setHideDevices(e.target.checked)} />
                     </div>
                 </div>
 
-                    <div className="floor-mapping">
-                        <button className="arrow-button" onClick={() => AddFloor('up')}>+⇧</button>
-                        {floorArray.map((floor) => (
-                            <div key={floor} className="floor-button-container">
-                                <button className={activeFloor === floor ? "floor-button-active" : "floor-button"} key={floor} onClick={() => SwitchFloor(floor)} disabled={activeFloor === floor}><b>{floor}</b></button>
-                                {(floor !== 'GR') && (floor === floorArray[0] || floor === floorArray[floorArray.length - 1]) && 
+                <div className="floor-mapping">
+                    <button className="arrow-button" onClick={() => AddFloor('up')}>+⇧</button>
+                    {floorArray.map((floor) => (
+                        <div key={floor} className="floor-button-container">
+                            <button className={activeFloor === floor ? "floor-button-active" : "floor-button"} key={floor} onClick={() => SwitchFloor(floor)} disabled={activeFloor === floor}><b>{floor}</b></button>
+                            {(floor !== 'GR') && (floor === floorArray[0] || floor === floorArray[floorArray.length - 1]) &&
                                 <button className="remove-button" onClick={() => RemoveFloor(floor)}>X</button>
-                                }
-                            </div>
-                        ))}
-                        <button className="arrow-button" onClick={() => AddFloor('down')}>+⇩</button>
-                    </div> 
+                            }
+                        </div>
+                    ))}
+                    <button className="arrow-button" onClick={() => AddFloor('down')}>+⇩</button>
+                </div>
             </div>
 
             <div>
                 <canvas ref={canvasRef}></canvas>
                 {canvasName && (
-                <div className="canvas-info">
-                    <div className="canvas-floor">
-                        {activeFloor}
-                    </div>
+                    <div className="canvas-info">
+                        <div className="canvas-floor">
+                            {activeFloor}
+                        </div>
 
-                    <div className="canvas-dimensions">
-                        {canvasName} 
-                        {" ("}{canvasWidth} x {canvasHeight}{")"}
+                        <div className="canvas-dimensions">
+                            {canvasName}
+                            {" ("}{canvasWidth} x {canvasHeight}{")"}
+                        </div>
                     </div>
-                </div>
                 )}
             </div>
 
@@ -1405,7 +1248,7 @@ function FabricCanvas({canvasInfo, canvasData, canvasState, onCanvasID, onSaveTo
                 )}
 
                 {deleteWarning && (
-                    <DeleteWarning onDeleteWarning={() => setDeleteWarning(false)} onDeleteConfirmation={() => setDeleteConfirmation(true)} onStachedFloor={() => setStachedFloor(null)}/>
+                    <DeleteWarning onDeleteWarning={() => setDeleteWarning(false)} onDeleteConfirmation={() => setDeleteConfirmation(true)} onStachedFloor={() => setStachedFloor(null)} />
                 )}
             </div>
         </div>

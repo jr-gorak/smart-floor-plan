@@ -5,7 +5,7 @@ import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 import yaml from 'js-yaml';
 
-function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
+function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown }) {
 
   const { canvasWidth, canvasHeight, canvasName, entityRegistry, deviceRegistry } = canvasInfo
   const { deviceList, labelList, floorData, floorArray } = canvasData
@@ -17,15 +17,15 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
   var zip = new JSZip();
 
   const floorMap = {
-    "4B" : "Basement Four",
-    "3B" : "Basement Three",
-    "2B" : "Basement Two",
-    "1B" : "Basement One",
-    "GR" : "Ground",
-    "1F" : "Floor One",
-    "2F" : "Floor Two",
-    "3F" : "Floor Three",
-    "4F" : "Floor Four"
+    "4B": "Basement Four",
+    "3B": "Basement Three",
+    "2B": "Basement Two",
+    "1B": "Basement One",
+    "GR": "Ground",
+    "1F": "Floor One",
+    "2F": "Floor Two",
+    "3F": "Floor Three",
+    "4F": "Floor Four"
   }
 
   async function generateImages(purpose) {
@@ -54,24 +54,24 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
               obj.visible = false;
             })
             if (hideRooms) {
-            canvas.getObjects().filter(obj => obj.classifier === 'mark').forEach(obj => {
-              obj.visible = false;
-            })
+              canvas.getObjects().filter(obj => obj.classifier === 'mark').forEach(obj => {
+                obj.visible = false;
+              })
 
             }
             if (hideLabels) {
-            canvas.getObjects().filter(obj => obj.classifier === 'text').forEach(obj => {
-              obj.visible = false;
-            })
-          }
+              canvas.getObjects().filter(obj => obj.classifier === 'text').forEach(obj => {
+                obj.visible = false;
+              })
+            }
           }, 0)
 
           canvas.renderAll();
 
           if (dataLength === 1) {
             setTimeout(() => {
-              const floorplanPNG = canvas.toDataURL({format: 'png'})
-              const fileName =  `${canvasName.toLowerCase().replace(/ /g, '_')}_${key}.png`;
+              const floorplanPNG = canvas.toDataURL({ format: 'png' })
+              const fileName = `${canvasName.toLowerCase().replace(/ /g, '_')}_${key}.png`;
 
               if (purpose === 'images') {
                 const link = document.createElement('a');
@@ -79,19 +79,19 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
                 link.download = fileName;
                 link.click();
               } else if (purpose === 'home-assistant') {
-                zip.folder('media').file(fileName, floorplanPNG.split(',')[1], {base64: true})
+                zip.folder('media').file(fileName, floorplanPNG.split(',')[1], { base64: true })
                 resolve();
               }
             }, 0)
           } else if (dataLength > 1) {
             setTimeout(() => {
-              const floorplanPNG = canvas.toDataURL({format: 'png'})
-              const fileName =  `${canvasName.toLowerCase().replace(/ /g, '_')}_${key}.png`;
-              zip.folder('media').file(fileName, floorplanPNG.split(',')[1], {base64: true})
+              const floorplanPNG = canvas.toDataURL({ format: 'png' })
+              const fileName = `${canvasName.toLowerCase().replace(/ /g, '_')}_${key}.png`;
+              zip.folder('media').file(fileName, floorplanPNG.split(',')[1], { base64: true })
               processedFiles++
 
               if (processedFiles === dataLength && purpose === 'images') {
-                zip.generateAsync({type: 'blob'}).then((blob) => {
+                zip.generateAsync({ type: 'blob' }).then((blob) => {
                   saveAs(blob, `${canvasName.toLowerCase().replace(/ /g, '_')}_images.zip`)
                   zip = new JSZip();
                   resolve();
@@ -100,7 +100,7 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
               } else if (processedFiles === dataLength && purpose === 'home-assistant') {
                 resolve();
               }
-                
+
             }, 0)
           }
           finishedDownloading = true;
@@ -136,13 +136,13 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
           icon: null,
           level: calculateLevel(floorArray[i]),
           name: floorMap[floorArray[i]],
-          created_at: new Date().toISOString().replace("Z","+00:00"),
-          modified_at: new Date().toISOString().replace("Z","+00:00"),
+          created_at: new Date().toISOString().replace("Z", "+00:00"),
+          modified_at: new Date().toISOString().replace("Z", "+00:00"),
         }
         dataArray.push(floorData)
-        }
-        return dataArray;
       }
+      return dataArray;
+    }
 
     function generateAreaData() {
       const dataArray = [];
@@ -159,8 +159,8 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
           name: data.objects.find(room => room.classifier === 'text' && room.area_id === obj.id).text,
           picture: null,
           temperature_entity_id: null,
-          created_at: new Date().toISOString().replace("Z","+00:00"),
-          modified_at: new Date().toISOString().replace("Z","+00:00"),
+          created_at: new Date().toISOString().replace("Z", "+00:00"),
+          modified_at: new Date().toISOString().replace("Z", "+00:00"),
         }))
         dataArray.push(...areaData);
       }
@@ -178,11 +178,11 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
             icon: null,
             label_id: labelList[i].toLowerCase().replace(/ /g, '_'),
             name: labelList[i],
-            created_at: new Date().toISOString().replace("Z","+00:00"),
-            modified_at: new Date().toISOString().replace("Z","+00:00"),
+            created_at: new Date().toISOString().replace("Z", "+00:00"),
+            modified_at: new Date().toISOString().replace("Z", "+00:00"),
           }
           dataArray.push(labelData)
-        } 
+        }
       }
       return dataArray;
     }
@@ -194,7 +194,7 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
         const coreDevice = deviceRegistry.data.devices.find(device => device.id === deviceId)
         coreDevice.area_id = deviceData.area_id;
         coreDevice.name_by_user = deviceData.name;
-        coreDevice.modified_at = new Date().toISOString().replace("Z","+00:00");
+        coreDevice.modified_at = new Date().toISOString().replace("Z", "+00:00");
 
         for (const entity in deviceData.entities) {
           const entityData = deviceData.entities[entity]
@@ -203,7 +203,7 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
           coreEntity.area_id = deviceData.area_id;
           coreEntity.labels.push(entityData.label);
           coreEntity.name = entityData.name;
-          coreEntity.modified_at = new Date().toISOString().replace("Z","+00:00");
+          coreEntity.modified_at = new Date().toISOString().replace("Z", "+00:00");
         }
       }
     }
@@ -315,26 +315,26 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
     const temperatureSensorIDArray = [];
     const lightSensorIDArray = [];
     for (const device in deviceList) {
-          const deviceData = deviceList[device]
-          const doorSensor = deviceData.entities.find(entity => (entity.type === "door" || entity.type === "window") && entity.visible === true)
-          const temperatureSensor = deviceData.entities.find(entity => entity.type === "temperature" && entity.visible === true)
-          const lightSensor = deviceData.entities.find(entity => entity.type.includes("light") && entity.visible === true)
-          if (doorSensor) {
-            doorSensorIDArray.push({device_id: doorSensor.device_id, id: doorSensor.id, area_id: deviceData.area_id, type: doorSensor.type, original_name: doorSensor.original_name})
-          } if (temperatureSensor) {
-            temperatureSensorIDArray.push({device_id: temperatureSensor.device_id, id: temperatureSensor.id, area_id: deviceData.area_id, type: temperatureSensor.type, original_name: temperatureSensor.original_name})
-          } if (lightSensor) {
-            lightSensorIDArray.push({device_id: lightSensor.device_id, id: lightSensor.id, area_id: deviceData.area_id, type: lightSensor.type, original_name: lightSensor.original_name})
-          }
+      const deviceData = deviceList[device]
+      const doorSensor = deviceData.entities.find(entity => (entity.type === "door" || entity.type === "window") && entity.visible === true)
+      const temperatureSensor = deviceData.entities.find(entity => entity.type === "temperature" && entity.visible === true)
+      const lightSensor = deviceData.entities.find(entity => entity.type.includes("light") && entity.visible === true)
+      if (doorSensor) {
+        doorSensorIDArray.push({ device_id: doorSensor.device_id, id: doorSensor.id, area_id: deviceData.area_id, type: doorSensor.type, original_name: doorSensor.original_name })
+      } if (temperatureSensor) {
+        temperatureSensorIDArray.push({ device_id: temperatureSensor.device_id, id: temperatureSensor.id, area_id: deviceData.area_id, type: temperatureSensor.type, original_name: temperatureSensor.original_name })
+      } if (lightSensor) {
+        lightSensorIDArray.push({ device_id: lightSensor.device_id, id: lightSensor.id, area_id: deviceData.area_id, type: lightSensor.type, original_name: lightSensor.original_name })
+      }
     }
 
     function generateDoorEntities(data) {
       const doorElementArray = [];
       for (const entity of doorSensorIDArray) {
         const doorElement = data.objects.filter(obj => obj.id === entity.device_id)
-        
-          doorElement.forEach(obj => {
-            
+
+        doorElement.forEach(obj => {
+
           const room = data.objects.find(o => o.classifier === 'mark' && o.area_id === obj.area_id)
           let roomText = undefined;
           if (room) {
@@ -354,7 +354,7 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
                 },
                 title: entity.type === "door" ? (roomText ? `${roomText} Door` : "Door") : (roomText ? `${roomText} Window` : "Window"),
               }
-             ],
+            ],
             conditions: [
               {
                 condition: "state",
@@ -362,7 +362,7 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
                 state: "1"
               }
             ],
-            title: entity.type === "door" ?  (roomText ? `${roomText} Door Closed` : "Door Closed") : (roomText ? `${roomText} Window Closed` : "Window Closed")
+            title: entity.type === "door" ? (roomText ? `${roomText} Door Closed` : "Door Closed") : (roomText ? `${roomText} Window Closed` : "Window Closed")
           };
           const openedState = {
             type: "conditional",
@@ -372,11 +372,11 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
                 entity: entity.original_name,
                 icon: entity.type === "door" ? "mdi:door-open" : "mdi:window-open-variant",
                 style: {
-                  left: (Math.round((obj.left / canvasWidth) * 100)-1) + "%",
+                  left: (Math.round((obj.left / canvasWidth) * 100) - 1) + "%",
                   top: Math.round((obj.top / canvasHeight) * 100) + "%",
                 },
               }
-             ],
+            ],
             conditions: [
               {
                 condition: "state",
@@ -387,7 +387,7 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
             title: entity.type === "door" ? (roomText ? `${roomText} Door Open` : "Door Open") : (roomText ? `${roomText} Window Open` : "Window Open")
           }
           doorElementArray.push(closedState, openedState);
-        })  
+        })
       }
       return doorElementArray;
     }
@@ -396,7 +396,7 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
       const temperatureElementArray = [];
       for (const entity of temperatureSensorIDArray) {
         const temperatureElement = data.objects.filter(obj => obj.id === entity.device_id)
-          temperatureElement.forEach(obj => {
+        temperatureElement.forEach(obj => {
           const room = data.objects.find(o => o.classifier === 'mark' && o.area_id === obj.area_id)
           const roomText = data.objects.find(o => o.classifier === 'text' && o.area_id === room.id).text
 
@@ -405,12 +405,12 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
             entity: entity.original_name,
             title: roomText ? `${roomText}` : "No Room",
             style: {
-              left: (Math.round((obj.left / canvasWidth) * 100)-1) + "%",
+              left: (Math.round((obj.left / canvasWidth) * 100) - 1) + "%",
               top: Math.round((obj.top / canvasHeight) * 100) + "%",
             },
           };
           temperatureElementArray.push(temperatureObject);
-        })  
+        })
       }
       return temperatureElementArray;
     }
@@ -419,7 +419,7 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
       const lightElementArray = [];
       for (const entity of lightSensorIDArray) {
         const lightElement = data.objects.filter(obj => obj.id === entity.device_id)
-          lightElement.forEach(obj => {
+        lightElement.forEach(obj => {
           const room = data.objects.find(o => o.classifier === 'mark' && o.area_id === obj.area_id)
           const roomText = data.objects.find(o => o.classifier === 'text' && o.area_id === room.id).text
 
@@ -468,7 +468,7 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
             ],
           }
           lightElementArray.push(onState, offState);
-        })  
+        })
       }
       return lightElementArray;
     }
@@ -500,8 +500,8 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
             type: "vertical-stack",
             cards: [
               {
-              type: "markdown",
-              content: floorMap[key]
+                type: "markdown",
+                content: floorMap[key]
               },
               {
                 type: "horizontal-stack",
@@ -528,8 +528,8 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
                     icon: "mdi:door",
                     show_state: false,
                     tap_action: {
-                    action: "call-service",
-                    service: "script.only_doors_table"
+                      action: "call-service",
+                      service: "script.only_doors_table"
                     }
                   },
                   {
@@ -576,7 +576,7 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
                     ],
                     elements: generateTemperatureEntities(data),
                     image: `/local/${canvasName.toLowerCase().replace(/ /g, '_')}_${key}.png`
-                  }, 
+                  },
                   {
                     type: "picture-elements",
                     title: "Lights",
@@ -589,7 +589,7 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
                     ],
                     elements: generateLightEntities(data),
                     image: `/local/${canvasName.toLowerCase().replace(/ /g, '_')}_${key}.png`
-                  }, 
+                  },
                 ]
               }
             ]
@@ -609,7 +609,7 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
           views: [
             {
               title: "Floorplans",
-              cards: [ 
+              cards: [
                 {
                   type: "vertical-stack",
                   cards: generateFloorDashboard()
@@ -629,33 +629,33 @@ function ExportDropdown({canvasData, canvasState, canvasInfo, activeDropdown}) {
     await generateJsonFiles();
     await generateDashboard();
     await fetchScriptYaml();
-    
-    await zip.generateAsync({type: 'blob'}).then((blob) => {
-        saveAs(blob, `${canvasName.toLowerCase().replace(/ /g, '_')}_export.zip`)
-        zip = new JSZip();
+
+    await zip.generateAsync({ type: 'blob' }).then((blob) => {
+      saveAs(blob, `${canvasName.toLowerCase().replace(/ /g, '_')}_export.zip`)
+      zip = new JSZip();
     });
   }
 
   return (
     <div>
-    {activeDropdown === 'export' &&
-    <div className="dropdown-container">
-        <div className='dropdown-content'>
-          <div className='export-settings'>
-            <div className="export-checkbox">
-              <input className='checkbox' type="checkbox" defaultChecked={hideRooms} onChange={(e) => setHideRooms(e.target.checked)}/>
-              <p>Hide Rooms on Export</p>
+      {activeDropdown === 'export' &&
+        <div className="dropdown-container">
+          <div className='dropdown-content'>
+            <div className='export-settings'>
+              <div className="export-checkbox">
+                <input className='checkbox' type="checkbox" defaultChecked={hideRooms} onChange={(e) => setHideRooms(e.target.checked)} />
+                <p>Hide Rooms on Export</p>
+              </div>
+              <div className="export-checkbox">
+                <input className='checkbox' type="checkbox" defaultChecked={hideLabels} onChange={(e) => setHideLabels(e.target.checked)} />
+                <p>Hide Labels on Export</p>
+              </div>
             </div>
-            <div className="export-checkbox">
-              <input className='checkbox' type="checkbox" defaultChecked={hideLabels} onChange={(e) => setHideLabels(e.target.checked)}/>
-              <p>Hide Labels on Export</p>
-            </div>
+            <button onClick={() => exportData()} disabled={!activeCanvas || !deviceRegistry || !entityRegistry}>Export to Home Assistant</button>
+            <button onClick={() => generateImages("images")} disabled={!activeCanvas}>Export as png</button>
           </div>
-          <button onClick={() => exportData()} disabled={!activeCanvas || !deviceRegistry || !entityRegistry}>Export to Home Assistant</button>
-          <button onClick={() => generateImages("images")} disabled={!activeCanvas}>Export as png</button>
         </div>
-    </div>
-    }
+      }
     </div>
   );
 }

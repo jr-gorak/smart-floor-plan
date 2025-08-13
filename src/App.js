@@ -1,8 +1,8 @@
-import {useState} from 'react';
-import {auth} from './firebase';
+import { useState } from 'react';
+import { auth } from './firebase';
 import Menu from './components/Menu';
 import './App.css';
-import FabricCanvas from './components/FabricCanvas';
+import FabricCanvas from './components/canvas/FabricCanvas';
 import AboutPopup from './components/menu/information/AboutPopup';
 import GuidePopup from './components/menu/information/GuidePopup';
 import AccountPopup from './components/menu/information/AccountPopup';
@@ -24,15 +24,15 @@ function App() {
   const [canvasName, setCanvasName] = useState(() => sessionStorage.getItem('canvasName'));
   const [canvasID, setCanvasID] = useState(() => sessionStorage.getItem('canvasID'));
   const [activeCanvas, setActiveCanvas] = useState(() => JSON.parse(sessionStorage.getItem('activeCanvas')));
-  const [deviceList, setDeviceList] =  useState(() => JSON.parse(sessionStorage.getItem('sensors')));
+  const [deviceList, setDeviceList] = useState(() => JSON.parse(sessionStorage.getItem('sensors')));
   const [originalDeviceList, setOriginalDeviceList] = useState(() => JSON.parse(sessionStorage.getItem('original-sensors')));
   const [labelList, setLabelList] = useState(() => JSON.parse(sessionStorage.getItem('labels')));
   const [deviceRegistry, setDeviceRegistry] = useState(() => JSON.parse(sessionStorage.getItem('deviceRegistry')));
   const [entityRegistry, setEntityRegistry] = useState(() => JSON.parse(sessionStorage.getItem('entityRegistry')));
-  const [floorData, setFloorData] = useState(() => {const stored = sessionStorage.getItem("floorData"); return stored? JSON.parse(stored) : {}; });
-  const [floorArray, setFloorArray] = useState(() => {const stored = sessionStorage.getItem("floorArray"); return stored? JSON.parse(stored) : ["GR"]; });
-  
-  
+  const [floorData, setFloorData] = useState(() => { const stored = sessionStorage.getItem("floorData"); return stored ? JSON.parse(stored) : {}; });
+  const [floorArray, setFloorArray] = useState(() => { const stored = sessionStorage.getItem("floorArray"); return stored ? JSON.parse(stored) : ["GR"]; });
+
+
   const [canvasAction, setCanvasAction] = useState('select');
   const [canvasImageData, setCanvasImageData] = useState(null);
   const [saveToggle, setSaveToggle] = useState(false);
@@ -76,8 +76,8 @@ function App() {
   };
 
   function preventScroll(scrollEvent) {
-  scrollEvent.preventDefault();
-}
+    scrollEvent.preventDefault();
+  }
 
   const zoomScroll = (e) => {
 
@@ -87,25 +87,25 @@ function App() {
 
     window.addEventListener('wheel', preventScroll, { passive: false });
 
-      if (e.deltaY < 0) {
-          setZoom(Math.min(zoom + 0.05, 1.5))
-          if (zoom < 1) {
-          setTransl(Math.max(transl - 5, 0))
-          }
-        } else {
-          setZoom(Math.max(zoom - 0.05, 0.5))
-          if (zoom < 1) {
-          setTransl(Math.min(transl + 5, 40))
-          }
-        }
+    if (e.deltaY < 0) {
+      setZoom(Math.min(zoom + 0.05, 1.5))
+      if (zoom < 1) {
+        setTransl(Math.max(transl - 5, 0))
+      }
+    } else {
+      setZoom(Math.max(zoom - 0.05, 0.5))
+      if (zoom < 1) {
+        setTransl(Math.min(transl + 5, 40))
+      }
+    }
 
-        if (zoom !== setZoom) {
-          centerZoom();
-        }
+    if (zoom !== setZoom) {
+      centerZoom();
+    }
 
-        setTimeout(() => {
-          window.removeEventListener('wheel', preventScroll);
-        }, 1000);
+    setTimeout(() => {
+      window.removeEventListener('wheel', preventScroll);
+    }, 1000);
   };
 
   function sessionSave() {
@@ -129,37 +129,37 @@ function App() {
     <div className="App">
 
       <header>
-        <Menu canvasData={canvasData} canvasState={canvasState} canvasInfo={canvasInfo} onOpenPopup={openPopup} onCanvasWidth={retrieveWidth} onCanvasHeight={retrieveHeight} onCanvasImageData={retrieveImageData} onCanvasName={retrieveName} onActive={retrieveActive} onCanvasID={retrieveID} onSaveToggle={() => setSaveToggle(true)} 
-        onRefreshToggle={() => setRefreshToggle(true)} onSaveResult={retrieveSave} user={user} onDeviceList={retrieveDeviceList} onOriginalDeviceList={retrieveOriginalDeviceList} onDeviceRegistry={retrieveDeviceRegistry} onEntityRegistry={retrieveEntityRegistry} onFloorData={retrieveFloorData} onFloorArray={retrieveFloorArray}/>
+        <Menu canvasData={canvasData} canvasState={canvasState} canvasInfo={canvasInfo} onOpenPopup={openPopup} onCanvasWidth={retrieveWidth} onCanvasHeight={retrieveHeight} onCanvasImageData={retrieveImageData} onCanvasName={retrieveName} onActive={retrieveActive} onCanvasID={retrieveID} onSaveToggle={() => setSaveToggle(true)}
+          onRefreshToggle={() => setRefreshToggle(true)} onSaveResult={retrieveSave} user={user} onDeviceList={retrieveDeviceList} onOriginalDeviceList={retrieveOriginalDeviceList} onDeviceRegistry={retrieveDeviceRegistry} onEntityRegistry={retrieveEntityRegistry} onFloorData={retrieveFloorData} onFloorArray={retrieveFloorArray} />
       </header>
-       
-       <div className='Canvas-State' style={{visibility: activeCanvas? 'visible' : 'hidden'}}>
-        <div className='Canvas' style={{transform: `scale(${zoom}) translate(${transl}%, ${transl}%)` , transformOrigin: 'top left'}} onWheel={zoomScroll}>
-          <FabricCanvas canvasInfo={canvasInfo} canvasData={canvasData} canvasState={canvasState} onRefreshToggle={()=> setRefreshToggle(false)} onDeviceToggle={() => setDeviceToggle(false)} 
-          user={user} onDeviceList={retrieveDeviceList} onHandlerToggle={(toggle) => setHandlerToggle(toggle)} onFloorData={retrieveFloorData} onFloorArray={retrieveFloorArray} 
-          onCanvasID={retrieveID} onSaveToggle={() => setSaveToggle(false)} onSaveResult={retrieveSave} onLoadToggle={() => setLoadToggle(false)} onCanvasImageData={retrieveImageData}
+
+      <div className='Canvas-State' style={{ visibility: activeCanvas ? 'visible' : 'hidden' }}>
+        <div className='Canvas' style={{ transform: `scale(${zoom}) translate(${transl}%, ${transl}%)`, transformOrigin: 'top left' }} onWheel={zoomScroll}>
+          <FabricCanvas canvasInfo={canvasInfo} canvasData={canvasData} canvasState={canvasState} onRefreshToggle={() => setRefreshToggle(false)} onDeviceToggle={() => setDeviceToggle(false)}
+            user={user} onDeviceList={retrieveDeviceList} onHandlerToggle={(toggle) => setHandlerToggle(toggle)} onFloorData={retrieveFloorData} onFloorArray={retrieveFloorArray}
+            onCanvasID={retrieveID} onSaveToggle={() => setSaveToggle(false)} onSaveResult={retrieveSave} onLoadToggle={() => setLoadToggle(false)} onCanvasImageData={retrieveImageData}
           />
         </div>
       </div>
 
       {activePopup === 'draw' && (
-      <DrawTool onCanvasAction={retrieveAction} drawWidth={drawWidth} onDrawWidth={retrieveDrawWidth} />
+        <DrawTool onCanvasAction={retrieveAction} drawWidth={drawWidth} onDrawWidth={retrieveDrawWidth} />
       )} {activePopup === 'sensor' && (
-      <SensorTool onCanvasDevice={retrieveDevice} onDeviceToggle={() => setDeviceToggle(true)} onDeviceList={retrieveDeviceList} deviceList={deviceList} onOriginalDeviceList={retrieveOriginalDeviceList} onLabelList={retrieveLabelList} labelList={labelList} onDeviceRegistry={retrieveDeviceRegistry} onEntityRegistry={retrieveEntityRegistry}/>
+        <SensorTool onCanvasDevice={retrieveDevice} onDeviceToggle={() => setDeviceToggle(true)} onDeviceList={retrieveDeviceList} deviceList={deviceList} onOriginalDeviceList={retrieveOriginalDeviceList} onLabelList={retrieveLabelList} labelList={labelList} onDeviceRegistry={retrieveDeviceRegistry} onEntityRegistry={retrieveEntityRegistry} />
       )} {activePopup === 'component' && (
-      <ComponentTool onCanvasAction={retrieveAction}/>
+        <ComponentTool onCanvasAction={retrieveAction} />
       )}
 
       {activePopup === 'about' && (
-        <AboutPopup onClose={closePopup}/>
+        <AboutPopup onClose={closePopup} />
       )} {activePopup === 'guide' && (
-        <GuidePopup onClose={closePopup}/>
+        <GuidePopup onClose={closePopup} />
       )}
       {activePopup === 'account' && !user && (
         <UserAuthentication onClose={closePopup} />
       )}
-       {activePopup === 'account' && user  && (
-        <AccountPopup onClose={closePopup} onCanvasName={retrieveName} onCanvasID={retrieveID} onCanvasWidth={retrieveWidth} onCanvasHeight={retrieveHeight} onActive={retrieveActive} onLoadToggle={() => setLoadToggle(true)}  onRefreshToggle={()=> setRefreshToggle(true)} onDeviceList={retrieveDeviceList} deviceList={deviceList} onOriginalDeviceList={retrieveOriginalDeviceList} originalDeviceList={originalDeviceList} onLabelList={retrieveLabelList} labelList={labelList} onDeviceRegistry={retrieveDeviceRegistry} onEntityRegistry={retrieveEntityRegistry} user={user}/>
+      {activePopup === 'account' && user && (
+        <AccountPopup onClose={closePopup} onCanvasName={retrieveName} onCanvasID={retrieveID} onCanvasWidth={retrieveWidth} onCanvasHeight={retrieveHeight} onActive={retrieveActive} onLoadToggle={() => setLoadToggle(true)} onRefreshToggle={() => setRefreshToggle(true)} onDeviceList={retrieveDeviceList} deviceList={deviceList} onOriginalDeviceList={retrieveOriginalDeviceList} originalDeviceList={originalDeviceList} onLabelList={retrieveLabelList} labelList={labelList} onDeviceRegistry={retrieveDeviceRegistry} onEntityRegistry={retrieveEntityRegistry} user={user} />
       )}
     </div>
   );
