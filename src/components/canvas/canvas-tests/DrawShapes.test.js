@@ -1,4 +1,4 @@
-import { mouseDownLine, drawLine, mouseDownRect, drawRect, mouseDownCircle, drawCircle, mouseDownMark, mouseUpMark } from "./DrawShapes";
+import { mouseDownLine, drawLine, mouseDownRect, drawRect, mouseDownCircle, drawCircle, mouseDownMark, mouseUpMark } from "../DrawShapes";
 import * as fabric from "fabric";
 
 describe('mouseDownLine', () => {

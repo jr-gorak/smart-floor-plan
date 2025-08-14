@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import * as fabric from "fabric";
 import {
-    deleteImg, copyImg, settingsImg, lockImg, unlockImg, lorawanImg, batteryImg, lightoffImg, co2Img, voltageImg, humidityImg, thermometerImg, pressureImg, soundImg, motionImg,
-    personImg, sensorImg, windowClosedImg, doorImg, zigbeeImg, componentImages
+    deleteImg, copyImg, settingsImg, lockImg, unlockImg, componentImages, deviceImages
 } from './../../icons/index';
 
 import { db } from "./../../firebase";
@@ -14,6 +13,7 @@ import DeleteWarning from "./../DeleteWarning";
 
 import { mouseDownLine, drawLine, mouseUpLine, mouseDownRect, drawRect, mouseDownCircle, drawCircle, mouseDownMark, mouseUpMark } from "./DrawShapes";
 import { filterComponent } from "./CreateComponents";
+import { createDevice } from "./CreateDevice";
 
 fabric.FabricObject.prototype.toObject = (function (toObject) {
     return function (propertyArray = []) {
@@ -539,158 +539,27 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
 
     // Create Devices
     useEffect(() => {
-        function createDevice(device) {
 
-            let l = canvasWidth / 2;
-            let t = canvasHeight / 2;
-            let sx = 1;
-            let sy = 1;
-            let area_id = null;
-
-            if (updateDeviceToggle) {
-
-                const oldDevice = fabricCanvas.current.getObjects().find(obj => obj.id === updatedDevice.id)
-                if (oldDevice) {
-                    l = oldDevice.left;
-                    t = oldDevice.top;
-                    sx = oldDevice.scaleX;
-                    sy = oldDevice.scaleY;
-                    area_id = oldDevice.area_id;
-                    fabricCanvas.current.remove(oldDevice);
-                    setUpdateDeviceToggle(false);
-                }
-            }
-
-            const deviceArray = []
-            let sensorCounter = 0;
-            let angleScaler = 0;
-
-            let deviceHolder = lorawanImg;
-
-            if (device.platform === 'zha') {
-                deviceHolder = zigbeeImg
-            }
-
-            var deviceImg = new fabric.FabricImage(deviceHolder, {
-                left: 0,
-                top: 0,
-                scaleX: 1.5,
-                scaleY: 1.5,
-                originX: 'center',
-                originY: 'center',
-                selectable: true,
-                strokeUniform: true,
-                id: device.id,
-                classifier: 'device',
-                area_id: area_id,
-            });
-
-            deviceArray.push(deviceImg);
-
-
-            const deviceText = new fabric.FabricText(device.name, {
-                fontSize: 12,
-                id: null,
-                classifier: 'text',
-                path: null,
-                area_id: area_id,
-            })
-
-            deviceText.set({
-                left: deviceImg.left - deviceText.width / 2,
-                top: deviceImg.top + 35,
-            })
-
-            deviceArray.push(deviceText);
-
-            device.entities.forEach(sensor => {
-                if (sensor.visible === true) {
-                    sensorCounter++;
-                }
-            });
-
-            device.entities.forEach(sensor => {
-                if (sensor.visible === true) {
-                    const angle = (2 * Math.PI / sensorCounter) * angleScaler;
-
-                    const x = deviceImg.left + 30 * Math.cos(angle);
-                    const y = deviceImg.top + 30 * Math.sin(angle);
-
-                    let imgHolder = sensorImg;
-
-                    if (sensor.type.toLowerCase().includes('temp')) {
-                        imgHolder = thermometerImg;
-                    } else if (sensor.type.toLowerCase().includes('occupancy')) {
-                        imgHolder = personImg;
-                    } else if (sensor.type.toLowerCase().includes('battery')) {
-                        imgHolder = batteryImg;
-                    } else if (sensor.type.toLowerCase().includes('light')) {
-                        imgHolder = lightoffImg;
-                    } else if (sensor.type.toLowerCase().includes('co2')) {
-                        imgHolder = co2Img;
-                    } else if (sensor.type.toLowerCase().includes('volt') || sensor.type.toLowerCase().includes('vdd')) {
-                        imgHolder = voltageImg;
-                    } else if (sensor.type.toLowerCase().includes('humidity')) {
-                        imgHolder = humidityImg;
-                    } else if (sensor.type.toLowerCase().includes('pressure')) {
-                        imgHolder = pressureImg;
-                    } else if (sensor.type.toLowerCase().includes('sound')) {
-                        imgHolder = soundImg;
-                    } else if (sensor.type.toLowerCase().includes('motion')) {
-                        imgHolder = motionImg;
-                    } else if (sensor.type.toLowerCase().includes('door')) {
-                        imgHolder = doorImg;
-                    } else if (sensor.type.toLowerCase().includes('window')) {
-                        imgHolder = windowClosedImg;
-                    }
-
-                    var sensorObject = new fabric.FabricImage(imgHolder, {
-                        left: x,
-                        top: y,
-                        scaleX: 1,
-                        scaleY: 1,
-                        originX: 'center',
-                        originY: 'center',
-                        id: sensor.id,
-                        classifier: 'sensor',
-                        area_id: area_id,
-                    });
-
-                    angleScaler++;
-                    deviceArray.push(sensorObject);
-                }
-            });
-
-            const group = new fabric.Group(deviceArray, {
-                left: l,
-                top: t,
-                scaleX: sx,
-                scaleY: sy,
-                strokeUniform: true,
-                originX: 'center',
-                originY: 'center',
-                classifier: 'device',
-                id: device.id,
-                area_id: area_id,
-            });
-
-            fabricCanvas.current.add(group);
+        if (deviceToggle) {
+            const group = createDevice(canvasDevice, canvasWidth, canvasHeight, false, fabricCanvas.current, deviceImages);
+            fabricCanvas.current.add(group)
+            onDeviceToggle();
             fabricCanvas.current.renderAll();
             setActionType(null);
-
             group.on('moving', () => {
                 AssignAreaIDsOnMove(group)
             })
-
-        }
-
-        if (deviceToggle) {
-            createDevice(canvasDevice);
-            onDeviceToggle();
         }
 
         if (updateDeviceToggle) {
-            createDevice(updatedDevice);
+            const group = createDevice(updatedDevice, canvasWidth, canvasHeight, true, fabricCanvas.current, deviceImages);
+            fabricCanvas.current.add(group)
+            setUpdateDeviceToggle(false);
+            fabricCanvas.current.renderAll();
+            setActionType(null);
+            group.on('moving', () => {
+                AssignAreaIDsOnMove(group)
+            })
         }
 
     }, [deviceToggle, onDeviceToggle, updateDeviceToggle, canvasDevice, canvasWidth, canvasHeight, updatedDevice, AssignAreaIDs, AssignAreaIDsOnMove]);

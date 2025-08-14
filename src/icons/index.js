@@ -126,10 +126,15 @@ const componentImages = {
     kitchensink: kitchensinkImg, bathtub: bathtubImg, roundsink: roundsinkImg, toilet: toiletImg
 }
 
+const deviceImages = {
+    lorawan: lorawanImg, zigbee: zigbeeImg, person: personImg, battery: batteryImg, light: lightoffImg, co2: co2Img, voltage: voltageImg, humidity: humidityImg,
+    thermometer: thermometerImg, pressure: pressureImg, sound: soundImg, motion: motionImg, sensor: sensorImg, window: windowClosedImg, door: doorImg
+}
+
 export {
     Draw, Sensor, Component, Create, Save, Export, Account, Guide, About, DrawLine, Square, DoorOpen, DoorClose, Upstairs, Downstairs, WindowClosed, WindowOpen, Delete,
     Copy, Share, Move, Settings, Lorawan, Zigbee, Person, Battery, LightOff, LightOn, Co2, Voltage, Humidity, Thermometer, Pressure, Sound, Motion,
     Door, Bathtub, Bed, Chair, KitchenSink, RoundSink, Sofa, Stairs, Stove, ThreeSofa, Toilet, Window, Map, CircleOutline,
     deleteImg, copyImg, moveImg, settingsImg, lockImg, unlockImg, lorawanImg, zigbeeImg, batteryImg, lightoffImg, co2Img, voltageImg, humidityImg, thermometerImg, pressureImg, soundImg, motionImg,
-    doorwayImg, doorImg, windowImg, windowClosedImg, personImg, sensorImg, bathtubImg, bedImg, chairImg, kitchensinkImg, roundsinkImg, sofaImg, stairsImg, stoveImg, threesofaImg, toiletImg, componentImages
+    doorwayImg, doorImg, windowImg, windowClosedImg, personImg, sensorImg, bathtubImg, bedImg, chairImg, kitchensinkImg, roundsinkImg, sofaImg, stairsImg, stoveImg, threesofaImg, toiletImg, componentImages, deviceImages
 };
