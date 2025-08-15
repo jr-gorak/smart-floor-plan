@@ -1,8 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import * as fabric from "fabric";
-import {
-    deleteImg, copyImg, settingsImg, lockImg, unlockImg, componentImages, deviceImages
-} from './../../icons/index';
+import { deleteImg, copyImg, settingsImg, lockImg, unlockImg, componentImages, deviceImages } from './../../icons/index';
 
 import { db } from "./../../firebase";
 import { addDoc, collection, doc, updateDoc, query, getDoc } from "firebase/firestore";
@@ -14,6 +12,7 @@ import DeleteWarning from "./../DeleteWarning";
 import { mouseDownLine, drawLine, mouseUpLine, mouseDownRect, drawRect, mouseDownCircle, drawCircle, mouseDownMark, mouseUpMark } from "./DrawShapes";
 import { filterComponent } from "./CreateComponents";
 import { createDevice } from "./CreateDevice";
+import { AddFloor, SwitchFloor, RemoveFloor } from "./Floors";
 
 fabric.FabricObject.prototype.toObject = (function (toObject) {
     return function (propertyArray = []) {
@@ -137,113 +136,24 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
         selectFlag.current = false;
     }, [])
 
-    function AddFloor(direction) {
-        if (direction === 'up') {
-            let floorCount = 0;
-            floorArray.forEach((floor) => {
-                if (floor.includes('B')) {
-                    floorCount++
-                }
-            })
-            if (floorArray.length < 5) {
-                onFloorArray(floors => [((floorArray.length - floorCount) + "F"), ...floors])
-            }
-        }
-        if (direction === 'down') {
-            let floorCount = 0;
-            floorArray.forEach((floor) => {
-                if (floor.includes('F')) {
-                    floorCount++
-                }
-            })
-            if (floorArray.length < 5) {
-                onFloorArray(floors => [...floors, ((floorArray.length - floorCount) + "B")])
-            }
-        }
-    }
 
-    const SwitchFloor = useCallback(async (floor) => {
+    const SwitchFloorCallback = useCallback(async (floor) => {
         removeTemporaryObjects();
-        const file = fabricCanvas.current.toJSON();
-        const objArray = [];
-
-        async function cloneObjects() {
-            const objects = fabricCanvas.current.getObjects().filter(obj => obj.classifier === 'stairs' || obj.classifier === 'locked')
-            for (const obj of objects) {
-                const clone = await obj.clone()
-                objArray.push(clone);
-            }
-        }
-
-        await cloneObjects();
-
-        onFloorData(files => ({
-            ...files,
-            [activeFloor]: file
-        }))
-
-        fabricCanvas.current.dispose()
-
-        const blankCanvas = new fabric.Canvas(canvasRef.current, {
-            width: canvasWidth,
-            height: canvasHeight,
-            backgroundColor: 'white',
-        });
-
-        if (floorData[floor]) {
-            blankCanvas.loadFromJSON(floorData[floor]);
-
-            setActionType(null);
-        } else if (objArray.length) {
-            objArray.forEach(obj => {
-                blankCanvas.add(obj)
-            })
-        }
-
-        fabricCanvas.current = blankCanvas;
-        fabricCanvas.current.on('selection:created', checkObjects)
-        fabricCanvas.current.on('selection:updated', checkObjects)
+        const newCanvas = await SwitchFloor(floor, fabricCanvas.current, onFloorData, activeFloor, canvasRef.current, canvasWidth, canvasHeight, floorData, setActionType, checkObjects, viewpointToggle)
+        fabricCanvas.current = newCanvas;
         setTimeout(() => {
             requestAnimationFrame(() => {
                 viewpointToggle();
                 fabricCanvas.current.renderAll();
             });
         }, 0)
-
         setActiveFloor(floor)
         setActionType(null);
     }, [activeFloor, canvasHeight, canvasWidth, floorData, onFloorData, viewpointToggle, checkObjects])
 
-    const RemoveFloor = useCallback((floor) => {
-        if (floorData[floor] && floorData[floor].objects.length > 0 && stachedFloor === null) {
-            setDeleteWarning(true);
-            setStachedFloor(floor);
-            return;
-        } else if (floorData[floor]) {
-            const existingData = { ...floorData }
-            delete existingData[floor];
-            onFloorData(existingData)
-        } else if (fabricCanvas.current._objects.length > 0 && stachedFloor === null) {
-            setDeleteWarning(true);
-            setStachedFloor(floor);
-            return;
-        }
-
-        if (activeFloor === floor) {
-            fabricCanvas.current.clear();
-            fabricCanvas.current.backgroundColor = 'white';
-            let nextFloor = floorArray[floorArray.indexOf(floor) + 1]
-            if (activeFloor.includes("B")) {
-                nextFloor = floorArray[floorArray.indexOf(floor) - 1]
-            }
-            SwitchFloor(nextFloor)
-        }
-
-        onFloorArray(original => original.filter(floorID => floorID !== floor))
-        setStachedFloor(null);
-        setDeleteConfirmation(null);
-
-    }, [SwitchFloor, activeFloor, floorArray, floorData, stachedFloor, onFloorData, onFloorArray])
+    const RemoveFloorCallback = useCallback((floor) => {
+        RemoveFloor(floor, activeFloor, floorArray, floorData, stachedFloor, onFloorData, onFloorArray, setDeleteWarning, setStachedFloor, setDeleteConfirmation, SwitchFloorCallback, fabricCanvas.current)
+    }, [SwitchFloorCallback, activeFloor, floorArray, floorData, stachedFloor, onFloorData, onFloorArray])
 
     const AssignAreaIDs = useCallback((room) => {
         const x1 = room.left;
@@ -328,9 +238,9 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
 
     useEffect(() => {
         if (deleteConfirmation) {
-            RemoveFloor(stachedFloor)
+            RemoveFloorCallback(stachedFloor)
         }
-    }, [deleteConfirmation, stachedFloor, RemoveFloor])
+    }, [deleteConfirmation, stachedFloor, RemoveFloorCallback])
 
     //Initialize Canvas
     useEffect(() => {
@@ -1028,16 +938,16 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
                 </div>
 
                 <div className="floor-mapping">
-                    <button className="arrow-button" onClick={() => AddFloor('up')}>+⇧</button>
+                    <button className="arrow-button" onClick={() => AddFloor('up', floorArray, onFloorArray)}>+⇧</button>
                     {floorArray.map((floor) => (
                         <div key={floor} className="floor-button-container">
-                            <button className={activeFloor === floor ? "floor-button-active" : "floor-button"} key={floor} onClick={() => SwitchFloor(floor)} disabled={activeFloor === floor}><b>{floor}</b></button>
+                            <button className={activeFloor === floor ? "floor-button-active" : "floor-button"} key={floor} onClick={() => SwitchFloorCallback(floor)} disabled={activeFloor === floor}><b>{floor}</b></button>
                             {(floor !== 'GR') && (floor === floorArray[0] || floor === floorArray[floorArray.length - 1]) &&
-                                <button className="remove-button" onClick={() => RemoveFloor(floor)}>X</button>
+                                <button className="remove-button" onClick={() => RemoveFloorCallback(floor)}>X</button>
                             }
                         </div>
                     ))}
-                    <button className="arrow-button" onClick={() => AddFloor('down')}>+⇩</button>
+                    <button className="arrow-button" onClick={() => AddFloor('down', floorArray, onFloorArray)}>+⇩</button>
                 </div>
             </div>
 

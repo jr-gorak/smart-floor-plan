@@ -9,6 +9,18 @@ HTMLCanvasElement.prototype.getContext = function () {
         textBaseline: '',
         measureText: () => ({ width: 0, height: 0 }),
         fillText: () => { },
-        scale: () => { }
+        scale: () => { },
+        clearRect: () => { },
+        save: () => { },
+        restore: () => { },
+        beginPath: () => { },
+        moveTo: () => { },
+        lineTo: () => { },
+        closePath: () => { },
+        transform: () => { },
+        translate: () => { },
+        setTransform: () => { },
+        fill: () => { },
+        drawImage: () => { }
     };
 };
