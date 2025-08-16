@@ -49,7 +49,9 @@
     background-color: #ff6666 !important;
 }
 
-.draw, .file, .about {
+.draw,
+.file,
+.about {
     display: flex;
     justify-content: space-between;
     padding: 0 5px 0 5px;

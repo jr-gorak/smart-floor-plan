@@ -30,7 +30,7 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
 
     const { canvasWidth, canvasHeight, canvasName, canvasID, drawWidth, entityRegistry, deviceRegistry } = canvasInfo
     const { deviceList, originalDeviceList, labelList, floorData, canvasImageData, canvasDevice, floorArray } = canvasData
-    const { canvasAction, saveToggle, loadToggle, refreshToggle, deviceToggle } = canvasState
+    const { canvasAction, saveToggle, loadToggle, refreshToggle, deviceToggle, dragMode } = canvasState
 
     const canvasRef = useRef(null);
     const fabricCanvas = useRef(null);
@@ -274,6 +274,7 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
             fabricCanvas.current = null;
         }
     }, [canvasWidth, canvasHeight, refreshToggle, loadToggle, checkObjects]);
+
 
     //Canvas File Handling
     useEffect(() => {
@@ -533,23 +534,23 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
                 object.controls.copyControl = new fabric.Control({
                     x: -0.5,
                     y: -0.5,
-                    offsetY: -16,
-                    offsetX: 16,
+                    offsetY: -32,
+                    offsetX: 32,
                     cursorStyle: 'pointer',
                     mouseUpHandler: copyObject,
                     render: renderIcon(copyImg),
-                    cornersize: 24,
+                    cornersize: 36,
                 });
 
                 object.controls.lockControl = new fabric.Control({
                     x: -0.5,
                     y: -0.5,
-                    offsetY: -16,
-                    offsetX: -16,
+                    offsetY: -32,
+                    offsetX: -32,
                     cursorStyle: 'pointer',
                     mouseUpHandler: lockObject,
                     render: renderIcon(object.classifier === 'locked' ? lockImg : unlockImg),
-                    cornersize: 24,
+                    cornersize: 36,
                 })
             }
 
@@ -557,12 +558,12 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
                 object.controls.settingsControl = new fabric.Control({
                     x: -0.5,
                     y: -0.5,
-                    offsetY: -16,
-                    offsetX: 16,
+                    offsetY: -32,
+                    offsetX: 32,
                     cursorStyle: 'pointer',
                     mouseUpHandler: deviceSettings,
                     render: renderIcon(settingsImg),
-                    cornersize: 24,
+                    cornersize: 36,
                 })
             }
 
@@ -570,24 +571,24 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
                 object.controls.settingsControl = new fabric.Control({
                     x: -0.5,
                     y: -0.5,
-                    offsetY: -16,
-                    offsetX: 16,
+                    offsetY: -32,
+                    offsetX: 32,
                     cursorStyle: 'pointer',
                     mouseUpHandler: roomInformation,
                     render: renderIcon(settingsImg),
-                    cornersize: 24,
+                    cornersize: 36,
                 })
             }
 
             object.controls.deleteControl = new fabric.Control({
                 x: 0.5,
                 y: -0.5,
-                offsetY: 16,
-                offsetX: 16,
+                offsetY: 32,
+                offsetX: 32,
                 cursorStyle: 'pointer',
                 mouseUpHandler: deleteObject,
                 render: renderIcon(deleteImg),
-                cornersize: 24,
+                cornersize: 36,
             });
         };
 
@@ -729,7 +730,10 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
 
         function renderIcon(icon) {
             return function (ctx, left, top, _styleOverride, fabricObject) {
-                const size = 24;
+                console.log('ctx', ctx)
+                console.log('ctx', left)
+                console.log('ctx', top)
+                const size = 36;
                 ctx.save();
                 ctx.translate(left, top);
                 ctx.rotate(fabric.util.degreesToRadians(fabricObject.angle));
@@ -835,6 +839,20 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
             setActiveRoom(transform.target);
         }
 
+
+        setTimeout(() => {
+            if (dragMode) {
+                fabricCanvas.current.upperCanvasEl.style.touchAction = "auto";
+                fabricCanvas.current.allowTouchScrolling = true;
+            }
+            else if (!dragMode) {
+                fabricCanvas.current.upperCanvasEl.style.touchAction = "none";
+                fabricCanvas.current.allowTouchScrolling = false;
+            }
+        }, 100)
+
+
+
         function keyDown(e) {
 
             const activeObject = fabricCanvas.current.getActiveObject()
@@ -901,7 +919,7 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
                 fabricCanvas.current.off('mouse:up', mouseUp);
             }
         }
-    }, [tempObject, setTempObject, deviceList, onDeviceList, isDrawing, shape, actionType, canvasAction, x1, y1, originalDeviceList, activeDevice, activeRoom, drawWidth, polygonVertices, updatedRoom, roomLabel, AssignAreaIDs, AssignAreaIDsOnMove, activeFloor, onFloorData]);
+    }, [dragMode, tempObject, setTempObject, deviceList, onDeviceList, isDrawing, shape, actionType, canvasAction, x1, y1, originalDeviceList, activeDevice, activeRoom, drawWidth, polygonVertices, updatedRoom, roomLabel, AssignAreaIDs, AssignAreaIDsOnMove, activeFloor, onFloorData]);
 
     useEffect(() => {
 
@@ -982,6 +1000,8 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
                     <DeleteWarning onDeleteWarning={() => setDeleteWarning(false)} onDeleteConfirmation={() => setDeleteConfirmation(true)} onStachedFloor={() => setStachedFloor(null)} />
                 )}
             </div>
+
+
         </div>
     )
 };

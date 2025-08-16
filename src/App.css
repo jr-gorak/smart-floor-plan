@@ -1,4 +1,5 @@
-html, body {
+html,
+body {
   background-color: #9cdaf3;
   overflow: visible;
   scrollbar-width: thin;
@@ -18,3 +19,30 @@ header {
   transition: transform 0.1s ease;
 }
 
+.wrapper {
+  position: relative;
+}
+
+.canvas-select-menu {
+  display: none;
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 10px 10px 10px 10px;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px #00000033;
+  background-color: #fffffb;
+}
+
+@media (max-width: 1024px) {
+  .canvas-select-menu {
+    display: block;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 10px 10px 10px 10px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px #00000033;
+    background-color: #fffffb;
+  }
+}

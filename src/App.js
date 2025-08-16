@@ -17,6 +17,8 @@ function App() {
 
   const [zoom, setZoom] = useState(1);
   const [transl, setTransl] = useState(0);
+  const [touchDistance, setTouchDistance] = useState(0);
+  const [touchToggle, setTouchToggle] = useState(false);
   const [activePopup, setActivePopup] = useState(null);
 
   const [canvasWidth, setCanvasWidth] = useState(() => sessionStorage.getItem('canvasWidth'));
@@ -31,7 +33,7 @@ function App() {
   const [entityRegistry, setEntityRegistry] = useState(() => JSON.parse(sessionStorage.getItem('entityRegistry')));
   const [floorData, setFloorData] = useState(() => { const stored = sessionStorage.getItem("floorData"); return stored ? JSON.parse(stored) : {}; });
   const [floorArray, setFloorArray] = useState(() => { const stored = sessionStorage.getItem("floorArray"); return stored ? JSON.parse(stored) : ["GR"]; });
-
+  const [dragMode, setDragMode] = useState(true);
 
   const [canvasAction, setCanvasAction] = useState('select');
   const [canvasImageData, setCanvasImageData] = useState(null);
@@ -66,7 +68,7 @@ function App() {
 
   const canvasInfo = { canvasWidth, canvasHeight, canvasName, canvasID, drawWidth, entityRegistry, deviceRegistry }
   const canvasData = { deviceList, originalDeviceList, labelList, floorData, canvasImageData, canvasDevice, floorArray }
-  const canvasState = { activeCanvas, canvasAction, saveToggle, loadToggle, refreshToggle, deviceToggle, saveResult, handlerToggle }
+  const canvasState = { activeCanvas, canvasAction, saveToggle, loadToggle, refreshToggle, deviceToggle, saveResult, handlerToggle, dragMode }
 
   const centerZoom = () => {
     window.scrollTo({
@@ -84,29 +86,58 @@ function App() {
     if (handlerToggle) {
       return;
     }
+    if (e._reactName === 'onWheel') {
+      window.addEventListener('wheel', preventScroll, { passive: false });
 
-    window.addEventListener('wheel', preventScroll, { passive: false });
-
-    if (e.deltaY < 0) {
-      setZoom(Math.min(zoom + 0.05, 1.5))
-      if (zoom < 1) {
-        setTransl(Math.max(transl - 5, 0))
+      if (e.deltaY < 0) {
+        setZoom(Math.min(zoom + 0.05, 1.5))
+        if (zoom < 1) {
+          setTransl(Math.max(transl - 5, 0))
+        }
+      } else {
+        setZoom(Math.max(zoom - 0.05, 0.5))
+        if (zoom < 1) {
+          setTransl(Math.min(transl + 5, 40))
+        }
       }
-    } else {
-      setZoom(Math.max(zoom - 0.05, 0.5))
-      if (zoom < 1) {
-        setTransl(Math.min(transl + 5, 40))
+
+      if (zoom !== setZoom) {
+        centerZoom();
+      }
+
+      setTimeout(() => {
+        window.removeEventListener('wheel', preventScroll);
+      }, 1000);
+    } else if (e._reactName === 'onTouchMove' && e.touches.length === 2) {
+      const dx = Math.abs(e.touches[0].clientX - e.touches[1].clientX);
+      const dy = Math.abs(e.touches[0].clientY - e.touches[1].clientY);
+      if (!touchToggle) {
+        setTouchDistance(Math.hypot(dx, dy))
+        setTouchToggle(true);
+      }
+      const distance = Math.hypot(dx, dy);
+      if (distance > touchDistance) {
+        setZoom(Math.min(zoom + 0.025, 1.5))
+        if (zoom < 1) {
+          setTransl(Math.max(transl - 2.5, 0))
+        }
+      } else {
+        setZoom(Math.max(zoom - 0.025, 0.5))
+        if (zoom < 1) {
+          setTransl(Math.min(transl + 2.5, 40))
+        }
+      }
+
+      if (zoom !== setZoom) {
+        centerZoom();
       }
     }
-
-    if (zoom !== setZoom) {
-      centerZoom();
-    }
-
-    setTimeout(() => {
-      window.removeEventListener('wheel', preventScroll);
-    }, 1000);
   };
+
+  function endTouch() {
+    setTouchDistance(null);
+    setTouchToggle(false);
+  }
 
   function sessionSave() {
     sessionStorage.setItem('canvasWidth', canvasWidth)
@@ -133,12 +164,20 @@ function App() {
           onRefreshToggle={() => setRefreshToggle(true)} onSaveResult={retrieveSave} user={user} onDeviceList={retrieveDeviceList} onOriginalDeviceList={retrieveOriginalDeviceList} onDeviceRegistry={retrieveDeviceRegistry} onEntityRegistry={retrieveEntityRegistry} onFloorData={retrieveFloorData} onFloorArray={retrieveFloorArray} />
       </header>
 
+
       <div className='Canvas-State' style={{ visibility: activeCanvas ? 'visible' : 'hidden' }}>
-        <div className='Canvas' style={{ transform: `scale(${zoom}) translate(${transl}%, ${transl}%)`, transformOrigin: 'top left' }} onWheel={zoomScroll}>
+        <div className='Canvas' style={{ transform: `scale(${zoom}) translate(${transl}%, ${transl}%)`, transformOrigin: 'top left', }} onWheel={zoomScroll} onTouchMove={zoomScroll} onTouchEnd={endTouch}>
           <FabricCanvas canvasInfo={canvasInfo} canvasData={canvasData} canvasState={canvasState} onRefreshToggle={() => setRefreshToggle(false)} onDeviceToggle={() => setDeviceToggle(false)}
             user={user} onDeviceList={retrieveDeviceList} onHandlerToggle={(toggle) => setHandlerToggle(toggle)} onFloorData={retrieveFloorData} onFloorArray={retrieveFloorArray}
             onCanvasID={retrieveID} onSaveToggle={() => setSaveToggle(false)} onSaveResult={retrieveSave} onLoadToggle={() => setLoadToggle(false)} onCanvasImageData={retrieveImageData}
           />
+        </div>
+
+        <div className="canvas-select-menu">
+          <div className="view-checkbox">
+            <p>Screen Dragging</p>
+            <input className='checkbox' type="checkbox" checked={dragMode} onChange={(e) => setDragMode(e.target.checked)} />
+          </div>
         </div>
       </div>
 
