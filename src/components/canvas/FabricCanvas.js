@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import * as fabric from "fabric";
-import { deleteImg, copyImg, settingsImg, lockImg, unlockImg, componentImages, deviceImages } from './../../icons/index';
+import { deleteImg, copyImg, settingsImg, lockImg, unlockImg, componentImages, deviceImages, moveImg, cursorImg } from './../../icons/index';
 
 import { db } from "./../../firebase";
 import { addDoc, collection, doc, updateDoc, query, getDoc } from "firebase/firestore";
@@ -533,9 +533,9 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
             if (object.classifier === 'draw' || object.classifier === 'stairs' || object.classifier === 'locked') {
                 object.controls.copyControl = new fabric.Control({
                     x: -0.5,
-                    y: -0.5,
-                    offsetY: -32,
-                    offsetX: 32,
+                    y: 0.5,
+                    offsetY: 32,
+                    offsetX: -32,
                     cursorStyle: 'pointer',
                     mouseUpHandler: copyObject,
                     render: renderIcon(copyImg),
@@ -559,7 +559,7 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
                     x: -0.5,
                     y: -0.5,
                     offsetY: -32,
-                    offsetX: 32,
+                    offsetX: -32,
                     cursorStyle: 'pointer',
                     mouseUpHandler: deviceSettings,
                     render: renderIcon(settingsImg),
@@ -572,7 +572,7 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
                     x: -0.5,
                     y: -0.5,
                     offsetY: -32,
-                    offsetX: 32,
+                    offsetX: -32,
                     cursorStyle: 'pointer',
                     mouseUpHandler: roomInformation,
                     render: renderIcon(settingsImg),
@@ -582,13 +582,27 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
 
             object.controls.deleteControl = new fabric.Control({
                 x: 0.5,
-                y: -0.5,
+                y: 0.5,
                 offsetY: 32,
                 offsetX: 32,
                 cursorStyle: 'pointer',
                 mouseUpHandler: deleteObject,
                 render: renderIcon(deleteImg),
                 cornersize: 36,
+            });
+
+            object.controls.moveControl = new fabric.Control({
+                x: 0.5,
+                y: -0.5,
+                offsetY: -32,
+                offsetX: 32,
+                cursorStyle: 'pointer',
+                actionHandler: fabric.controlsUtils.dragHandler,
+                render: renderIcon(moveImg),
+                mouseDownHandler: function () {
+                    this.render = renderIcon(cursorImg);
+                },
+                cornersize: 5,
             });
         };
 
@@ -730,9 +744,6 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
 
         function renderIcon(icon) {
             return function (ctx, left, top, _styleOverride, fabricObject) {
-                console.log('ctx', ctx)
-                console.log('ctx', left)
-                console.log('ctx', top)
                 const size = 36;
                 ctx.save();
                 ctx.translate(left, top);
