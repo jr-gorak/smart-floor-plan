@@ -59,6 +59,7 @@
   display: flex;
   justify-content: flex-end;
 }
+
 .exit button {
   background-color: #fffffb;
   border: none;
@@ -67,8 +68,8 @@
 }
 
 .exit button:hover {
-    background-color: #ff6767;
-    cursor: pointer;
+  background-color: #ff6767;
+  cursor: pointer;
 }
 
 h2 {
@@ -77,28 +78,28 @@ h2 {
   white-space: pre;
 }
 
-.popup-content{
+.popup-content {
   padding: 0px 25px 25px 25px;
 }
 
 .popup-content button {
-    background-color: #fffffb;
-    padding: 1rem;
-    border: none;
-    border-radius: 5px;
-    font-size: 15px;
-    font-weight: 500;
-    transition: background-color 0.5s ease;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    height: 100%;
-    position: relative;
+  background-color: #fffffb;
+  padding: 1rem;
+  border: none;
+  border-radius: 5px;
+  font-size: 15px;
+  font-weight: 500;
+  transition: background-color 0.5s ease;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  height: 100%;
+  position: relative;
 }
 
 .popup-content button:hover {
-    background-color: #efefef;
-    cursor: pointer;
+  background-color: #efefef;
+  cursor: pointer;
 }
 
 .dimensions {
@@ -140,7 +141,6 @@ input[type=number]::-webkit-outer-spin-button {
 button:disabled {
   background-color: #fffffb !important;
   cursor: default !important
-
 }
 
 .create-button button:disabled {
@@ -375,7 +375,7 @@ td {
 }
 
 .tab-menu .button-on {
-    background-color: #efefef !important;
+  background-color: #efefef !important;
 }
 
 .tab-menu button {
@@ -436,4 +436,15 @@ td {
 
 .select-dropdown button {
   padding: 5px 10px 10px 10px;
+}
+
+.split-view {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.split-view button {
+  padding: 20px;
+  height: 35px;
 }
