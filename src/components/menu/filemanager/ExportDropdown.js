@@ -201,7 +201,9 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
           const entityId = entityData.id;
           const coreEntity = entityRegistry.data.entities.find(entity => entity.id === entityId)
           coreEntity.area_id = deviceData.area_id;
-          coreEntity.labels.push(entityData.label);
+          if (!entityData.label.includes('')) {
+            coreEntity.labels = (entityData.label);
+          }
           coreEntity.name = entityData.name;
           coreEntity.modified_at = new Date().toISOString().replace("Z", "+00:00");
         }
@@ -349,8 +351,9 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
                 entity: entity.original_name,
                 icon: entity.type === "door" ? "mdi:door-closed" : "mdi:window-closed-variant",
                 style: {
-                  left: Math.round((obj.left / canvasWidth) * 100) + "%",
-                  top: Math.round((obj.top / canvasHeight) * 100) + "%",
+                  left: Math.round(((obj.left + obj.objects[0].left) / canvasWidth) * 100) - 5 + "%",
+                  top: Math.round(((obj.top + obj.objects[0].top) / canvasHeight) * 100) - 4 + "%",
+                  transform: "scale(2,2)"
                 },
                 title: entity.type === "door" ? (roomText ? `${roomText} Door` : "Door") : (roomText ? `${roomText} Window` : "Window"),
               }
@@ -372,8 +375,9 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
                 entity: entity.original_name,
                 icon: entity.type === "door" ? "mdi:door-open" : "mdi:window-open-variant",
                 style: {
-                  left: (Math.round((obj.left / canvasWidth) * 100) - 1) + "%",
-                  top: Math.round((obj.top / canvasHeight) * 100) + "%",
+                  left: (Math.round(((obj.left + obj.objects[0].left) / canvasWidth) * 100)) - 5 + "%",
+                  top: Math.round(((obj.top + obj.objects[0].top) / canvasHeight) * 100) - 4 + "%",
+                  transform: "scale(2,2)"
                 },
               }
             ],
@@ -405,8 +409,8 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
             entity: entity.original_name,
             title: roomText ? `${roomText}` : "No Room",
             style: {
-              left: (Math.round((obj.left / canvasWidth) * 100) - 1) + "%",
-              top: Math.round((obj.top / canvasHeight) * 100) + "%",
+              left: (Math.round(((obj.left + obj.objects[0].left) / canvasWidth) * 100) - 1) + "%",
+              top: Math.round(((obj.top + obj.objects[0].top) / canvasHeight) * 100) + "%",
             },
           };
           temperatureElementArray.push(temperatureObject);
@@ -439,8 +443,9 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
                 entity: entity.original_name,
                 icon: "mdi:lightbulb-on-outline",
                 style: {
-                  left: Math.round((obj.left / canvasWidth) * 100) + "%",
-                  top: Math.round((obj.top / canvasHeight) * 100) + "%",
+                  left: Math.round(((obj.left + obj.objects[0].left) / canvasWidth) * 100) - 5 + "%",
+                  top: Math.round(((obj.top + obj.objects[0].top) / canvasHeight) * 100) - 4 + "%",
+                  transform: "scale(2,2)"
                 },
               }
             ],
@@ -461,8 +466,9 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
                 entity: entity.original_name,
                 icon: "mdi:lightbulb-outline",
                 style: {
-                  left: Math.round((obj.left / canvasWidth) * 100) + "%",
-                  top: Math.round((obj.top / canvasHeight) * 100) + "%",
+                  left: Math.round(((obj.left + obj.objects[0].left) / canvasWidth) * 100) - 5 + "%",
+                  top: Math.round(((obj.top + obj.objects[0].top) / canvasHeight) * 100) - 4 + "%",
+                  transform: "scale(2,2)"
                 },
               }
             ],
