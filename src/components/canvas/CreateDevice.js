@@ -53,11 +53,12 @@ export function createDevice(device, width, height, updateDeviceToggle, canvas, 
         classifier: 'text',
         path: null,
         area_id: area_id,
+        fill: 'red'
     })
 
     deviceText.set({
         left: deviceImg.left - deviceText.width / 2,
-        top: deviceImg.top + 35,
+        top: deviceImg.top + 13,
     })
 
     deviceArray.push(deviceText);
@@ -72,8 +73,8 @@ export function createDevice(device, width, height, updateDeviceToggle, canvas, 
         if (sensor.visible === true) {
             const angle = (2 * Math.PI / sensorCounter) * angleScaler;
 
-            const x = deviceImg.left + 30 * Math.cos(angle);
-            const y = deviceImg.top + 30 * Math.sin(angle);
+            const x = (deviceImg.left + 35) * Math.cos(angle);
+            const y = (deviceImg.top + 35) * Math.sin(angle);
 
             let imgHolder = deviceImages['sensor'];
 

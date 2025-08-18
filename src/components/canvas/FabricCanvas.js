@@ -512,7 +512,14 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
                     obj.hasBorders = false;
                 }
 
+                if (obj.classifier === 'mark') {
+                    fabricCanvas.current.bringObjectToFront(obj);
+                    fabricCanvas.current.renderAll();
+                }
+
                 if (obj.classifier === 'text') {
+                    fabricCanvas.current.bringObjectToFront(obj);
+                    fabricCanvas.current.renderAll();
                     obj.perPixelTargetFind = false;
                 }
             });
@@ -534,23 +541,23 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
                 object.controls.copyControl = new fabric.Control({
                     x: -0.5,
                     y: 0.5,
-                    offsetY: 32,
-                    offsetX: -32,
+                    offsetY: 22,
+                    offsetX: -22,
                     cursorStyle: 'pointer',
                     mouseUpHandler: copyObject,
                     render: renderIcon(copyImg),
-                    cornersize: 36,
+                    cornersize: 26,
                 });
 
                 object.controls.lockControl = new fabric.Control({
                     x: -0.5,
                     y: -0.5,
-                    offsetY: -32,
-                    offsetX: -32,
+                    offsetY: -22,
+                    offsetX: -22,
                     cursorStyle: 'pointer',
                     mouseUpHandler: lockObject,
                     render: renderIcon(object.classifier === 'locked' ? lockImg : unlockImg),
-                    cornersize: 36,
+                    cornersize: 26,
                 })
             }
 
@@ -558,12 +565,12 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
                 object.controls.settingsControl = new fabric.Control({
                     x: -0.5,
                     y: -0.5,
-                    offsetY: -32,
-                    offsetX: -32,
+                    offsetY: -22,
+                    offsetX: -22,
                     cursorStyle: 'pointer',
                     mouseUpHandler: deviceSettings,
                     render: renderIcon(settingsImg),
-                    cornersize: 36,
+                    cornersize: 26,
                 })
             }
 
@@ -571,38 +578,38 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
                 object.controls.settingsControl = new fabric.Control({
                     x: -0.5,
                     y: -0.5,
-                    offsetY: -32,
-                    offsetX: -32,
+                    offsetY: -22,
+                    offsetX: -22,
                     cursorStyle: 'pointer',
                     mouseUpHandler: roomInformation,
                     render: renderIcon(settingsImg),
-                    cornersize: 36,
+                    cornersize: 26,
                 })
             }
 
             object.controls.deleteControl = new fabric.Control({
                 x: 0.5,
                 y: 0.5,
-                offsetY: 32,
-                offsetX: 32,
+                offsetY: 22,
+                offsetX: 22,
                 cursorStyle: 'pointer',
                 mouseUpHandler: deleteObject,
                 render: renderIcon(deleteImg),
-                cornersize: 36,
+                cornersize: 26,
             });
 
             object.controls.moveControl = new fabric.Control({
                 x: 0.5,
                 y: -0.5,
-                offsetY: -32,
-                offsetX: 32,
+                offsetY: -22,
+                offsetX: 22,
                 cursorStyle: 'pointer',
                 actionHandler: fabric.controlsUtils.dragHandler,
                 render: renderIcon(moveImg),
                 mouseDownHandler: function () {
                     this.render = renderIcon(cursorImg);
                 },
-                cornersize: 5,
+                cornersize: 26,
             });
         };
 
@@ -744,7 +751,7 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
 
         function renderIcon(icon) {
             return function (ctx, left, top, _styleOverride, fabricObject) {
-                const size = 36;
+                const size = 26;
                 ctx.save();
                 ctx.translate(left, top);
                 ctx.rotate(fabric.util.degreesToRadians(fabricObject.angle));
