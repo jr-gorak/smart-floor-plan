@@ -88,8 +88,8 @@ export function createDevice(device, width, height, updateDeviceToggle, canvas, 
                 imgHolder = deviceImages['light'];
             } else if (sensor.type.toLowerCase().includes('co2')) {
                 imgHolder = deviceImages['co2'];
-            } else if (sensor.type.toLowerCase().includes('volt') || sensor.type.toLowerCase().includes('vdd')) {
-                imgHolder = deviceImages['voltage'];
+            } else if (sensor.type.toLowerCase().includes('current')) {
+                imgHolder = deviceImages['electric'];
             } else if (sensor.type.toLowerCase().includes('humidity')) {
                 imgHolder = deviceImages['humidity'];
             } else if (sensor.type.toLowerCase().includes('pressure')) {
@@ -102,6 +102,12 @@ export function createDevice(device, width, height, updateDeviceToggle, canvas, 
                 imgHolder = deviceImages['door'];
             } else if (sensor.type.toLowerCase().includes('window')) {
                 imgHolder = deviceImages['window'];
+            } else if (sensor.type.toLowerCase().includes('microwave')) {
+                imgHolder = deviceImages['microwave'];
+            } else if (sensor.type.toLowerCase().includes('kettle')) {
+                imgHolder = deviceImages['kettle'];
+            } else if (sensor.type.toLowerCase().includes('toaster')) {
+                imgHolder = deviceImages['toaster'];
             }
 
             var sensorObject = new fabric.FabricImage(imgHolder, {

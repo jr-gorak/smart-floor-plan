@@ -40,6 +40,9 @@ import Thermometer from './device-icons/device_thermostat.svg';
 import Pressure from './device-icons/compress.svg';
 import Sound from './device-icons/sound_detection.svg';
 import Motion from './device-icons/motion_blur.svg';
+import Toaster from './device-icons/toaster.svg';
+import Microwave from './device-icons/microwave.svg';
+import Kettle from './device-icons/kettle.svg';
 
 import Door from './draw-icons/doorway.svg';
 import Bathtub from './draw-icons/bathtub.svg';
@@ -74,6 +77,9 @@ var pressureImg = document.createElement('img');
 var soundImg = document.createElement('img');
 var motionImg = document.createElement('img');
 var sensorImg = document.createElement('img');
+var toasterImg = document.createElement('img');
+var microwaveImg = document.createElement('img');
+var kettleImg = document.createElement('img');
 var doorwayImg = document.createElement('img');
 var doorImg = document.createElement('img');
 var windowImg = document.createElement('img');
@@ -108,6 +114,9 @@ thermometerImg.src = Thermometer;
 pressureImg.src = Pressure;
 soundImg.src = Sound;
 motionImg.src = Motion;
+toasterImg.src = Toaster;
+microwaveImg.src = Microwave;
+kettleImg.src = Kettle;
 sensorImg.src = Sensor;
 doorwayImg.src = Door;
 doorImg.src = Component;
@@ -130,8 +139,9 @@ const componentImages = {
 }
 
 const deviceImages = {
-    lorawan: lorawanImg, zigbee: zigbeeImg, person: personImg, battery: batteryImg, light: lightoffImg, co2: co2Img, voltage: voltageImg, humidity: humidityImg,
-    thermometer: thermometerImg, pressure: pressureImg, sound: soundImg, motion: motionImg, sensor: sensorImg, window: windowClosedImg, door: doorImg
+    lorawan: lorawanImg, zigbee: zigbeeImg, person: personImg, battery: batteryImg, light: lightoffImg, co2: co2Img, electric: voltageImg, humidity: humidityImg,
+    thermometer: thermometerImg, pressure: pressureImg, sound: soundImg, motion: motionImg, sensor: sensorImg, window: windowClosedImg, door: doorImg, toaster: toasterImg,
+    microwave: microwaveImg, kettle: kettleImg
 }
 
 export {

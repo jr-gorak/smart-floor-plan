@@ -606,6 +606,52 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
       return floorDashboardArray
     }
 
+    function generateBatteryDashboard() {
+      const batteryDashboardArray = []
+
+      function generateBatteries(areaID) {
+        const batteryArray = []
+        const devices = deviceList.filter(device => device.area_id === areaID);
+
+        for (const device in devices) {
+          const deviceData = devices[device];
+          for (const entity in deviceData.entities) {
+            const entityData = deviceData.entities[entity]
+            if (entityData.type.includes("battery")) {
+              batteryArray.push(
+                {
+                  entity: entityData.name
+                }
+              )
+            }
+          }
+        }
+        return batteryArray;
+      }
+
+      for (const key in floorData) {
+        const data = floorData[key];
+        const batteryCard = data.objects.filter(obj => obj.classifier === 'mark').map(obj => (
+          {
+            type: "grid",
+            cards: [
+              {
+                type: "heading",
+                heading: data.objects.find(room => room.classifier === 'text' && room.area_id === obj.id).text,
+                heading_style: "title",
+              },
+              {
+                type: "entities",
+                entities: generateBatteries(obj.area_id)
+              }
+            ]
+          }
+        ));
+        batteryDashboardArray.push(...batteryCard);
+      }
+      return batteryDashboardArray;
+    }
+
     const lovelaceDashboardExport = {
       version: 1,
       minor_verson: 1,
@@ -614,13 +660,21 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
         config: {
           views: [
             {
-              title: "Floorplans",
+              title: "Floorplan",
               cards: [
                 {
                   type: "vertical-stack",
                   cards: generateFloorDashboard()
                 }
               ]
+            },
+            {
+              type: "sections",
+              max_columns: 4,
+              title: "Batteries",
+              path: "batteries",
+              theme: "red_alert",
+              sections: generateBatteryDashboard()
             }
           ]
         }
