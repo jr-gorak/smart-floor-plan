@@ -1189,8 +1189,6 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
       return cardArray
     }
 
-
-
     //Overview
 
     function generateOverviewSummary() {

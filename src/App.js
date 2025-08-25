@@ -165,7 +165,7 @@ function App() {
     <div className="App">
 
       <header>
-        <Menu canvasData={canvasData} canvasState={canvasState} canvasInfo={canvasInfo} onOpenPopup={openPopup} onCanvasWidth={retrieveWidth} onCanvasHeight={retrieveHeight} onCanvasImageData={retrieveImageData} onCanvasName={retrieveName} onActive={retrieveActive} onCanvasID={retrieveID} onSaveToggle={() => setSaveToggle(true)}
+        <Menu canvasData={canvasData} canvasState={canvasState} canvasInfo={canvasInfo} onOpenPopup={openPopup} onCanvasAction={retrieveAction} onCanvasWidth={retrieveWidth} onCanvasHeight={retrieveHeight} onCanvasImageData={retrieveImageData} onCanvasName={retrieveName} onActive={retrieveActive} onCanvasID={retrieveID} onSaveToggle={() => setSaveToggle(true)}
           onRefreshToggle={() => setRefreshToggle(true)} onSaveResult={retrieveSave} user={user} onDeviceList={retrieveDeviceList} onOriginalDeviceList={retrieveOriginalDeviceList} onDeviceRegistry={retrieveDeviceRegistry} onEntityRegistry={retrieveEntityRegistry} onFloorData={retrieveFloorData} onFloorArray={retrieveFloorArray} />
       </header>
 

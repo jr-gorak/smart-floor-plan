@@ -275,10 +275,8 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
         }
     }, [canvasWidth, canvasHeight, refreshToggle, loadToggle, checkObjects]);
 
-
     //Canvas File Handling
     useEffect(() => {
-
         async function saveCanvas(canvas) {
 
             if (!user) return;
@@ -939,15 +937,10 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
         }
     }, [floorData, dragMode, tempObject, setTempObject, deviceList, onDeviceList, isDrawing, shape, actionType, canvasAction, x1, y1, originalDeviceList, activeDevice, activeRoom, drawWidth, polygonVertices, updatedRoom, roomLabel, AssignAreaIDs, AssignAreaIDsOnMove, activeFloor, onFloorData]);
 
+    //Toggles scroll handler for when a popup is opened
     useEffect(() => {
-
         onHandlerToggle(togglePopup);
-
     }, [onHandlerToggle, togglePopup]);
-
-    useEffect(() => {
-
-    }, [])
 
     //Hidden View Toggles
     useEffect(() => {
