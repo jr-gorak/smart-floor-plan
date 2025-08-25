@@ -108,6 +108,20 @@ export function createDevice(device, width, height, updateDeviceToggle, canvas, 
                 imgHolder = deviceImages['kettle'];
             } else if (sensor.type.toLowerCase().includes('toaster')) {
                 imgHolder = deviceImages['toaster'];
+            } else if (sensor.type.toLowerCase().includes('blender')) {
+                imgHolder = deviceImages['blender'];
+            } else if (sensor.type.toLowerCase().includes('tv')) {
+                imgHolder = deviceImages['tv'];
+            } else if (sensor.type.toLowerCase().includes('cupboard')) {
+                imgHolder = deviceImages['cupboard'];
+            } else if (sensor.type.toLowerCase().includes('faucet')) {
+                imgHolder = deviceImages['faucet'];
+            } else if (sensor.type.toLowerCase().includes('shower')) {
+                imgHolder = deviceImages['shower'];
+            } else if (sensor.type.toLowerCase().includes('seat')) {
+                imgHolder = deviceImages['seat'];
+            } else if (sensor.type.toLowerCase().includes('bed')) {
+                imgHolder = deviceImages['bed'];
             }
 
             var sensorObject = new fabric.FabricImage(imgHolder, {

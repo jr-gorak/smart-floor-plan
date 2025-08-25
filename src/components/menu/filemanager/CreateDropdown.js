@@ -1,8 +1,8 @@
-import {useState, useEffect} from 'react';
+import { useState, useEffect } from 'react';
 import '../../css/Dropdown.css';
 import '../../css/Popup.css'
 
-function CreateDropdown({activeDropdown, onCanvasWidth, onCanvasHeight, onActiveDropdown, onCanvasImageData, onCanvasName, onCanvasID, onActive, onRefreshToggle, onDeviceList, onOriginalDeviceList, onDeviceRegistry, onEntityRegistry, onFloorData, onFloorArray}) {
+function CreateDropdown({ activeDropdown, onCanvasWidth, onCanvasHeight, onActiveDropdown, onCanvasImageData, onCanvasName, onCanvasID, onActive, onRefreshToggle, onDeviceList, onOriginalDeviceList, onDeviceRegistry, onEntityRegistry, onFloorData, onFloorArray }) {
 
   const [activeValue, setActiveValue] = useState(null);
   const [width, setWidth] = useState(1000);
@@ -14,29 +14,29 @@ function CreateDropdown({activeDropdown, onCanvasWidth, onCanvasHeight, onActive
   const [imageData, setImageData] = useState({});
 
   function AddFloor(direction) {
-        if (direction === 'up') {
-            let floorCount = 0;
-            floorArray.forEach((floor) => {
-                if (floor.includes('B')) {
-                    floorCount++
-                }
-            })
-            if (floorArray.length < 5) {
-                setFloorArray(floors => [((floorArray.length - floorCount) + "F"), ...floors])
-            }
+    if (direction === 'up') {
+      let floorCount = 0;
+      floorArray.forEach((floor) => {
+        if (floor.includes('B')) {
+          floorCount++
         }
-        if (direction === 'down') {
-            let floorCount = 0;
-            floorArray.forEach((floor) => {
-                if (floor.includes('F')) {
-                    floorCount++
-                }
-            })
-            if (floorArray.length < 5) {
-            setFloorArray(floors => [...floors, ((floorArray.length - floorCount) + "B")])
-            }
-        }
+      })
+      if (floorArray.length < 5) {
+        setFloorArray(floors => [((floorArray.length - floorCount) + "F"), ...floors])
+      }
     }
+    if (direction === 'down') {
+      let floorCount = 0;
+      floorArray.forEach((floor) => {
+        if (floor.includes('F')) {
+          floorCount++
+        }
+      })
+      if (floorArray.length < 5) {
+        setFloorArray(floors => [...floors, ((floorArray.length - floorCount) + "B")])
+      }
+    }
+  }
 
   function RemoveFloor(floor) {
     setFloorArray(original => original.filter(floorID => floorID !== floor))
@@ -51,60 +51,18 @@ function CreateDropdown({activeDropdown, onCanvasWidth, onCanvasHeight, onActive
     } else if (height > 2500) {
       setError("The height must be less than 2500")
     } else {
-    setError(null);
-    onCanvasWidth(width);
-    onCanvasHeight(height);
-    onCanvasName(name);
-    onActive(true);
-    onCanvasID(null);
-    onRefreshToggle();
-    setWidth(1000);
-    setHeight(800);
-    setName("");
-    setActiveValue(null);
-    onActiveDropdown(null);
-    onDeviceList(null);
-    onOriginalDeviceList(null);
-    onDeviceRegistry(null);
-    onEntityRegistry(null);
-    onFloorData({});
-    onFloorArray(["GR"]);
-    }
-  }
-
-    const imageUpload = (e, floor) => {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = () => {
-            setImageData(images => ({
-            ...images, 
-            [floor]: reader.result
-        }))
-        }
-        reader.readAsDataURL(file)
-      }
-    }
-
-  function canvasImageCreate() {
-    if (name === "") {
-      setError("Please ensure you have named your project");
-    } else {
-    const img = new Image();
-    img.src = imageData["GR"];
-    console.log(imageData)
-    img.onload = () => {
-      onCanvasWidth(img.width);
-      onCanvasHeight(img.height);
-      onCanvasImageData(imageData);
+      setError(null);
+      onCanvasWidth(width);
+      onCanvasHeight(height);
       onCanvasName(name);
       onActive(true);
       onCanvasID(null);
       onRefreshToggle();
+      setWidth(1000);
+      setHeight(800);
+      setName("");
       setActiveValue(null);
       onActiveDropdown(null);
-      setName("");
-      setButtonToggle(!buttonToggle);
       onDeviceList(null);
       onOriginalDeviceList(null);
       onDeviceRegistry(null);
@@ -112,24 +70,65 @@ function CreateDropdown({activeDropdown, onCanvasWidth, onCanvasHeight, onActive
       onFloorData({});
       onFloorArray(["GR"]);
     }
+  }
+
+  const imageUpload = (e, floor) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setImageData(images => ({
+          ...images,
+          [floor]: reader.result
+        }))
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  function canvasImageCreate() {
+    if (name === "") {
+      setError("Please ensure you have named your project");
+    } else {
+      const img = new Image();
+      img.src = imageData["GR"];
+      img.onload = () => {
+        onCanvasWidth(img.width + 50);
+        onCanvasHeight(img.height + 50);
+        onCanvasImageData(imageData);
+        onCanvasName(name);
+        onActive(true);
+        onCanvasID(null);
+        onRefreshToggle();
+        setActiveValue(null);
+        onActiveDropdown(null);
+        setName("");
+        setButtonToggle(!buttonToggle);
+        onDeviceList(null);
+        onOriginalDeviceList(null);
+        onDeviceRegistry(null);
+        onEntityRegistry(null);
+        onFloorData({});
+        onFloorArray(["GR"]);
+      }
     }
   }
 
   function togglePopup(value) {
 
-      if (activeValue === null) {
-          setActiveValue(value)
-      } else if (activeValue !== value) {
-          setActiveValue(value)
-      }  else if (activeValue === value) {
-          setActiveValue(null)
-      }
-      setFloorArray(["GR"])
-      setImageData({})
+    if (activeValue === null) {
+      setActiveValue(value)
+    } else if (activeValue !== value) {
+      setActiveValue(value)
+    } else if (activeValue === value) {
+      setActiveValue(null)
+    }
+    setFloorArray(["GR"])
+    setImageData({})
   }
 
   useEffect(() => {
-    if(imageData !=="{}" && name) {
+    if (imageData !== "{}" && name) {
       setButtonToggle(true);
     } else {
       setButtonToggle(false)
@@ -139,18 +138,18 @@ function CreateDropdown({activeDropdown, onCanvasWidth, onCanvasHeight, onActive
   return (
     <div>
       {activeDropdown === 'create' &&
-      <div className="dropdown-container">
+        <div className="dropdown-container">
           <div className='dropdown-content'>
             <button onClick={() => togglePopup('new')}>Create new canvas</button>
             <button onClick={() => togglePopup('upload')}>Create canvas from image</button>
           </div>
-      </div>
+        </div>
       }
       {activeValue === 'new' &&
         <div className="filter" onClick={() => setActiveValue(null)}>
           <div className="small-frame" onClick={e => e.stopPropagation()}>
             <div className='exit'>
-            <button onClick={() => setActiveValue(null)}>X</button>
+              <button onClick={() => setActiveValue(null)}>X</button>
             </div>
             <h2>Create New Canvas</h2>
             <div className='popup-content'><p>Please choose the dimensions of your canvas below</p>
@@ -163,12 +162,12 @@ function CreateDropdown({activeDropdown, onCanvasWidth, onCanvasHeight, onActive
 
               Floor Plan Name: <input type='text' value={name} onChange={(e) => setName(e.target.value)} placeholder='name' maxLength={100} />
               {error && (
-                <p style={{color: 'red'}}>{error}</p>
+                <p style={{ color: 'red' }}>{error}</p>
               )}
               <div className='create-button'>
                 <button onClick={() => canvasCreate()}>Create Canvas</button>
               </div>
-            </div> 
+            </div>
           </div>
         </div>
       }
@@ -177,7 +176,7 @@ function CreateDropdown({activeDropdown, onCanvasWidth, onCanvasHeight, onActive
         <div className="filter" onClick={() => setActiveValue(null)}>
           <div className="small-frame" onClick={e => e.stopPropagation()}>
             <div className='exit'>
-            <button onClick={() => setActiveValue(null)}>X</button>
+              <button onClick={() => setActiveValue(null)}>X</button>
             </div>
             <h2>Upload Image for Canvas Background</h2>
 
@@ -191,8 +190,8 @@ function CreateDropdown({activeDropdown, onCanvasWidth, onCanvasHeight, onActive
                 {floorArray.map((floor) => (
                   <div className='upload-map'>
                     <b>{floor}:  </b><input key={floor} type='file' accept='image/*' onChange={(e) => imageUpload(e, floor)} />
-                    {(floor !== 'GR') && (floor === floorArray[0] || floor === floorArray[floorArray.length - 1]) && 
-                    <button onClick={() => RemoveFloor(floor)}>X</button>
+                    {(floor !== 'GR') && (floor === floorArray[0] || floor === floorArray[floorArray.length - 1]) &&
+                      <button onClick={() => RemoveFloor(floor)}>X</button>
                     }
                   </div>
                 ))}
@@ -201,12 +200,12 @@ function CreateDropdown({activeDropdown, onCanvasWidth, onCanvasHeight, onActive
               </div>
               Floor Plan Name: <input type='text' value={name} onChange={(e) => setName(e.target.value)} placeholder='name' maxLength={100} />
               {error && (
-                <p style={{color: 'red'}}>{error}</p>
+                <p style={{ color: 'red' }}>{error}</p>
               )}
               <div className='create-button'>
                 <button onClick={() => canvasImageCreate()} disabled={!buttonToggle}>Upload Image</button>
               </div>
-            </div> 
+            </div>
           </div>
         </div>
       }

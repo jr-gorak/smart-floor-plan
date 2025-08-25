@@ -291,8 +291,9 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
                 const docRef = await addDoc(collection(db, "canvases"), {
                     owner: user.uid,
                     canvasName: canvasName,
-                    canvasData: file,
                     floorplanData: floorData,
+                    width: canvasWidth,
+                    height: canvasHeight,
                     floorArray: floorArray,
                     shared: [],
                     devices: deviceList,
@@ -319,7 +320,6 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
 
             try {
                 await updateDoc(doc(db, "canvases", canvasID), {
-                    canvasData: file,
                     floorplanData: floorData,
                     floorArray: floorArray,
                     devices: deviceList,
@@ -346,20 +346,18 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
 
                 const querySnapshot = await getDoc(q);
                 const retrieve = querySnapshot.data();
-                const json = retrieve.canvasData;
+                const json = retrieve.floorplanData['GR'];
 
                 if (retrieve) {
 
                     refreshCanvas();
 
                     onFloorArray(retrieve.floorArray);
-                    onFloorData(retrieve.floorplanData);
                     setActiveFloor("GR");
                     fabricCanvas.current.loadFromJSON(json, () => {
-
-                        sessionSave(fabricCanvas.current)
                         requestAnimationFrame(() => {
                             fabricCanvas.current.renderAll();
+                            onFloorData(retrieve.floorplanData);
                         });
                     });
                     setActionType(null);
@@ -419,6 +417,9 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
                     fabricCanvas.current.backgroundImage.classifier = 'background';
                     fabricCanvas.current.backgroundImage.id = null;
                     fabricCanvas.current.backgroundImage.area_id = null;
+                    fabricCanvas.current.backgroundImage.top = 25;
+                    fabricCanvas.current.backgroundImage.left = 25;
+
                     fabricCanvas.current.renderAll();
                     if (key === 'GR') {
                         sessionStorage.setItem('fabricCanvas', JSON.stringify(fabricCanvas.current.toJSON()));
@@ -936,7 +937,7 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
                 fabricCanvas.current.off('mouse:up', mouseUp);
             }
         }
-    }, [dragMode, tempObject, setTempObject, deviceList, onDeviceList, isDrawing, shape, actionType, canvasAction, x1, y1, originalDeviceList, activeDevice, activeRoom, drawWidth, polygonVertices, updatedRoom, roomLabel, AssignAreaIDs, AssignAreaIDsOnMove, activeFloor, onFloorData]);
+    }, [floorData, dragMode, tempObject, setTempObject, deviceList, onDeviceList, isDrawing, shape, actionType, canvasAction, x1, y1, originalDeviceList, activeDevice, activeRoom, drawWidth, polygonVertices, updatedRoom, roomLabel, AssignAreaIDs, AssignAreaIDsOnMove, activeFloor, onFloorData]);
 
     useEffect(() => {
 

@@ -43,6 +43,13 @@ import Motion from './device-icons/motion_blur.svg';
 import Toaster from './device-icons/toaster.svg';
 import Microwave from './device-icons/microwave.svg';
 import Kettle from './device-icons/kettle.svg';
+import Blender from './device-icons/blender.svg';
+import TV from './device-icons/television.svg';
+import Faucet from './device-icons/faucet.svg';
+import Shower from './device-icons/shower-head.svg';
+import Cupboard from './device-icons/cupboard.svg';
+import Seat from './device-icons/seat.svg';
+import BedIcon from './device-icons/bed-double.svg';
 
 import Door from './draw-icons/doorway.svg';
 import Bathtub from './draw-icons/bathtub.svg';
@@ -94,6 +101,13 @@ var stairsImg = document.createElement('img');
 var stoveImg = document.createElement('img');
 var threesofaImg = document.createElement('img');
 var toiletImg = document.createElement('img');
+var blenderImg = document.createElement('img');
+var tvImg = document.createElement('img');
+var faucetImg = document.createElement('img');
+var showerImg = document.createElement('img');
+var cupboardImg = document.createElement('img');
+var seatImg = document.createElement('img');
+var bedIconImg = document.createElement('img');
 
 copyImg.src = Copy;
 deleteImg.src = Delete;
@@ -117,6 +131,13 @@ motionImg.src = Motion;
 toasterImg.src = Toaster;
 microwaveImg.src = Microwave;
 kettleImg.src = Kettle;
+blenderImg.src = Blender;
+tvImg.src = TV;
+faucetImg.src = Faucet;
+showerImg.src = Shower;
+cupboardImg.src = Cupboard;
+seatImg.src = Seat;
+bedIconImg.src = BedIcon;
 sensorImg.src = Sensor;
 doorwayImg.src = Door;
 doorImg.src = Component;
@@ -141,7 +162,7 @@ const componentImages = {
 const deviceImages = {
     lorawan: lorawanImg, zigbee: zigbeeImg, person: personImg, battery: batteryImg, light: lightoffImg, co2: co2Img, electric: voltageImg, humidity: humidityImg,
     thermometer: thermometerImg, pressure: pressureImg, sound: soundImg, motion: motionImg, sensor: sensorImg, window: windowClosedImg, door: doorImg, toaster: toasterImg,
-    microwave: microwaveImg, kettle: kettleImg
+    microwave: microwaveImg, kettle: kettleImg, blender: blenderImg, tv: tvImg, faucet: faucetImg, shower: showerImg, cupboard: cupboardImg, seat: seatImg, bed: bedIconImg
 }
 
 export {

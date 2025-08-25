@@ -87,6 +87,20 @@ function DeviceSettings({ settingsMode, activeDevice, deviceList, onTogglePopup,
       return deviceImages['kettle'].src;
     } else if (type.toLowerCase().includes('microwave')) {
       return deviceImages['microwave'].src;
+    } else if (type.toLowerCase().includes('blender')) {
+      return deviceImages['blender'].src;
+    } else if (type.toLowerCase().includes('tv')) {
+      return deviceImages['tv'].src;
+    } else if (type.toLowerCase().includes('cupboard')) {
+      return deviceImages['cupboard'].src;
+    } else if (type.toLowerCase().includes('faucet')) {
+      return deviceImages['faucet'].src;
+    } else if (type.toLowerCase().includes('shower')) {
+      return deviceImages['shower'].src;
+    } else if (type.toLowerCase().includes('seat')) {
+      return deviceImages['seat'].src;
+    } else if (type.toLowerCase().includes('bed')) {
+      return deviceImages['bed'].src;
     } else {
       return deviceImages['sensor'].src;
     }
@@ -211,11 +225,12 @@ function DeviceSettings({ settingsMode, activeDevice, deviceList, onTogglePopup,
                       <div className='sensor-display'>
                         <img src={filterImage(ent.type)} alt='sensor type icon'></img>
                         {(ent.type.toLowerCase() !== 'digital' && ent.type.toLowerCase() !== 'binary' && ent.type.toLowerCase() !== 'door' && ent.type.toLowerCase() !== 'window' && ent.type.toLowerCase() !== 'current'
-                          && ent.type.toLowerCase() !== 'microwave' && ent.type.toLowerCase() !== 'toaster' && ent.type.toLowerCase() !== 'kettle') && (
+                          && ent.type.toLowerCase() !== 'microwave' && ent.type.toLowerCase() !== 'toaster' && ent.type.toLowerCase() !== 'kettle' && ent.type.toLowerCase() !== 'blender' && ent.type.toLowerCase() !== 'tv'
+                          && ent.type.toLowerCase() !== 'cupboard' && ent.type.toLowerCase() !== 'shower' && ent.type.toLowerCase() !== 'faucet' && ent.type.toLowerCase() !== 'flood' && ent.type.toLowerCase() !== 'seat' && ent.type.toLowerCase() !== 'bed' && !ent.type.toLowerCase().includes('status')) && (
                             ent.type
                           )}
 
-                        {(ent.type.toLowerCase() === 'digital' || ent.type.toLowerCase() === 'binary' || ent.type.toLowerCase() === 'door' || ent.type.toLowerCase() === 'window') && (
+                        {(ent.type.toLowerCase() === 'digital' || ent.type.toLowerCase() === 'binary' || ent.type.toLowerCase() === 'door' || ent.type.toLowerCase() === 'window' || ent.type.toLowerCase() === 'cupboard') && (
                           <select key={ent.id} onChange={(e) => updateDevice('type', ent.id, e.target.value)}>
                             <option value={ent.type}>{ent.type}</option>
                             {ent.type !== 'door' && (
@@ -224,26 +239,64 @@ function DeviceSettings({ settingsMode, activeDevice, deviceList, onTogglePopup,
                             {ent.type !== 'window' && (
                               <option value='window'>window</option>
                             )}
+                            {ent.type !== 'cupboard' && (
+                              <option value='cupboard'>cupboard</option>
+                            )}
                           </select>
                         )}
 
-                        {(ent.type.toLowerCase() === 'current' || ent.type.toLowerCase() === 'toaster' || ent.type.toLowerCase() === 'kettle' || ent.type.toLowerCase() === 'microwave') && (
+                        {(ent.type.toLowerCase() === 'current' || ent.type.toLowerCase() === 'toaster' || ent.type.toLowerCase() === 'kettle' || ent.type.toLowerCase() === 'microwave' || ent.type.toLowerCase() === 'blender'
+                          || ent.type.toLowerCase() === 'tv') && (
+                            <select key={ent.id} onChange={(e) => updateDevice('type', ent.id, e.target.value)}>
+                              <option value={ent.type}>{ent.type}</option>
+                              {ent.type !== 'kettle' && (
+                                <option value='kettle'>kettle</option>
+                              )}
+                              {ent.type !== 'microwave' && (
+                                <option value='microwave'>microwave</option>
+                              )}
+                              {ent.type !== 'toaster' && (
+                                <option value='toaster'>toaster</option>
+                              )}
+                              {ent.type !== 'blender' && (
+                                <option value='blender'>blender</option>
+                              )}
+                              {ent.type !== 'tv' && (
+                                <option value='tv'>tv</option>
+                              )}
+                              {ent.type !== 'current' && (
+                                <option value='current'>current</option>
+                              )}
+                            </select>
+                          )}
+
+                        {(ent.type.toLowerCase() === 'flood' || ent.type.toLowerCase() === 'shower' || ent.type.toLowerCase() === 'faucet') && (
                           <select key={ent.id} onChange={(e) => updateDevice('type', ent.id, e.target.value)}>
                             <option value={ent.type}>{ent.type}</option>
-                            {ent.type !== 'kettle' && (
-                              <option value='kettle'>kettle</option>
+                            {ent.type !== 'shower' && (
+                              <option value='shower'>shower</option>
                             )}
-                            {ent.type !== 'microwave' && (
-                              <option value='microwave'>microwave</option>
+                            {ent.type !== 'faucet' && (
+                              <option value='faucet'>faucet</option>
                             )}
-                            {ent.type !== 'toaster' && (
-                              <option value='toaster'>toaster</option>
-                            )}
-                            {ent.type !== 'current' && (
-                              <option value='current'>current</option>
+                            {ent.type !== 'flood' && (
+                              <option value='flood'>flood</option>
                             )}
                           </select>
                         )}
+
+                        {(ent.type.toLowerCase().includes('status') || ent.type.toLowerCase() === 'seat' || ent.type.toLowerCase() === 'bed') && (
+                          <select key={ent.id} onChange={(e) => updateDevice('type', ent.id, e.target.value)}>
+                            <option value={ent.type}>{ent.type}</option>
+                            {ent.type !== 'seat' && (
+                              <option value='seat'>seat</option>
+                            )}
+                            {ent.type !== 'bed' && (
+                              <option value='bed'>bed</option>
+                            )}
+                          </select>
+                        )}
+
                       </div>
                     </td>
 

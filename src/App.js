@@ -203,7 +203,7 @@ function App() {
         <UserAuthentication onClose={closePopup} />
       )}
       {activePopup === 'account' && user && (
-        <AccountPopup onClose={closePopup} onCanvasName={retrieveName} onCanvasID={retrieveID} onCanvasWidth={retrieveWidth} onCanvasHeight={retrieveHeight} onActive={retrieveActive} onLoadToggle={() => setLoadToggle(true)} onRefreshToggle={() => setRefreshToggle(true)} onDeviceList={retrieveDeviceList} deviceList={deviceList} onOriginalDeviceList={retrieveOriginalDeviceList} originalDeviceList={originalDeviceList} onLabelList={retrieveLabelList} labelList={labelList} onDeviceRegistry={retrieveDeviceRegistry} onEntityRegistry={retrieveEntityRegistry} user={user} />
+        <AccountPopup onClose={closePopup} onCanvasName={retrieveName} onCanvasID={retrieveID} onCanvasWidth={retrieveWidth} onCanvasHeight={retrieveHeight} onActive={retrieveActive} onLoadToggle={() => setLoadToggle(true)} onRefreshToggle={() => setRefreshToggle(true)} onDeviceList={retrieveDeviceList} onOriginalDeviceList={retrieveOriginalDeviceList} onLabelList={retrieveLabelList} onDeviceRegistry={retrieveDeviceRegistry} onEntityRegistry={retrieveEntityRegistry} user={user} />
       )}
     </div>
   );

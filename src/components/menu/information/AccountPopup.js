@@ -5,7 +5,7 @@ import { collection, query, where, getDoc, getDocs, doc, deleteDoc, addDoc, or, 
 import { useState, useEffect } from 'react';
 import { Delete, Copy, Share, Settings } from '../../../icons';
 
-function Account({ onClose, onCanvasName, onCanvasID, onCanvasWidth, onCanvasHeight, onActive, onLoadToggle, onRefreshToggle, deviceList, onDeviceList, onOriginalDeviceList, originalDeviceList, onLabelList, labelList, onDeviceRegistry, onEntityRegistry, user }) {
+function Account({ onClose, onCanvasName, onCanvasID, onCanvasWidth, onCanvasHeight, onActive, onLoadToggle, onRefreshToggle, onDeviceList, onOriginalDeviceList, onLabelList, onDeviceRegistry, onEntityRegistry, user }) {
 
   const [files, setFiles] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -13,7 +13,15 @@ function Account({ onClose, onCanvasName, onCanvasID, onCanvasWidth, onCanvasHei
   const [activeName, setActiveName] = useState(null);
   const [activeID, setActiveID] = useState(null);
   const [activeData, setActiveData] = useState(null);
+  const [activeWidth, setActiveWidth] = useState(null);
+  const [activeHeight, setActiveHeight] = useState(null);
+  const [activeFloorArray, setActiveFloorArray] = useState(null);
   const [sharedList, setSharedList] = useState(null);
+  const [activeDevice, setActiveDevice] = useState(null);
+  const [activeOriginalDevice, setActiveOriginalDevice] = useState(null);
+  const [activeLabel, setActiveLabel] = useState(null);
+  const [activeDeviceRegistry, setActiveDeviceRegistry] = useState(null);
+  const [activeEntityRegistry, setActiveEntityRegistry] = useState(null);
   const [emailList, setEmailList] = useState([]);
   const [nameCopy, setNameCopy] = useState(null);
   const [shareRequest, setShareRequest] = useState("");
@@ -86,10 +94,15 @@ function Account({ onClose, onCanvasName, onCanvasID, onCanvasWidth, onCanvasHei
         await addDoc(collection(db, "canvases"), {
           owner: user.uid,
           canvasName: nameCopy,
-          canvasData: activeData,
-          devices: deviceList,
-          originalDevices: originalDeviceList,
-          labelList: labelList,
+          floorplanData: activeData,
+          width: activeWidth,
+          height: activeHeight,
+          floorArray: activeFloorArray,
+          devices: activeDevice,
+          originalDevices: activeOriginalDevice,
+          labelList: activeLabel,
+          deviceRegistry: activeDeviceRegistry,
+          entityRegistry: activeEntityRegistry,
           shared: [],
           created: new Date(),
           updated: new Date()
@@ -180,7 +193,7 @@ function Account({ onClose, onCanvasName, onCanvasID, onCanvasWidth, onCanvasHei
     onClose();
   }
 
-  function togglePopup(value, name, id, data, list) {
+  function togglePopup(value, name, id, data, width, height, floorArray, list, dev, originalDev, label, devRegistry, entRegistry) {
     if (value === 'copy') {
       setNameCopy(`${name} copy`);
     }
@@ -195,7 +208,15 @@ function Account({ onClose, onCanvasName, onCanvasID, onCanvasWidth, onCanvasHei
     setActiveValue(value);
     setActiveID(id);
     setActiveData(data);
+    setActiveWidth(width);
+    setActiveHeight(height);
+    setActiveFloorArray(floorArray);
     setSharedList(list);
+    setActiveDevice(dev);
+    setActiveOriginalDevice(originalDev);
+    setActiveLabel(label);
+    setActiveDeviceRegistry(devRegistry);
+    setActiveEntityRegistry(entRegistry);
   }
 
   function userSignOut() {
@@ -277,12 +298,12 @@ function Account({ onClose, onCanvasName, onCanvasID, onCanvasWidth, onCanvasHei
             {tabMode === 'floorplan' && (
               <ul className='floor-plan-grid'>
                 {files.filter(file => file.owner === user.uid).map((file) => (
-                  <li key={file.id} onClick={() => loadCanvas(file.id, file.canvasName, file.canvasData.width, file.canvasData.height, file.devices, file.originalDevices, file.labelList, file.deviceRegistry, file.entityRegistry)}>
+                  <li key={file.id} onClick={() => loadCanvas(file.id, file.canvasName, file.width, file.height, file.devices, file.originalDevices, file.labelList, file.deviceRegistry, file.entityRegistry)}>
                     <div className='upper-bar' onClick={e => e.stopPropagation()}>
-                      <img className="round-icon" onClick={() => togglePopup('copy', file.canvasName, file.id, file.canvasData, file.shared)} src={Copy} alt='Copy Button' />
-                      <img className="round-icon" onClick={() => togglePopup('share', file.canvasName, file.id, file.canvasData, file.shared)} src={Share} alt='Share Button' />
-                      <img className="round-icon" onClick={() => togglePopup('delete', file.canvasName, file.id, file.canvasData, file.shared)} src={Delete} alt='Delete Button' />
-                      <img className="round-icon" onClick={() => togglePopup('settings', file.canvasName, file.id, file.canvasData, file.shared)} src={Settings} alt='Settings Button' />
+                      <img className="round-icon" onClick={() => togglePopup('copy', file.canvasName, file.id, file.floorplanData, file.width, file.height, file.floorArray, file.shared, file.devices, file.originalDevices, file.labelList, file.deviceRegistry, file.entityRegistry)} src={Copy} alt='Copy Button' />
+                      <img className="round-icon" onClick={() => togglePopup('share', file.canvasName, file.id, file.floorplanData, file.width, file.height, file.floorArray, file.shared, file.devices, file.originalDevices, file.labelList, file.deviceRegistry, file.entityRegistry)} src={Share} alt='Share Button' />
+                      <img className="round-icon" onClick={() => togglePopup('delete', file.canvasName, file.id, file.floorplanData, file.width, file.height, file.floorArray, file.shared, file.devices, file.originalDevices, file.labelList, file.deviceRegistry, file.entityRegistry)} src={Delete} alt='Delete Button' />
+                      <img className="round-icon" onClick={() => togglePopup('settings', file.canvasName, file.id, file.floorplanData, file.width, file.height, file.floorArray, file.shared, file.devices, file.originalDevices, file.labelList, file.deviceRegistry, file.entityRegistry)} src={Settings} alt='Settings Button' />
                     </div>
                     <p>{file.canvasName}</p>
                   </li>
@@ -292,7 +313,7 @@ function Account({ onClose, onCanvasName, onCanvasID, onCanvasWidth, onCanvasHei
             {tabMode === 'shared' && (
               <ul className='floor-plan-grid'>
                 {files.filter(file => file.owner !== user.uid).map((file) => (
-                  <li key={file.id} onClick={() => loadCanvas(file.id, file.canvasName, file.canvasData.width, file.canvasData.height, file.devices, file.originalDevices, file.labelList, file.deviceRegistry, file.entityRegistry)}>
+                  <li key={file.id} onClick={() => loadCanvas(file.id, file.canvasName, file.width, file.height, file.devices, file.originalDevices, file.labelList, file.deviceRegistry, file.entityRegistry)}>
                     <p>{file.canvasName}</p>
                   </li>
                 ))}
