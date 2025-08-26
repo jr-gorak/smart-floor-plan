@@ -356,6 +356,7 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
                         requestAnimationFrame(() => {
                             fabricCanvas.current.renderAll();
                             onFloorData(retrieve.floorplanData);
+                            sessionSave(fabricCanvas.current)
                         });
                     });
                     setActionType(null);

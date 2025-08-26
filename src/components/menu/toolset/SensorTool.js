@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 import DeviceSettings from './DeviceSettings';
 import '../../css/Tools.css';
 import '../../css/Popup.css';
-import {Sensor, Lorawan, Zigbee} from '../../../icons/index'
+import { Sensor, Lorawan, Zigbee } from '../../../icons/index'
 
-function SensorTool({onCanvasDevice, onDeviceToggle, onDeviceList, onOriginalDeviceList, deviceList, onLabelList, labelList, onDeviceRegistry, onEntityRegistry}) {
+function SensorTool({ onCanvasDevice, onDeviceToggle, onDeviceList, onOriginalDeviceList, deviceList, onLabelList, labelList, onDeviceRegistry, onEntityRegistry }) {
 
   const [devices, setDevices] = useState(null);
   const [entities, setEntities] = useState(null);
@@ -31,28 +31,28 @@ function SensorTool({onCanvasDevice, onDeviceToggle, onDeviceList, onOriginalDev
   function generateType(entityString) {
     if (entityString.toLowerCase().includes('binary')) {
       return 'Binary'
-    } else if (entityString.toLowerCase().includes('switch')){
+    } else if (entityString.toLowerCase().includes('switch')) {
       return 'Switch'
-    } else if (entityString.toLowerCase().includes('button')){
+    } else if (entityString.toLowerCase().includes('button')) {
       return 'Button'
-    } else if (entityString.toLowerCase().includes('siren')){
+    } else if (entityString.toLowerCase().includes('siren')) {
       return 'Siren'
     } else {
       return 'Unknown'
     }
   };
 
-  const locationWords = ["motion","digital","binary","pressure","light","occupancy","rad"]
-  const activityWords = ["vdd","current","energy","power","voltage","button"]
+  const locationWords = ["motion", "digital", "binary", "pressure", "light", "occupancy", "rad"]
+  const activityWords = ["vdd", "current", "energy", "power", "voltage", "button"]
   const environmentWords = ["temp", "humid"]
-  
+
   function generateLabel(entityString) {
 
     if (locationWords.some(str => entityString.toLowerCase().includes(str))) {
       return 'location'
-    } else if (activityWords.some(str => entityString.toLowerCase().includes(str))){
+    } else if (activityWords.some(str => entityString.toLowerCase().includes(str))) {
       return 'activity'
-    } else if (environmentWords.some(str => entityString.toLowerCase().includes(str))){
+    } else if (environmentWords.some(str => entityString.toLowerCase().includes(str))) {
       return 'environment'
     } else {
       return ''
@@ -60,7 +60,7 @@ function SensorTool({onCanvasDevice, onDeviceToggle, onDeviceList, onOriginalDev
   }
 
   function generateSensors() {
-      
+
     const deviceReader = new FileReader();
 
     deviceReader.onload = (e) => {
@@ -69,18 +69,18 @@ function SensorTool({onCanvasDevice, onDeviceToggle, onDeviceList, onOriginalDev
       const deviceData = text.data.devices;
 
       const deviceMap = deviceData.filter(d => d.identifiers[0] && (d.identifiers[0][0] === 'thethingsnetwork' || d.identifiers[0][0] === 'zha'))
-      .map((d) => ({
-        id: d.id,
-        original_name:  d.name,
-        name: d.name,
-        platform: d.identifiers[0][0],
-        isActive: false,
-        area_id: null,
-      }));
+        .map((d) => ({
+          id: d.id,
+          original_name: d.name,
+          name: d.name,
+          platform: d.identifiers[0][0],
+          isActive: false,
+          area_id: null,
+        }));
       setDevices(deviceMap);
     }
     deviceReader.readAsText(coreDeviceFile)
-      
+
     const entityReader = new FileReader();
 
     entityReader.onload = (e) => {
@@ -89,20 +89,19 @@ function SensorTool({onCanvasDevice, onDeviceToggle, onDeviceList, onOriginalDev
       const entityData = text.data.entities;
 
       const entityMap = entityData.filter(en => en.platform === 'zha' || en.platform === 'thethingsnetwork')
-      .map((en) => ({
-        id: en.id,
-        device_id: en.device_id,
-        original_name: en.entity_id,
-        name: en.entity_id,
-        platform: en.platform,
-        type: en.original_name? en.original_name : generateType(en.entity_id),
-        label: [generateLabel(en.original_name? en.original_name : generateType(en.entity_id))],
-        visible: false,
-        tag: null,
-      }));
+        .map((en) => ({
+          id: en.id,
+          device_id: en.device_id,
+          original_name: en.entity_id,
+          name: en.entity_id,
+          platform: en.platform,
+          type: en.original_name ? en.original_name : generateType(en.entity_id),
+          label: [generateLabel(en.original_name ? en.original_name : generateType(en.entity_id))],
+          visible: false,
+        }));
       setEntities(entityMap);
     };
-    entityReader.readAsText(coreEntityFile)  
+    entityReader.readAsText(coreEntityFile)
   };
 
   function checkDevice(e) {
@@ -111,7 +110,7 @@ function SensorTool({onCanvasDevice, onDeviceToggle, onDeviceList, onOriginalDev
       if (file.name === 'core.device_registry') {
         setCoreDeviceFile(file);
         setErrorMessage(null);
-      }  else {
+      } else {
         setErrorMessage("This file is not DEVICE_REGISTRY")
         setCoreDeviceFile(null);
       }
@@ -164,10 +163,10 @@ function SensorTool({onCanvasDevice, onDeviceToggle, onDeviceList, onOriginalDev
   return (
     <div className="box">
       <div className='head-container'>
-        <img src={Sensor} className="menu-icon" alt="logo"/><p><b>Sensors</b></p>
+        <img src={Sensor} className="menu-icon" alt="logo" /><p><b>Sensors</b></p>
       </div>
 
-      {!deviceList && 
+      {!deviceList &&
         <div>
           <button onClick={() => togglePopup('upload')}>Upload Devices</button>
         </div>
@@ -179,26 +178,26 @@ function SensorTool({onCanvasDevice, onDeviceToggle, onDeviceList, onOriginalDev
             <p><b>LoRaWAN Sensors</b></p>
             {deviceList.filter(device => device.platform === "thethingsnetwork").map((device) => (
               <button key={device.id} className={device.isActive ? "input-off" : "input-on "} onClick={() => togglePopup('device-config', device)} disabled={device.isActive}>
-                <img src={Lorawan} className="menu-icon" alt="logo"/>{device.name} {device.isActive && <div style={{color: 'green'}}>active</div>}
+                <img src={Lorawan} className="menu-icon" alt="logo" />{device.name} {device.isActive && <div style={{ color: 'green' }}>active</div>}
               </button>
             ))}
             {deviceList.filter(device => device.platform === "thethingsnetwork").length === 0 &&
-            <div className='content'>
-              <b>none</b>
-            </div>
+              <div className='content'>
+                <b>none</b>
+              </div>
             }
           </div>
           <div className='content-grid'>
             <p><b>ZigBee Sensors</b></p>
             {deviceList.filter(device => device.platform === "zha").map((device) => (
               <button key={device.id} className={device.isActive ? "input-off" : "input-on "} onClick={() => togglePopup('device-config', device)} disabled={device.isActive}>
-                <img src={Zigbee} className="menu-icon" alt="logo"/>{device.name} {device.isActive && <p style={{color: 'green'}}>active</p>}
+                <img src={Zigbee} className="menu-icon" alt="logo" />{device.name} {device.isActive && <p style={{ color: 'green' }}>active</p>}
               </button>
             ))}
             {deviceList.filter(device => device.platform === "zha").length === 0 &&
-            <div className='content'>
-              <b>none</b>
-            </div>
+              <div className='content'>
+                <b>none</b>
+              </div>
             }
           </div>
         </div>
@@ -219,18 +218,18 @@ function SensorTool({onCanvasDevice, onDeviceToggle, onDeviceList, onOriginalDev
                 <label><b>core.entity_registry:</b><input type='file' onChange={checkEntity} /></label>
               </div>
               {errorMessage && (
-                <p style={{color: 'red'}}>{errorMessage}</p>
+                <p style={{ color: 'red' }}>{errorMessage}</p>
               )}
               <div className='create-button'>
                 <button onClick={() => generateSensors()} disabled={!buttonToggle}>Generate Sensors</button>
               </div>
-            </div> 
+            </div>
           </div>
         </div>
       }
 
       {activeValue === 'device-config' &&
-        <DeviceSettings settingsMode={settingsMode} activeDevice={activeDevice} deviceList={deviceList} onTogglePopup={togglePopup} onCanvasDevice={onCanvasDevice} onDeviceToggle={onDeviceToggle} onDeviceList={onDeviceList} onLabelList={onLabelList} labelList={labelList}/>
+        <DeviceSettings settingsMode={settingsMode} activeDevice={activeDevice} deviceList={deviceList} onTogglePopup={togglePopup} onCanvasDevice={onCanvasDevice} onDeviceToggle={onDeviceToggle} onDeviceList={onDeviceList} onLabelList={onLabelList} labelList={labelList} />
       }
     </div>
   );
