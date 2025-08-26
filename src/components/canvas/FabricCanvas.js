@@ -348,7 +348,8 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
 
                 if (retrieve) {
 
-                    refreshCanvas();
+                    fabricCanvas.current.clear();
+                    fabricCanvas.current.backgroundColor = "white"
 
                     onFloorArray(retrieve.floorArray);
                     setActiveFloor("GR");
