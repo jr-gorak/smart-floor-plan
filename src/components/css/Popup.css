@@ -448,3 +448,11 @@ td {
   padding: 20px;
   height: 35px;
 }
+
+.room-list-view {
+  padding-top: 20px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  width: 100%;
+}

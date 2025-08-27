@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import '../../css/Dropdown.css';
+import '../../css/Popup.css'
 import * as fabric from "fabric";
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
@@ -13,6 +14,7 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
 
   const [hideRooms, setHideRooms] = useState(false);
   const [hideLabels, setHideLabels] = useState(false);
+  const [homeAssistantToggle, setHomeAssistantToggle] = useState(false);
 
   var zip = new JSZip();
 
@@ -28,9 +30,40 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
     "4F": "Floor Four"
   }
 
+  let roomList = [];
+
+  if (floorData) {
+    for (const key in floorData) {
+      const data = floorData[key];
+      if (data) {
+        const areaData = data.objects.filter(obj => obj.classifier === 'mark')
+        if (areaData) {
+          areaData.forEach(obj => {
+            const room = data.objects.find(o => o.classifier === 'mark' && o.area_id === obj.area_id)
+            let roomText = undefined;
+            if (room) {
+              roomText = data.objects.find(o => o.classifier === 'text' && o.area_id === room.id).text
+            }
+            roomList.push({ id: obj.area_id, room: roomText, active: false })
+          })
+        }
+      }
+    }
+  }
+
+  function setRoomActive(value, id) {
+    const findRoom = roomList.find(room => room.id === id);
+    findRoom.active = value;
+  }
+
   async function generateRoomImages(canvas) {
 
-    const rooms = canvas.getObjects().filter(obj => obj.classifier === 'mark')
+    let rooms = [];
+
+    roomList.filter(room => room.active === true).forEach(room => {
+      const findObj = canvas.getObjects().find(obj => obj.classifier === 'mark' && obj.area_id === room.id)
+      rooms.push(findObj);
+    })
 
     rooms.forEach(room => {
       const floorplanPNG = canvas.toDataURL({
@@ -1378,7 +1411,12 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
 
       for (const key in floorData) {
         const data = floorData[key];
-        const rooms = data.objects.filter(obj => obj.classifier === 'mark')
+        let rooms = [];
+
+        roomList.filter(room => room.active === true).forEach(room => {
+          const findObj = data.objects.find(obj => obj.classifier === 'mark' && obj.area_id === room.id)
+          rooms.push(findObj);
+        })
 
         rooms.forEach(obj => {
           if (data.objects.filter(item => item.area_id === obj.area_id && item.classifier === 'device').length !== 0) {
@@ -1662,11 +1700,60 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
                 <p>Hide Labels on Export</p>
               </div>
             </div>
-            <button onClick={() => exportData()} disabled={!activeCanvas || !deviceRegistry || !entityRegistry}>Export to Home Assistant</button>
+            <button onClick={() => setHomeAssistantToggle(true)} disabled={!activeCanvas || !deviceRegistry || !entityRegistry}>Export to Home Assistant</button>
             <button onClick={() => generateImages("images")} disabled={!activeCanvas}>Export as png</button>
           </div>
         </div>
       }
+
+      {homeAssistantToggle && (
+        <div className="filter" onClick={() => setHomeAssistantToggle(false)}>
+          <div className="new-label-frame" onClick={e => e.stopPropagation()}>
+            <div className='exit'>
+              <button onClick={() => setHomeAssistantToggle(false)}>X</button>
+            </div>
+            <div className='popup-content'>
+
+
+              <h2>Export to Home Assistant</h2>
+              <p><b>Image View</b></p>
+              <p>These will hide the room colors or room labels in the exported images.</p>
+              <div className="export-checkbox">
+                <input className='checkbox' type="checkbox" defaultChecked={hideRooms} onChange={(e) => setHideRooms(e.target.checked)} />
+                <p>Hide Rooms on Export</p>
+              </div>
+              <div className="export-checkbox">
+                <input className='checkbox' type="checkbox" defaultChecked={hideLabels} onChange={(e) => setHideLabels(e.target.checked)} />
+                <p>Hide Labels on Export</p>
+              </div>
+              <p><b>Room Dashboard Select</b></p>
+              For each room you labeled, it is possible to generate dashboards curated towards the sensors you have placed inside them. Please select
+              which rooms you wish to generate a dashboard for.
+              <div className="room-list-view">
+                {roomList && (
+                  roomList.map((room) => (
+                    <div className="export-checkbox">
+                      <input key={room.id} className='checkbox' type="checkbox" defaultChecked={room.active} onChange={(e) => setRoomActive(e.target.checked, room.id)} />
+                      <p>{room.room}</p>
+                    </div>
+                  ))
+                )}
+                {!roomList && (
+                  <p>No labeled rooms</p>
+                )}
+
+              </div>
+
+              <p><b>Export Data</b></p>
+              Once you are ready, click the button below to generate a zip folder that can be imported into Home Assistant. For help importing the files,
+              please visit section 3 of the How to Use Guide.
+
+              <button onClick={() => exportData()}>Export to Home Assistant</button>
+
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
