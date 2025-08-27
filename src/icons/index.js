@@ -20,6 +20,8 @@ import Cursor from './control-icons/cursor-pointer.svg';
 import Settings from './control-icons/cog-outline.svg';
 import Lock from './control-icons/lock.svg';
 import Unlock from './control-icons/lock-open.svg';
+import ArrowFlipX from './control-icons/arrow_range.svg';
+import ArrowFlipY from './control-icons/height.svg';
 
 import DoorOpen from './device-icons/door-open.svg';
 import DoorClose from './device-icons/door-closed.svg';
@@ -71,6 +73,8 @@ var cursorImg = document.createElement('img');
 var settingsImg = document.createElement('img');
 var lockImg = document.createElement('img');
 var unlockImg = document.createElement('img');
+var arrowFlipXImg = document.createElement('img');
+var arrowFlipYImg = document.createElement('img');
 var lorawanImg = document.createElement('img');
 var zigbeeImg = document.createElement('img');
 var personImg = document.createElement('img');
@@ -116,6 +120,8 @@ cursorImg.src = Cursor;
 settingsImg.src = Settings;
 lockImg.src = Lock;
 unlockImg.src = Unlock;
+arrowFlipXImg.src = ArrowFlipX;
+arrowFlipYImg.src = ArrowFlipY;
 lorawanImg.src = Lorawan;
 zigbeeImg.src = Zigbee;
 personImg.src = Person;
@@ -169,6 +175,6 @@ export {
     Draw, Sensor, Component, Create, Save, Export, Account, Guide, About, DrawLine, Square, DoorOpen, DoorClose, Upstairs, Downstairs, WindowClosed, WindowOpen, Delete,
     Copy, Share, Move, Settings, Lorawan, Zigbee, Person, Battery, LightOff, LightOn, Co2, Voltage, Humidity, Thermometer, Pressure, Sound, Motion,
     Door, Bathtub, Bed, Chair, KitchenSink, RoundSink, Sofa, Stairs, Stove, ThreeSofa, Toilet, Window, Map, CircleOutline,
-    deleteImg, copyImg, moveImg, cursorImg, settingsImg, lockImg, unlockImg, lorawanImg, zigbeeImg, batteryImg, lightoffImg, co2Img, voltageImg, humidityImg, thermometerImg, pressureImg, soundImg, motionImg,
+    deleteImg, copyImg, moveImg, cursorImg, settingsImg, lockImg, unlockImg, arrowFlipXImg, arrowFlipYImg, lorawanImg, zigbeeImg, batteryImg, lightoffImg, co2Img, voltageImg, humidityImg, thermometerImg, pressureImg, soundImg, motionImg,
     doorwayImg, doorImg, windowImg, windowClosedImg, personImg, sensorImg, bathtubImg, bedImg, chairImg, kitchensinkImg, roundsinkImg, sofaImg, stairsImg, stoveImg, threesofaImg, toiletImg, componentImages, deviceImages
 };

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import * as fabric from "fabric";
-import { deleteImg, copyImg, settingsImg, lockImg, unlockImg, componentImages, deviceImages, moveImg, cursorImg } from './../../icons/index';
+import { deleteImg, copyImg, settingsImg, lockImg, unlockImg, arrowFlipXImg, arrowFlipYImg, componentImages, deviceImages, moveImg, cursorImg } from './../../icons/index';
 
 import { db } from "./../../firebase";
 import { addDoc, collection, doc, updateDoc, query, getDoc } from "firebase/firestore";
@@ -560,6 +560,28 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
                     render: renderIcon(object.classifier === 'locked' ? lockImg : unlockImg),
                     cornersize: 26,
                 })
+
+                object.controls.flipXAxis = new fabric.Control({
+                    x: 0,
+                    y: -0.5,
+                    offsetY: -22,
+                    offsetX: 0,
+                    cursorStyle: 'pointer',
+                    mouseUpHandler: flipObjectX,
+                    render: renderIcon(arrowFlipXImg),
+                    cornersize: 26,
+                })
+
+                object.controls.flipYAxis = new fabric.Control({
+                    x: 0.5,
+                    y: 0,
+                    offsetY: 0,
+                    offsetX: 22,
+                    cursorStyle: 'pointer',
+                    mouseUpHandler: flipObjectY,
+                    render: renderIcon(arrowFlipYImg),
+                    cornersize: 26,
+                })
             }
 
             if (object.classifier === 'device') {
@@ -852,6 +874,26 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
             }
         }
 
+        function flipObjectX(_eventData, transform) {
+            const obj = transform.target;
+            if (obj.flipX === false) {
+                obj.flipX = true;
+            } else {
+                obj.flipX = false;
+            }
+            fabricCanvas.current.renderAll();
+        }
+
+        function flipObjectY(_eventData, transform) {
+            const obj = transform.target;
+            if (obj.flipY === false) {
+                obj.flipY = true;
+            } else {
+                obj.flipY = false;
+            }
+            fabricCanvas.current.renderAll();
+        }
+
         function roomInformation(_eventData, transform) {
             const roomText = fabricCanvas.current.getObjects().find(obj => obj.id === transform.target.id && obj.classifier === 'text')
             setRoomLabel(roomText.text)
@@ -873,6 +915,8 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
 
 
         function keyDown(e) {
+
+            console.log(arrowFlipYImg)
 
             const activeObject = fabricCanvas.current.getActiveObject()
 
