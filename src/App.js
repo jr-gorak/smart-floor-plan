@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { auth } from './firebase';
 import Menu from './components/Menu';
 import './App.css';
@@ -34,6 +34,11 @@ function App() {
   const [floorData, setFloorData] = useState(() => { const stored = sessionStorage.getItem("floorData"); return stored ? JSON.parse(stored) : {}; });
   const [floorArray, setFloorArray] = useState(() => { const stored = sessionStorage.getItem("floorArray"); return stored ? JSON.parse(stored) : ["GR"]; });
   const [dragMode, setDragMode] = useState(true);
+  const [menuObject, setMenuObject] = useState(null);
+  const [objectColor, setObjectColor] = useState("");
+  const [strokeColor, setStrokeColor] = useState("");
+  const [strokeWidth, setStrokeWidth] = useState(null);
+  const [moveStack, setMoveStack] = useState(null);
 
   const [canvasAction, setCanvasAction] = useState('select');
   const [canvasImageData, setCanvasImageData] = useState(null);
@@ -65,10 +70,11 @@ function App() {
   const retrieveEntityRegistry = (data) => setEntityRegistry(data);
   const retrieveFloorData = (data) => setFloorData(data);
   const retrieveFloorArray = (array) => setFloorArray(array);
+  const retrieveMoveStack = (value) => setMoveStack(value);
 
   const canvasInfo = { canvasWidth, canvasHeight, canvasName, canvasID, drawWidth, entityRegistry, deviceRegistry }
-  const canvasData = { deviceList, originalDeviceList, labelList, floorData, canvasImageData, canvasDevice, floorArray }
-  const canvasState = { activeCanvas, canvasAction, saveToggle, loadToggle, refreshToggle, deviceToggle, saveResult, handlerToggle, dragMode }
+  const canvasData = { deviceList, originalDeviceList, labelList, floorData, canvasImageData, canvasDevice, floorArray, menuObject, objectColor, strokeColor, strokeWidth }
+  const canvasState = { activeCanvas, canvasAction, saveToggle, loadToggle, refreshToggle, deviceToggle, saveResult, handlerToggle, dragMode, moveStack }
 
   const centerZoom = () => {
     window.scrollTo({
@@ -153,13 +159,28 @@ function App() {
     sessionStorage.setItem("floorData", JSON.stringify(floorData));
   }
 
+  const retrieveMenuObject = useCallback((obj) => {
+    setMenuObject(obj);
+  }, [])
+
+  const retrieveObjectColor = useCallback((color) => {
+    setObjectColor(color);
+  }, [])
+
+  const retrieveStrokeColor = useCallback((color) => {
+    setStrokeColor(color);
+  }, [])
+
+  const retrieveStrokeWidth = useCallback((width) => {
+    setStrokeWidth(width);
+  }, [])
+
   window.addEventListener("beforeunload", sessionSave);
   document.addEventListener('touchmove', (e) => {
     if (e.touches.length > 1) {
       e.preventDefault();
     }
   }, { passive: false })
-
 
   return (
     <div className="App">
@@ -174,7 +195,8 @@ function App() {
         <div className='Canvas' style={{ transform: `scale(${zoom}) translate(${transl}%, ${transl}%)`, transformOrigin: 'top left', }} onWheel={zoomScroll} onTouchMove={zoomScroll} onTouchEnd={endTouch}>
           <FabricCanvas canvasInfo={canvasInfo} canvasData={canvasData} canvasState={canvasState} onRefreshToggle={() => setRefreshToggle(false)} onDeviceToggle={() => setDeviceToggle(false)}
             user={user} onDeviceList={retrieveDeviceList} onHandlerToggle={(toggle) => setHandlerToggle(toggle)} onFloorData={retrieveFloorData} onFloorArray={retrieveFloorArray}
-            onCanvasID={retrieveID} onSaveToggle={() => setSaveToggle(false)} onSaveResult={retrieveSave} onLoadToggle={() => setLoadToggle(false)} onCanvasImageData={retrieveImageData}
+            onCanvasID={retrieveID} onSaveToggle={() => setSaveToggle(false)} onSaveResult={retrieveSave} onLoadToggle={() => setLoadToggle(false)} onCanvasImageData={retrieveImageData} retrieveMenuObject={retrieveMenuObject}
+            retrieveObjectColor={retrieveObjectColor} retrieveStrokeColor={retrieveStrokeColor} onMoveStack={retrieveMoveStack} retrieveStrokeWidth={retrieveStrokeWidth}
           />
         </div>
 
@@ -186,26 +208,79 @@ function App() {
         </div>
       </div>
 
+      {menuObject && menuObject.classifier !== "mark" && menuObject.classifier !== "text" && (
+        <div className='object-menu'>
+          <h3><b>Object Menu</b></h3>
+          <p>type: {menuObject.type}</p>
+
+          {menuObject.type !== 'image' && (menuObject.classifier === 'draw' || menuObject.classifier === 'locked') && (
+            <div>
+              {menuObject.type !== 'line' && (
+                <div className='fill-picker'>
+                  <div className='fill'>fill: <input className="object-color-input" type='color' value={objectColor ? (objectColor === "default" ? "#000000" : objectColor) : "#000000"} onChange={(e) => setObjectColor(e.target.value)}></input></div>
+                  <button onClick={() => setObjectColor("default")}>clear</button>
+                </div>
+              )}
+              <div className='stroke-picker'>
+                <p>stroke: <input className="object-color-input" type='color' value={strokeColor} onChange={(e) => setStrokeColor(e.target.value)}></input></p>
+              </div>
+            </div>
+          )}
+          <button onClick={() => setMoveStack('up')}>forward ↑</button>
+          <button onClick={() => setMoveStack('down')}>backward ↓</button>
+
+          {menuObject.type !== 'rect' && menuObject.type !== 'image' && menuObject.classifier !== "device" && (
+            <div>
+              <div className='slider'>
+                Stroke Width
+                <input type="range" defaultValue={strokeWidth} onChange={(e) => setStrokeWidth(e.target.value)} min="1" max="5" list='data' />
+              </div>
+              <datalist id="data">
+                <option value="1" label='1'></option>
+                <option value="2" label='2'></option>
+                <option value="3" label='3'></option>
+                <option value="4" label='4'></option>
+                <option value="5" label='5'></option>
+              </datalist>
+            </div>
+          )}
+        </div>
+      )
+      }
+
       {activePopup === 'draw' && (
         <DrawTool onCanvasAction={retrieveAction} drawWidth={drawWidth} onDrawWidth={retrieveDrawWidth} />
-      )} {activePopup === 'sensor' && (
-        <SensorTool onCanvasDevice={retrieveDevice} onDeviceToggle={() => setDeviceToggle(true)} onDeviceList={retrieveDeviceList} deviceList={deviceList} onOriginalDeviceList={retrieveOriginalDeviceList} onLabelList={retrieveLabelList} labelList={labelList} onDeviceRegistry={retrieveDeviceRegistry} onEntityRegistry={retrieveEntityRegistry} />
-      )} {activePopup === 'component' && (
-        <ComponentTool onCanvasAction={retrieveAction} />
-      )}
+      )
+      } {
+        activePopup === 'sensor' && (
+          <SensorTool onCanvasDevice={retrieveDevice} onDeviceToggle={() => setDeviceToggle(true)} onDeviceList={retrieveDeviceList} deviceList={deviceList} onOriginalDeviceList={retrieveOriginalDeviceList} onLabelList={retrieveLabelList} labelList={labelList} onDeviceRegistry={retrieveDeviceRegistry} onEntityRegistry={retrieveEntityRegistry} />
+        )
+      } {
+        activePopup === 'component' && (
+          <ComponentTool onCanvasAction={retrieveAction} />
+        )
+      }
 
-      {activePopup === 'about' && (
-        <AboutPopup onClose={closePopup} />
-      )} {activePopup === 'guide' && (
-        <GuidePopup onClose={closePopup} />
-      )}
-      {activePopup === 'account' && !user && (
-        <UserAuthentication onClose={closePopup} />
-      )}
-      {activePopup === 'account' && user && (
-        <AccountPopup onClose={closePopup} onCanvasName={retrieveName} onCanvasID={retrieveID} onCanvasWidth={retrieveWidth} onCanvasHeight={retrieveHeight} onActive={retrieveActive} onLoadToggle={() => setLoadToggle(true)} onRefreshToggle={() => setRefreshToggle(true)} onDeviceList={retrieveDeviceList} onOriginalDeviceList={retrieveOriginalDeviceList} onLabelList={retrieveLabelList} onDeviceRegistry={retrieveDeviceRegistry} onEntityRegistry={retrieveEntityRegistry} user={user} />
-      )}
-    </div>
+      {
+        activePopup === 'about' && (
+          <AboutPopup onClose={closePopup} />
+        )
+      } {
+        activePopup === 'guide' && (
+          <GuidePopup onClose={closePopup} />
+        )
+      }
+      {
+        activePopup === 'account' && !user && (
+          <UserAuthentication onClose={closePopup} />
+        )
+      }
+      {
+        activePopup === 'account' && user && (
+          <AccountPopup onClose={closePopup} onCanvasName={retrieveName} onCanvasID={retrieveID} onCanvasWidth={retrieveWidth} onCanvasHeight={retrieveHeight} onActive={retrieveActive} onLoadToggle={() => setLoadToggle(true)} onRefreshToggle={() => setRefreshToggle(true)} onDeviceList={retrieveDeviceList} onOriginalDeviceList={retrieveOriginalDeviceList} onLabelList={retrieveLabelList} onDeviceRegistry={retrieveDeviceRegistry} onEntityRegistry={retrieveEntityRegistry} user={user} />
+        )
+      }
+    </div >
   );
 }
 

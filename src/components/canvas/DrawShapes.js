@@ -5,7 +5,7 @@ export function mouseDownLine(event, canvas, drawWidth) {
     const pointer = canvas.getPointer(event.e)
 
     const newLine = new fabric.Line([pointer.x, pointer.y, pointer.x, pointer.y], {
-        stroke: 'black',
+        stroke: '#000000',
         strokeWidth: drawWidth,
         strokeUniform: true,
         objectCaching: false,
@@ -75,7 +75,7 @@ export function mouseDownRect(event, canvas, drawWidth) {
         width: 0,
         height: 0,
         fill: null,
-        stroke: 'black',
+        stroke: '#000000',
         strokeWidth: drawWidth,
         strokeUniform: true,
         objectCaching: false,
@@ -120,7 +120,7 @@ export function mouseDownCircle(event, canvas, drawWidth) {
         originY: 'top',
         fill: null,
         radius: 0,
-        stroke: 'black',
+        stroke: '#000000',
         strokeWidth: drawWidth,
         strokeUniform: true,
         objectCaching: false,

@@ -26,11 +26,12 @@ fabric.FabricObject.prototype.toObject = (function (toObject) {
 })(fabric.FabricObject.prototype.toObject);
 
 function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveToggle, onSaveResult, onLoadToggle, onRefreshToggle,
-    onDeviceToggle, user, onDeviceList, onHandlerToggle, onFloorData, onFloorArray, onCanvasImageData }) {
+    onDeviceToggle, user, onDeviceList, onHandlerToggle, onFloorData, onFloorArray, onCanvasImageData, retrieveMenuObject, retrieveObjectColor,
+    retrieveStrokeColor, onMoveStack, retrieveStrokeWidth }) {
 
     const { canvasWidth, canvasHeight, canvasName, canvasID, drawWidth, entityRegistry, deviceRegistry } = canvasInfo
-    const { deviceList, originalDeviceList, labelList, floorData, canvasImageData, canvasDevice, floorArray } = canvasData
-    const { canvasAction, saveToggle, loadToggle, refreshToggle, deviceToggle, dragMode } = canvasState
+    const { deviceList, originalDeviceList, labelList, floorData, canvasImageData, canvasDevice, floorArray, menuObject, objectColor, strokeColor, strokeWidth } = canvasData
+    const { canvasAction, saveToggle, loadToggle, refreshToggle, deviceToggle, dragMode, moveStack } = canvasState
 
     const canvasRef = useRef(null);
     const fabricCanvas = useRef(null);
@@ -110,7 +111,13 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
         }
     }, [hideDevices, hideLabels, hideRooms])
 
-    const checkObjects = useCallback(() => {
+    const checkObjects = useCallback((e) => {
+
+        retrieveMenuObject(e.selected[0]);
+        retrieveObjectColor(e.selected[0].fill);
+        retrieveStrokeColor(e.selected[0].stroke);
+        retrieveStrokeWidth(e.selected[0].strokeWidth)
+
         if (selectFlag.current) return;
         selectFlag.current = true;
 
@@ -134,7 +141,15 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
             }
         }
         selectFlag.current = false;
-    }, [])
+    }, [retrieveMenuObject, retrieveObjectColor, retrieveStrokeColor, retrieveStrokeWidth])
+
+    const unSetMenuObject = useCallback(() => {
+        retrieveMenuObject(null);
+        retrieveObjectColor("");
+        retrieveStrokeColor("");
+        retrieveStrokeWidth(null);
+    }, [retrieveMenuObject, retrieveObjectColor, retrieveStrokeColor, retrieveStrokeWidth])
+
 
 
     const SwitchFloorCallback = useCallback(async (floor) => {
@@ -264,16 +279,18 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
             sessionSave(fabricCanvas.current)
         };
 
+
         window.addEventListener("beforeunload", triggerSave);
         window.addEventListener("beforeunload", removeTemporaryObjects)
         fabricCanvas.current.on('selection:created', checkObjects)
         fabricCanvas.current.on('selection:updated', checkObjects)
+        fabricCanvas.current.on('selection:cleared', unSetMenuObject)
 
         return () => {
             fabricCanvas.current?.dispose();
             fabricCanvas.current = null;
         }
-    }, [canvasWidth, canvasHeight, refreshToggle, loadToggle, checkObjects]);
+    }, [canvasWidth, canvasHeight, refreshToggle, loadToggle, checkObjects, unSetMenuObject]);
 
     //Canvas File Handling
     useEffect(() => {
@@ -916,8 +933,6 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
 
         function keyDown(e) {
 
-            console.log(arrowFlipYImg)
-
             const activeObject = fabricCanvas.current.getActiveObject()
 
             if (((activeObject && (activeObject.classifier === 'draw' || activeObject.classifier === 'stairs' || activeObject.classifier === 'locked'))) || ((tempObject && (tempObject.classifier === 'draw' || tempObject.classifier === 'stairs' || tempObject.classifier === 'locked')))) {
@@ -992,6 +1007,46 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
     useEffect(() => {
         viewpointToggle();
     }, [viewpointToggle]);
+
+    useEffect(() => {
+
+        if (menuObject && objectColor === "default") {
+            menuObject.fill = null;
+            menuObject.dirty = true;
+            fabricCanvas.current.renderAll();
+        }
+
+        if (menuObject && objectColor !== "default") {
+            menuObject.fill = objectColor;
+            menuObject.dirty = true;
+            fabricCanvas.current.renderAll();
+        }
+
+        if (menuObject && strokeColor) {
+            menuObject.stroke = strokeColor;
+            menuObject.dirty = true;
+            fabricCanvas.current.renderAll();
+        }
+
+        if (menuObject && moveStack === "up") {
+            fabricCanvas.current.bringObjectForward(menuObject);
+            fabricCanvas.current.renderAll();
+            onMoveStack(null);
+        }
+
+        if (menuObject && strokeWidth) {
+            menuObject.strokeWidth = strokeWidth;
+            menuObject.dirty = true;
+            fabricCanvas.current.renderAll();
+        }
+
+        if (menuObject && moveStack === "down") {
+            fabricCanvas.current.sendObjectBackwards(menuObject);
+            fabricCanvas.current.renderAll();
+            onMoveStack(null);
+        }
+
+    }, [menuObject, objectColor, strokeColor, moveStack, onMoveStack, strokeWidth])
 
     return (
         <div className="canvas-container">

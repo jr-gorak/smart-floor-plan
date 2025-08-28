@@ -27,12 +27,73 @@ header {
   display: none;
   position: fixed;
   bottom: 20px;
-  right: 20px;
+  right: 10px;
   padding: 10px 10px 10px 10px;
   border-radius: 10px;
   box-shadow: 0 2px 4px #00000033;
   background-color: #fffffb;
 }
+
+.object-menu {
+  width: 140px;
+  height: auto;
+  background-color: #fffffb;
+  position: fixed;
+  right: 10px;
+  padding: 10px 10px 10px 10px;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px #00000033;
+  top: 100px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin: 0px 0px 10px 0px;
+}
+
+.object-menu h3 {
+  padding: 5px;
+  margin: 0px;
+  border-bottom: 1px solid #000000;
+}
+
+.object-menu input {
+  width: 30px;
+}
+
+.object-menu button {
+  padding: 10px 5px 10px 5px;
+  margin: 0px 5px 0px -5px;
+}
+
+.fill-picker {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  height: 40px;
+}
+
+.fill {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 5px
+}
+
+.stroke-picker {
+  height: 40px;
+}
+
+.fill-picker button {
+  padding: 10px;
+  height: 30px;
+}
+
+.slider input {
+  width: 100%
+}
+
 
 @media (max-width: 1024px) {
   .canvas-select-menu {
