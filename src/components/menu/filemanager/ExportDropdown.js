@@ -31,6 +31,7 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
   }
 
   let roomList = [];
+  const roomNameMap = {}
 
   if (floorData) {
     for (const key in floorData) {
@@ -43,6 +44,7 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
             let roomText = undefined;
             if (room) {
               roomText = data.objects.find(o => o.classifier === 'text' && o.area_id === room.id).text
+              roomNameMap[obj.area_id] = { name: roomText }
             }
             roomList.push({ id: obj.area_id, room: roomText, active: false })
           })
@@ -311,55 +313,104 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
       return yaml.dump(configObject).replace(/'/g, '')
     }
 
+
+
+
+
+    function createCustomizeObject(class_type, measurement, sensorArray, customizeObject) {
+
+      console.log(sensorArray)
+
+      if (measurement !== 'none') {
+        sensorArray.forEach(sensor => {
+          customizeObject[sensor.original_name] = {
+            state_class: "measurement",
+            device_class: class_type,
+            unit_of_measurement: measurement
+          }
+        })
+      } else if (measurement === 'none') {
+        sensorArray.forEach(sensor => {
+          customizeObject[sensor.original_name] = {
+            state_class: "measurement",
+            device_class: class_type,
+          }
+        })
+      }
+
+      return customizeObject
+    }
+
     function generateCustomizeYaml() {
 
       let temperatureSensors = [];
       let humiditySensors = [];
       let co2Sensors = [];
+      let lightSensors = [];
+      let voltageSensors = [];
+      let batterySensors = [];
+      let currentSensors = [];
+      let energySensors = [];
+      let powerSensors = [];
+      let floodSensors = [];
       for (const device in deviceList) {
         const deviceData = deviceList[device]
         const temperatureSensor = deviceData.entities.find(entity => entity.type.includes("temperature"))
         const humiditySensor = deviceData.entities.find(entity => entity.type.includes("humid"))
         const co2Sensor = deviceData.entities.find(entity => entity.type.includes("co2"))
+        const voltageSensor = deviceData.entities.find(entity => entity.type.includes("volt") || entity.type.includes("vdd"))
+        const batterySensor = deviceData.entities.find(entity => entity.type.includes("battery"))
+        const currentSensor = deviceData.entities.find(entity => entity.type.includes("current") || entity.type === "toaster" || entity.type === "kettle" || entity.type === "blender" || entity.type === "microwave" || entity.type === "tv")
+        const energySensor = deviceData.entities.find(entity => entity.type.includes("energy"))
+        const powerSensor = deviceData.entities.find(entity => entity.type.includes("power"))
+        const floodSensor = deviceData.entities.find(entity => entity.type.includes("flood") || entity.type === "shower" || entity.type === "sink")
+        const lightSensor = deviceData.entities.find(entity => entity.type.includes("light") || entity.type.includes("lux"))
+        deviceData.entities.find(entity => entity.type.includes("co2"))
         if (temperatureSensor) {
           temperatureSensors.push({ device_id: temperatureSensor.device_id, id: temperatureSensor.id, area_id: deviceData.area_id, type: temperatureSensor.type, original_name: temperatureSensor.original_name })
         } if (humiditySensor) {
           humiditySensors.push({ device_id: humiditySensor.device_id, id: humiditySensor.id, area_id: deviceData.area_id, type: humiditySensor.type, original_name: humiditySensor.original_name })
         } if (co2Sensor) {
           co2Sensors.push({ device_id: co2Sensor.device_id, id: co2Sensor.id, area_id: deviceData.area_id, type: co2Sensor.type, original_name: co2Sensor.original_name })
+        } if (voltageSensor) {
+          voltageSensors.push({ device_id: voltageSensor.device_id, id: voltageSensor.id, area_id: deviceData.area_id, type: voltageSensor.type, original_name: voltageSensor.original_name })
+        } if (batterySensor) {
+          batterySensors.push({ device_id: batterySensor.device_id, id: batterySensor.id, area_id: deviceData.area_id, type: batterySensor.type, original_name: batterySensor.original_name })
+        } if (currentSensor) {
+          currentSensors.push({ device_id: currentSensor.device_id, id: currentSensor.id, area_id: deviceData.area_id, type: currentSensor.type, original_name: currentSensor.original_name })
+        } if (energySensor) {
+          energySensors.push({ device_id: energySensor.device_id, id: energySensor.id, area_id: deviceData.area_id, type: energySensor.type, original_name: energySensor.original_name })
+        } if (powerSensor) {
+          powerSensors.push({ device_id: powerSensor.device_id, id: powerSensor.id, area_id: deviceData.area_id, type: powerSensor.type, original_name: powerSensor.original_name })
+        } if (floodSensor) {
+          floodSensors.push({ device_id: floodSensor.device_id, id: floodSensor.id, area_id: deviceData.area_id, type: floodSensor.type, original_name: floodSensor.original_name })
+        } if (lightSensor) {
+          lightSensors.push({ device_id: lightSensor.device_id, id: lightSensor.id, area_id: deviceData.area_id, type: lightSensor.type, original_name: lightSensor.original_name })
         }
       }
 
       const customizeObject = {}
 
       if (temperatureSensors) {
-        temperatureSensors.forEach(sensor => {
-          customizeObject[sensor.original_name] = {
-            state_class: "measurement",
-            device_class: "temperature",
-            unit_of_measurement: '"°C"'
-          }
-        })
-      }
-
-      if (humiditySensors) {
-        humiditySensors.forEach(sensor => {
-          customizeObject[sensor.original_name] = {
-            state_class: "measurement",
-            device_class: "humidity",
-            unit_of_measurement: '"%"'
-          }
-        })
-      }
-
-      if (co2Sensors) {
-        co2Sensors.forEach(sensor => {
-          customizeObject[sensor.original_name] = {
-            state_class: "measurement",
-            device_class: "carbon_dioxide",
-            unit_of_measurement: '"ppm"'
-          }
-        })
+        createCustomizeObject("temperature", '"°C"', temperatureSensors, customizeObject)
+      } if (humiditySensors) {
+        createCustomizeObject("humidity", '"%"', humiditySensors, customizeObject)
+      } if (co2Sensors) {
+        createCustomizeObject("carbon_dioxide", '"ppm"', co2Sensors, customizeObject)
+      } if (lightSensors) {
+        createCustomizeObject("illuminance", '"lx"', lightSensors, customizeObject)
+      } if (voltageSensors) {
+        createCustomizeObject("voltage", 'none', voltageSensors, customizeObject)
+      } if (batterySensors) {
+        createCustomizeObject("battery", '"%"', batterySensors, customizeObject)
+      } if (currentSensors) {
+        createCustomizeObject("current", '"mA"', currentSensors, customizeObject)
+      } if (energySensors) {
+        createCustomizeObject("energy", '"wH"', energySensors, customizeObject)
+      } if (powerSensors) {
+        createCustomizeObject("power_factor", '"%"', powerSensors, customizeObject)
+      } if (floodSensors) {
+        createCustomizeObject("humidity", '"%"', floodSensors, customizeObject)
       }
 
       return yaml.dump(customizeObject).replace(/'/g, '');
@@ -437,6 +488,7 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
     const humidityIDArray = [];
     const co2IDArray = [];
     const binarySensorIDArray = []
+    const currentSensorIDArray = []
     for (const device in deviceList) {
       const deviceData = deviceList[device]
       const doorSensor = deviceData.entities.find(entity => (entity.type.includes("door") || entity.type === "window") && entity.visible === true)
@@ -447,27 +499,32 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
       const humiditySensor = deviceData.entities.find(entity => entity.type.includes("humid") && entity.visible === true)
       const co2Sensor = deviceData.entities.find(entity => entity.type.includes("co2") && entity.visible === true)
       const binarySensor = deviceData.entities.find(entity => (entity.type.includes("door") || entity.type === "window" || entity.type === 'cupboard') && entity.visible === true)
+      const currentSensor = deviceData.entities.find(entity => (entity.type === "toaster" || entity.type === "kettle" || entity.type === 'microwave' || entity.type === 'blender' || entity.type === 'tv') && entity.visible === true)
 
       if (doorSensor) {
-        doorSensorIDArray.push({ device_id: doorSensor.device_id, id: doorSensor.id, area_id: deviceData.area_id, type: doorSensor.type, original_name: doorSensor.original_name })
+        doorSensorIDArray.push({ device_id: doorSensor.device_id, id: doorSensor.id, area_id: deviceData.area_id, type: doorSensor.type, original_name: doorSensor.original_name, name: doorSensor.name })
       } if (temperatureSensor) {
-        temperatureSensorIDArray.push({ device_id: temperatureSensor.device_id, id: temperatureSensor.id, area_id: deviceData.area_id, type: temperatureSensor.type, original_name: temperatureSensor.original_name })
+        temperatureSensorIDArray.push({ device_id: temperatureSensor.device_id, id: temperatureSensor.id, area_id: deviceData.area_id, type: temperatureSensor.type, original_name: temperatureSensor.original_name, name: temperatureSensor.name })
       } if (lightSensor) {
-        lightSensorIDArray.push({ device_id: lightSensor.device_id, id: lightSensor.id, area_id: deviceData.area_id, type: lightSensor.type, original_name: lightSensor.original_name })
+        lightSensorIDArray.push({ device_id: lightSensor.device_id, id: lightSensor.id, area_id: deviceData.area_id, type: lightSensor.type, original_name: lightSensor.original_name, name: lightSensor.name })
       } if (motionSensor) {
-        motionSensorIDArray.push({ device_id: motionSensor.device_id, id: motionSensor.id, area_id: deviceData.area_id, type: motionSensor.type, original_name: motionSensor.original_name })
+        motionSensorIDArray.push({ device_id: motionSensor.device_id, id: motionSensor.id, area_id: deviceData.area_id, type: motionSensor.type, original_name: motionSensor.original_name, name: motionSensor.name })
       } if (seatSensor) {
-        seatSensorIDArray.push({ device_id: seatSensor.device_id, id: seatSensor.id, area_id: deviceData.area_id, type: seatSensor.type, original_name: seatSensor.original_name })
+        seatSensorIDArray.push({ device_id: seatSensor.device_id, id: seatSensor.id, area_id: deviceData.area_id, type: seatSensor.type, original_name: seatSensor.original_name, name: seatSensor.name })
       } if (deviceData.original_name.includes("smoke") && deviceData.isActive === true) {
-        smokeSensorIDArray.push({ id: deviceData.id, area_id: deviceData.area_id, original_name: deviceData.original_name })
+        smokeSensorIDArray.push({ id: deviceData.id, area_id: deviceData.area_id, original_name: deviceData.original_name, name: deviceData.name })
       } if (humiditySensor) {
-        humidityIDArray.push({ device_id: humiditySensor.device_id, id: humiditySensor.id, area_id: deviceData.area_id, type: humiditySensor.type, original_name: humiditySensor.original_name })
+        humidityIDArray.push({ device_id: humiditySensor.device_id, id: humiditySensor.id, area_id: deviceData.area_id, type: humiditySensor.type, original_name: humiditySensor.original_name, name: humiditySensor.name })
       } if (co2Sensor) {
-        co2IDArray.push({ device_id: co2Sensor.device_id, id: co2Sensor.id, area_id: deviceData.area_id, type: co2Sensor.type, original_name: co2Sensor.original_name })
+        co2IDArray.push({ device_id: co2Sensor.device_id, id: co2Sensor.id, area_id: deviceData.area_id, type: co2Sensor.type, original_name: co2Sensor.original_name, name: co2Sensor.name })
       } if (binarySensor) {
-        binarySensorIDArray.push({ device_id: binarySensor.device_id, id: binarySensor.id, area_id: deviceData.area_id, type: binarySensor.type, original_name: binarySensor.original_name })
+        binarySensorIDArray.push({ device_id: binarySensor.device_id, id: binarySensor.id, area_id: deviceData.area_id, type: binarySensor.type, original_name: binarySensor.original_name, name: binarySensor.name })
+      } if (currentSensor) {
+        currentSensorIDArray.push({ device_id: currentSensor.device_id, id: currentSensor.id, area_id: deviceData.area_id, type: currentSensor.type, original_name: currentSensor.original_name, name: currentSensor.name })
       }
     }
+
+
 
     //Object Maps
 
@@ -484,7 +541,8 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
       seat: 'seat occupied',
       bed: 'bed occupied',
       motion: 'space occupied',
-      co2: 'co2'
+      co2: 'co2',
+      shower: 'shower in use'
     }
 
     const negTitleMap = {
@@ -499,6 +557,7 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
       tv: 'television off',
       seat: 'seat empty',
       bed: 'bed empty',
+      shower: 'shower not in use'
     }
 
     const posIconMap = {
@@ -514,7 +573,8 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
       seat: 'mdi:account',
       bed: 'mdi:account',
       motion: 'mdi:account',
-      co2: 'mdi:molecule-co2'
+      co2: 'mdi:molecule-co2',
+      shower: 'mdi:shower-head'
     }
 
     const negIconMap = {
@@ -529,6 +589,7 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
       tv: 'mdi:television-off',
       seat: 'mdi:seat',
       bed: 'mdi:bed-double-outline',
+      shower: 'mdi:shower'
     }
 
     const posStateMap = {
@@ -544,7 +605,8 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
       seat: 'ON',
       bed: 'ON',
       motion: '1',
-      co2: 1000
+      co2: 1000,
+      shower: 90
     }
 
     const negStateMap = {
@@ -559,6 +621,7 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
       tv: 1000,
       seat: 'OFF',
       bed: 'OFF',
+      shower: 90
     }
 
     const conditionMap = {
@@ -574,7 +637,8 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
       seat: 'state',
       bed: 'state',
       motion: 'state',
-      co2: 'numeric_state'
+      co2: 'numeric_state',
+      shower: 'numeric_state'
     }
 
     const posConditionMap = {
@@ -590,7 +654,8 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
       seat: 'state',
       bed: 'state',
       motion: 'state',
-      co2: 'above'
+      co2: 'above',
+      shower: 'above'
     }
 
     const negConditionMap = {
@@ -605,6 +670,7 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
       tv: 'below',
       seat: 'state',
       bed: 'state',
+      shower: 'below'
     }
 
     const badgeTitleMap = {
@@ -643,12 +709,6 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
 
         doorElement.forEach(obj => {
 
-          const room = data.objects.find(o => o.classifier === 'mark' && o.area_id === obj.area_id)
-          let roomText = undefined;
-          if (room) {
-            roomText = data.objects.find(o => o.classifier === 'text' && o.area_id === room.id).text
-          }
-
           const closedState = {
             type: "conditional",
             elements: [
@@ -661,7 +721,7 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
                   top: Math.round(((obj.top + obj.objects[0].top) / canvasHeight) * 100) - 4 + "%",
                   transform: "scale(2,2)"
                 },
-                title: entity.type === "door" ? (roomText ? `${roomText} Door` : "Door") : (roomText ? `${roomText} Window` : "Window"),
+                title: entity.type === "door" ? (roomNameMap[entity.area_id]?.name ? `${roomNameMap[entity.area_id]?.name} Door` : "Door") : (roomNameMap[entity.area_id]?.name ? `${roomNameMap[entity.area_id]?.name} Window` : "Window"),
               }
             ],
             conditions: [
@@ -671,7 +731,7 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
                 state: "1"
               }
             ],
-            title: entity.type === "door" ? (roomText ? `${roomText} Door Closed` : "Door Closed") : (roomText ? `${roomText} Window Closed` : "Window Closed")
+            title: entity.type === "door" ? (roomNameMap[entity.area_id]?.name ? `${roomNameMap[entity.area_id]?.name} Door Closed` : "Door Closed") : (roomNameMap[entity.area_id]?.name ? `${roomNameMap[entity.area_id]?.name} Window Closed` : "Window Closed")
           };
           const openedState = {
             type: "conditional",
@@ -694,7 +754,7 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
                 state: "0"
               }
             ],
-            title: entity.type === "door" ? (roomText ? `${roomText} Door Open` : "Door Open") : (roomText ? `${roomText} Window Open` : "Window Open")
+            title: entity.type === "door" ? (roomNameMap[entity.area_id]?.name ? `${roomNameMap[entity.area_id]?.name} Door Open` : "Door Open") : (roomNameMap[entity.area_id]?.name ? `${roomNameMap[entity.area_id]?.name} Window Open` : "Window Open")
           }
           doorElementArray.push(closedState, openedState);
         })
@@ -707,17 +767,11 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
       for (const entity of temperatureSensorIDArray) {
         const temperatureElement = data.objects.filter(obj => obj.id === entity.device_id)
         temperatureElement.forEach(obj => {
-          const room = data.objects.find(o => o.classifier === 'mark' && o.area_id === obj.area_id)
-          let roomText = undefined;
-          if (room) {
-            roomText = data.objects.find(o => o.classifier === 'text' && o.area_id === room.id).text
-          }
-
 
           const temperatureObject = {
             type: "state-badge",
             entity: entity.original_name,
-            title: roomText ? `${roomText}` : "No Room",
+            title: roomNameMap[entity.area_id]?.name ? `${roomNameMap[entity.area_id]?.name}` : "No Room",
             style: {
               left: (Math.round(((obj.left + obj.objects[0].left) / canvasWidth) * 100) - 1) + "%",
               top: Math.round(((obj.top + obj.objects[0].top) / canvasHeight) * 100) + "%",
@@ -734,16 +788,10 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
       for (const entity of lightSensorIDArray) {
         const lightElement = data.objects.filter(obj => obj.id === entity.device_id)
         lightElement.forEach(obj => {
-          const room = data.objects.find(o => o.classifier === 'mark' && o.area_id === obj.area_id)
-          let roomText = undefined;
-          if (room) {
-            roomText = data.objects.find(o => o.classifier === 'text' && o.area_id === room.id).text
-          }
-
 
           const onState = {
             type: "conditional",
-            title: roomText ? `${roomText} Light On` : "Light On",
+            title: roomNameMap[entity.area_id]?.name ? `${roomNameMap[entity.area_id]?.name} Light On` : "Light On",
             conditions: [
               {
                 condition: "numeric_state",
@@ -766,7 +814,7 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
           };
           const offState = {
             type: "conditional",
-            title: roomText ? `${roomText} Light Off` : "Light Off",
+            title: roomNameMap[entity.area_id]?.name ? `${roomNameMap[entity.area_id]?.name} Light Off` : "Light Off",
             conditions: [
               {
                 condition: "numeric_state",
@@ -959,6 +1007,8 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
             elementArray.push(generateConditionalElement('seat', 'neg', entity, calculatedLeft, calculatedTop), generateConditionalElement('seat', 'pos', entity, calculatedLeft, calculatedTop))
           } else if (entity.type === 'bed') {
             elementArray.push(generateConditionalElement('bed', 'neg', entity, calculatedLeft, calculatedTop), generateConditionalElement('bed', 'pos', entity, calculatedLeft, calculatedTop))
+          } else if (entity.type === 'shower') {
+            elementArray.push(generateConditionalElement('shower', 'neg', entity, calculatedLeft, calculatedTop), generateConditionalElement('shower', 'pos', entity, calculatedLeft, calculatedTop))
           } else if (entity.type.includes('motion')) {
             elementArray.push(generateConditionalElement('motion', 'pos', entity, calculatedLeft, calculatedTop))
           } else if (entity.type.includes('co2')) {
@@ -1167,7 +1217,7 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
         binarySensorIDArray.filter(entity => entity.area_id === room.area_id).forEach(entity => {
           const targetEntity = {
             entity: entity.original_name,
-            name: entity.area_id
+            name: entity.name
           }
           entityArray.push(targetEntity);
         })
@@ -1175,7 +1225,7 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
         motionSensorIDArray.filter(entity => entity.area_id === room.area_id).forEach(entity => {
           const targetEntity = {
             entity: entity.original_name,
-            name: entity.area_id
+            name: entity.name
           }
           entityArray.push(targetEntity);
         })
@@ -1183,13 +1233,28 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
         seatSensorIDArray.filter(entity => entity.area_id === room.area_id).forEach(entity => {
           const targetEntity = {
             entity: entity.original_name,
-            name: entity.area_id
+            name: entity.name
           }
           entityArray.push(targetEntity);
         })
       }
 
       return entityArray;
+    }
+
+    function generateApplianceActivity(room) {
+
+      const applianceStringArray = [];
+
+      const findAppliances = currentSensorIDArray.filter(entity => entity.area_id === room.area_id)
+
+      findAppliances.forEach(entity => {
+        const applianceString = `\n {'name': '${entity.type}', 'last_changed': states.${entity.original_name}.last_changed}`
+        applianceStringArray.push(applianceString)
+      })
+
+      const contentString = `{% set sensors_kitchen = [${applianceStringArray}] %}\n{% set sorted_sensors_${room.area_id} = sensors_${room.area_id} | sort(attribute='last_changed', reverse=true) %}\n\n<table>  \n{% for targetsensor in sorted_sensors_${room.area_id} %}\n  <tr><td>{{ targetsensor.name }} </td><td>{{ targetsensor.last_changed.strftime('%A %I:%M%p')}}</td> </tr>\n{% endfor %} \n</table>`
+      return contentString
     }
 
     function generateActivityCards(room) {
@@ -1202,10 +1267,20 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
       }
       cardArray.push(header);
 
-      if (doorSensorIDArray.filter(entity => entity.area_id === room.area_id).length > 0) {
+      if (currentSensorIDArray.filter(entity => entity.area_id === room.area_id).length > 0) {
+        const applianceActivity = {
+          type: "markdown",
+          title: "Latest Appliance Activity",
+          content: generateApplianceActivity(room)
+        }
+        cardArray.push(applianceActivity);
+      }
+
+
+      if (binarySensorIDArray.filter(entity => entity.area_id === room.area_id).length > 0) {
         const doorHistory = {
           type: "history-graph",
-          title: "Door activity",
+          title: "Door Activity",
           hours_to_show: 24,
           logarithmic_scale: false,
           entities: generateRoomHistoryGraph('binary', room),
@@ -1216,7 +1291,7 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
       if (motionSensorIDArray.filter(entity => entity.area_id === room.area_id).length > 0) {
         const doorHistory = {
           type: "history-graph",
-          title: "Motion activity",
+          title: "Motion Activity",
           hours_to_show: 24,
           logarithmic_scale: false,
           entities: generateRoomHistoryGraph('motion', room),
@@ -1227,7 +1302,7 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
       if (seatSensorIDArray.filter(entity => entity.area_id === room.area_id).length > 0) {
         const doorHistory = {
           type: "history-graph",
-          title: "Seat/Bed activity",
+          title: "Seat/Bed Activity",
           hours_to_show: 24,
           logarithmic_scale: false,
           entities: generateRoomHistoryGraph('seat', room),
@@ -1297,14 +1372,14 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
       const lastSeen = {
         type: "markdown",
         content: `{% set newest_entity = namespace(entity_id=None, last_changed=None) %} {% for entity in states.sensor %} {% if entity.entity_id in label_entities("location") %} {# The {{ entity.entity_id }} was last changed at {{ entity.last_changed }} #} {% if newest_entity.last_changed == None or entity.last_changed > newest_entity.last_changed %} {% set newest_entity.entity_id = entity.entity_id %} {% set newest_entity.last_changed = entity.last_changed %} {% endif %} {% endif %} {% endfor %} {% if newest_entity.entity_id %} <ha-alert alert-type="info"><ha-icon icon="mdi: account"></ha-icon>The most recent activity was in the **{{area_name(newest_entity.entity_id)}}** on **{{ newest_entity.last_changed.strftime('%A') }}** at **{{ newest_entity.last_changed.strftime('%I:%M %p') }}**.</ha-alert> {% else %} <ha-alert alert-type="error">No recent activity detected.</ha-alert> {% endif %}`,
-        title: "Last seen"
+        title: "Last Seen"
       }
       cardArray.push(lastSeen);
 
       if (doorSensorIDArray) {
         const doorHistory = {
           type: "history-graph",
-          title: "Door activity",
+          title: "Door Activity",
           hours_to_show: 24,
           logarithmic_scale: false,
           entities: generateHistoryGraph('door'),
@@ -1315,7 +1390,7 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
       if (motionSensorIDArray) {
         const motionHistory = {
           type: "history-graph",
-          title: "Motion activity",
+          title: "Motion Activity",
           hours_to_show: 24,
           logarithmic_scale: false,
           entities: generateHistoryGraph('motion'),
@@ -1326,7 +1401,7 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
       if (seatSensorIDArray) {
         const seatHistory = {
           type: "history-graph",
-          title: "Seat/Bed activity",
+          title: "Seat/Bed Activity",
           hours_to_show: 24,
           logarithmic_scale: false,
           entities: generateHistoryGraph('seat'),
@@ -1352,7 +1427,7 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
       smokeSensorIDArray.forEach(device => {
         const smokeSensors = {
           entity: device.original_name + "_smokesensorstatus",
-          name: device.area_id
+          name: device.name
         }
         entityArray.push(smokeSensors);
       })
@@ -1402,7 +1477,7 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
         doorSensorIDArray.filter(entity => entity.type.includes('door')).forEach(entity => {
           const targetEntity = {
             entity: entity.original_name,
-            name: entity.area_id
+            name: entity.name
           }
           entityArray.push(targetEntity);
         })
@@ -1410,7 +1485,7 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
         motionSensorIDArray.forEach(entity => {
           const targetEntity = {
             entity: entity.original_name,
-            name: entity.area_id
+            name: entity.name
           }
           entityArray.push(targetEntity);
         })
@@ -1418,7 +1493,7 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
         seatSensorIDArray.forEach(entity => {
           const targetEntity = {
             entity: entity.original_name,
-            name: entity.area_id
+            name: entity.name
           }
           entityArray.push(targetEntity);
         })

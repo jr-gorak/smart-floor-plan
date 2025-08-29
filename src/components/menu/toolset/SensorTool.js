@@ -42,9 +42,9 @@ function SensorTool({ onCanvasDevice, onDeviceToggle, onDeviceList, onOriginalDe
     }
   };
 
-  const locationWords = ["motion", "digital", "binary", "pressure", "light", "occupancy", "rad"]
-  const activityWords = ["vdd", "current", "energy", "power", "voltage", "button"]
-  const environmentWords = ["temp", "humid"]
+  const locationWords = ["motion", "digital", "binary", "occupancy", "rad", "status"]
+  const activityWords = ["current", "energy", "power", "button"]
+  const environmentWords = ["temp", "humid", "light"]
 
   function generateLabel(entityString) {
 
