@@ -277,6 +277,10 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
           themes: "!include_dir_merge_named themes"
         },
 
+        homeassistant: {
+          customize: "!include customize.yaml"
+        },
+
         input_boolean: {
           show_celsius_table: {
             name: "Temperature",
@@ -305,6 +309,60 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
         scene: "!include scenes.yaml",
       }
       return yaml.dump(configObject).replace(/'/g, '')
+    }
+
+    function generateCustomizeYaml() {
+
+      let temperatureSensors = [];
+      let humiditySensors = [];
+      let co2Sensors = [];
+      for (const device in deviceList) {
+        const deviceData = deviceList[device]
+        const temperatureSensor = deviceData.entities.find(entity => entity.type.includes("temperature"))
+        const humiditySensor = deviceData.entities.find(entity => entity.type.includes("humid"))
+        const co2Sensor = deviceData.entities.find(entity => entity.type.includes("co2"))
+        if (temperatureSensor) {
+          temperatureSensors.push({ device_id: temperatureSensor.device_id, id: temperatureSensor.id, area_id: deviceData.area_id, type: temperatureSensor.type, original_name: temperatureSensor.original_name })
+        } if (humiditySensor) {
+          humiditySensors.push({ device_id: humiditySensor.device_id, id: humiditySensor.id, area_id: deviceData.area_id, type: humiditySensor.type, original_name: humiditySensor.original_name })
+        } if (co2Sensor) {
+          co2Sensors.push({ device_id: co2Sensor.device_id, id: co2Sensor.id, area_id: deviceData.area_id, type: co2Sensor.type, original_name: co2Sensor.original_name })
+        }
+      }
+
+      const customizeObject = {}
+
+      if (temperatureSensors) {
+        temperatureSensors.forEach(sensor => {
+          customizeObject[sensor.original_name] = {
+            state_class: "measurement",
+            device_class: "temperature",
+            unit_of_measurement: '"°C"'
+          }
+        })
+      }
+
+      if (humiditySensors) {
+        humiditySensors.forEach(sensor => {
+          customizeObject[sensor.original_name] = {
+            state_class: "measurement",
+            device_class: "humidity",
+            unit_of_measurement: '"%"'
+          }
+        })
+      }
+
+      if (co2Sensors) {
+        co2Sensors.forEach(sensor => {
+          customizeObject[sensor.original_name] = {
+            state_class: "measurement",
+            device_class: "carbon_dioxide",
+            unit_of_measurement: '"ppm"'
+          }
+        })
+      }
+
+      return yaml.dump(customizeObject).replace(/'/g, '');
     }
 
     const floorRegistryExport = {
@@ -355,6 +413,7 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
     }
 
     const configFile = generateConfigYaml();
+    const customizeFile = generateCustomizeYaml();
     updateRegistries();
 
     zip.folder('core-registry-files').file('core.floor_registry', JSON.stringify(floorRegistryExport, null, 2));
@@ -364,6 +423,7 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
     zip.folder('core-registry-files').file('core.entity_registry', JSON.stringify(entityRegistry, null, 2));
     zip.folder('core-registry-files').file('lovelace_dashboards', JSON.stringify(lovelaceDashboards, null, 2));
     zip.folder('yaml-files').file('configuration.yaml', configFile);
+    zip.folder('yaml-files').file('customize.yaml', customizeFile);
   }
 
   async function generateDashboard() {

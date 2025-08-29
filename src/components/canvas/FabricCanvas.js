@@ -832,10 +832,9 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
             transform.target.clone().then((cloned) => {
                 cloned.left += 10;
                 cloned.top += 10;
-                cloned.controls.deleteControl = transform.target.controls.deleteControl;
-                cloned.controls.copyControl = transform.target.controls.copyControl;
                 cloned.classifier = 'draw';
                 canvas.add(cloned);
+                setControls(cloned);
                 canvas.setActiveObject(cloned);
             })
         };
@@ -950,9 +949,8 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
                         tempObject.clone().then((cloned) => {
                             cloned.left += 10;
                             cloned.top += 10;
-                            cloned.controls.deleteControl = tempObject.controls.deleteControl;
-                            cloned.controls.copyControl = tempObject.controls.copyControl;
                             fabricCanvas.current.add(cloned);
+                            setControls(cloned);
                             fabricCanvas.current.setActiveObject(cloned);
                             fabricCanvas.current.renderAll();
                         });
@@ -996,7 +994,8 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
                 fabricCanvas.current.off('mouse:up', mouseUp);
             }
         }
-    }, [floorData, dragMode, tempObject, setTempObject, deviceList, onDeviceList, isDrawing, shape, actionType, canvasAction, x1, y1, originalDeviceList, activeDevice, activeRoom, drawWidth, polygonVertices, updatedRoom, roomLabel, AssignAreaIDs, AssignAreaIDsOnMove, activeFloor, onFloorData]);
+    }, [floorData, dragMode, tempObject, setTempObject, deviceList, onDeviceList, isDrawing, shape, actionType, canvasAction, x1, y1, originalDeviceList, activeDevice, activeRoom, drawWidth, polygonVertices, updatedRoom, roomLabel,
+        AssignAreaIDs, AssignAreaIDsOnMove, activeFloor, onFloorData]);
 
     //Toggles scroll handler for when a popup is opened
     useEffect(() => {
