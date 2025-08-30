@@ -4,6 +4,12 @@
 // learn more: https://github.com/testing-library/jest-dom
 import '@testing-library/jest-dom';
 
+//Issue: Jest does not recognize structured clones, solution:
+//snippet source: https://github.com/jsdom/jsdom/issues/3363#issuecomment-1221060809
+global.structuredClone = val => {
+    return JSON.parse(JSON.stringify(val))
+}
+
 HTMLCanvasElement.prototype.getContext = function () {
     return {
         textBaseline: '',

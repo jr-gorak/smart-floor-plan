@@ -4,7 +4,153 @@ import '../../css/Tools.css';
 import '../../css/Popup.css';
 import { deviceImages } from '../../../icons/index'
 
-function DeviceSettings({ settingsMode, activeDevice, deviceList, onTogglePopup, onUpdateDeviceToggle, onCanvasDevice, onDeviceToggle, onDeviceList, onUpdatedDevice, labelList }) {
+export function toggleHandle(settingsMode, onTogglePopup, setErrorMessage, setActiveValue, setActiveDevice) {
+  document.body.style.overflow = 'auto';
+  if (settingsMode === 'tool') {
+    onTogglePopup(null, null, setErrorMessage, setActiveValue, setActiveDevice);
+  } else if (settingsMode === 'canvas') {
+    onTogglePopup();
+  }
+}
+
+export function filterImage(type, deviceImages) {
+  if (type == null) {
+    return;
+  } else if (type.toLowerCase().includes('temp')) {
+    return deviceImages['thermometer'].src;
+  } else if (type.toLowerCase().includes('occupancy')) {
+    return deviceImages['person'].src;
+  } else if (type.toLowerCase().includes('battery')) {
+    return deviceImages['battery'].src;
+  } else if (type.toLowerCase().includes('light') || type.toLowerCase().includes('lux')) {
+    return deviceImages['light'].src;
+  } else if (type.toLowerCase().includes('co2')) {
+    return deviceImages['co2'].src;
+  } else if (type.toLowerCase().includes('current')) {
+    return deviceImages['electric'].src;
+  } else if (type.toLowerCase().includes('humidity')) {
+    return deviceImages['humidity'].src;
+  } else if (type.toLowerCase().includes('pressure')) {
+    return deviceImages['pressure'].src;
+  } else if (type.toLowerCase().includes('sound')) {
+    return deviceImages['sound'].src;
+  } else if (type.toLowerCase().includes('motion')) {
+    return deviceImages['motion'].src;
+  } else if (type.toLowerCase().includes('door')) {
+    return deviceImages['door'].src;
+  } else if (type.toLowerCase().includes('window')) {
+    return deviceImages['window'].src;
+  } else if (type.toLowerCase().includes('toaster')) {
+    return deviceImages['toaster'].src;
+  } else if (type.toLowerCase().includes('kettle')) {
+    return deviceImages['kettle'].src;
+  } else if (type.toLowerCase().includes('microwave')) {
+    return deviceImages['microwave'].src;
+  } else if (type.toLowerCase().includes('blender')) {
+    return deviceImages['blender'].src;
+  } else if (type.toLowerCase().includes('tv')) {
+    return deviceImages['tv'].src;
+  } else if (type.toLowerCase().includes('cupboard')) {
+    return deviceImages['cupboard'].src;
+  } else if (type.toLowerCase().includes('faucet')) {
+    return deviceImages['faucet'].src;
+  } else if (type.toLowerCase().includes('shower')) {
+    return deviceImages['shower'].src;
+  } else if (type.toLowerCase().includes('seat')) {
+    return deviceImages['seat'].src;
+  } else if (type.toLowerCase().includes('bed')) {
+    return deviceImages['bed'].src;
+  } else {
+    return deviceImages['sensor'].src;
+  }
+};
+
+export function addDevice(activeDevice, onDeviceList, deviceList, onCanvasDevice, onDeviceToggle, toggleHandle, settingsMode, onTogglePopup, setErrorMessage, setActiveValue, setActiveDevice) {
+  activeDevice.isActive = true;
+  onDeviceList(deviceList);
+  onCanvasDevice(activeDevice);
+  onDeviceToggle();
+  toggleHandle(settingsMode, onTogglePopup, setErrorMessage, setActiveValue, setActiveDevice);
+};
+
+export function updateDevice(classifier, id, value, device, activeDevice, setDevice) {
+  if (classifier === 'device') {
+    activeDevice.name = value;
+  } else if (classifier === 'entity') {
+    const entity = activeDevice.entities.find(d => d.id === id)
+    entity.name = value;
+  } else if (classifier === 'entity-visible') {
+    const entity = activeDevice.entities.find(d => d.id === id)
+    entity.visible = value;
+  } else if (classifier === 'type') {
+    const entity = activeDevice.entities.find(e => e.id === id)
+    const index = device.entities.findIndex(e => e.id === id)
+    const stacheDevice = { ...device };
+    entity.type = value;
+    stacheDevice.entities[index].type = value;
+    setDevice(stacheDevice);
+  }
+};
+
+export function saveUpdateDevice(deviceList, onDeviceList, onUpdatedDevice, activeDevice, onUpdateDeviceToggle, toggleHandle, settingsMode, onTogglePopup, setErrorMessage, setActiveValue, setActiveDevice) {
+  const updatedDeviceList = [...deviceList];
+  onDeviceList(updatedDeviceList);
+  onUpdatedDevice(activeDevice);
+  onUpdateDeviceToggle();
+  toggleHandle(settingsMode, onTogglePopup, setErrorMessage, setActiveValue, setActiveDevice);
+};
+
+export function addNewLabel(newLabel, labelList, device, activeEntity, activeDevice, setDevice, setInputToggle, setActiveEntity, setNewLabel, setSelectLabel, setSelectLabelID) {
+  if (newLabel && !labelList.includes(newLabel)) {
+    labelList.push(newLabel.toLowerCase());
+    const index = device.entities.findIndex(e => e.id === activeEntity.id)
+    activeDevice.entities[index].label.push(newLabel);
+    setDevice(structuredClone(activeDevice));
+    setInputToggle(false);
+    setActiveEntity(null);
+    setNewLabel("");
+    setSelectLabel(false);
+    setSelectLabelID(null);
+  }
+}
+
+export function resetLabel(setInputToggle, setActiveEntity) {
+  setInputToggle(false)
+  setActiveEntity(null)
+}
+
+export function selectToggle(id, activeID, setSelectLabel, setSelectLabelID) {
+  if (id === activeID) {
+    setSelectLabel(false);
+    setSelectLabelID(null);
+    return;
+  }
+  setSelectLabel(true);
+  setSelectLabelID(id);
+}
+
+export function checkLabel(label, labelList) {
+  if (labelList.includes(label)) {
+    return true;
+  }
+}
+
+export function addLabel(value, id, activeDevice, setDevice, setSelectLabel, setSelectLabelID) {
+  const entity = activeDevice.entities.find(e => e.id === id)
+  entity.label.push(value);
+  setDevice(structuredClone(activeDevice));
+  setSelectLabel(false);
+  setSelectLabelID(null);
+}
+
+export function removeLabel(value, id, activeDevice, setDevice) {
+  const entity = activeDevice.entities.find(e => e.id === id)
+  const index = entity.label.indexOf(value);
+  entity.label.splice(index, 1);
+  setDevice(structuredClone(activeDevice))
+}
+
+function DeviceSettings({ settingsMode, activeDevice, deviceList, onTogglePopup, onUpdateDeviceToggle, onCanvasDevice, onDeviceToggle, onDeviceList, onUpdatedDevice, labelList, setErrorMessage, setActiveValue, setActiveDevice }) {
 
   const [activeInput, setActiveInput] = useState(null);
   const [device, setDevice] = useState(activeDevice);
@@ -17,173 +163,17 @@ function DeviceSettings({ settingsMode, activeDevice, deviceList, onTogglePopup,
 
   document.body.style.overflow = 'hidden';
 
-  function toggleHandle() {
-    document.body.style.overflow = 'auto';
-    if (settingsMode === 'tool') {
-      onTogglePopup(null);
-    } else if (settingsMode === 'canvas') {
-      onTogglePopup();
-    }
-  };
-
-  function updateDevice(classifier, id, value) {
-    if (classifier === 'device') {
-      activeDevice.name = value;
-    } else if (classifier === 'entity-label') {
-      const entity = activeDevice.entities.find(d => d.id === id)
-      entity.name = value;
-    } else if (classifier === 'entity-visible') {
-      const entity = activeDevice.entities.find(d => d.id === id)
-      entity.visible = value;
-    } else if (classifier === 'type') {
-      const entity = activeDevice.entities.find(e => e.id === id)
-      const index = device.entities.findIndex(e => e.id === id)
-      const stacheDevice = { ...device };
-      entity.type = value;
-      stacheDevice.entities[index].type = value;
-      setDevice(stacheDevice);
-    } else if (classifier === 'label' && value === 'input') {
-      setInputToggle(true);
-      const entity = activeDevice.entities.find(e => e.id === id);
-      setActiveEntity(entity);
-      return;
-    }
-    else if (classifier === 'label') {
-      const entity = activeDevice.entities.find(e => e.id === id)
-      entity.label = value;
-    }
-  };
-
-  function filterImage(type) {
-    if (type == null) {
-      return;
-    } else if (type.toLowerCase().includes('temp')) {
-      return deviceImages['thermometer'].src;
-    } else if (type.toLowerCase().includes('occupancy')) {
-      return deviceImages['person'].src;
-    } else if (type.toLowerCase().includes('battery')) {
-      return deviceImages['battery'].src;
-    } else if (type.toLowerCase().includes('light') || type.toLowerCase().includes('lux')) {
-      return deviceImages['light'].src;
-    } else if (type.toLowerCase().includes('co2')) {
-      return deviceImages['co2'].src;
-    } else if (type.toLowerCase().includes('current')) {
-      return deviceImages['electric'].src;
-    } else if (type.toLowerCase().includes('humidity')) {
-      return deviceImages['humidity'].src;
-    } else if (type.toLowerCase().includes('pressure')) {
-      return deviceImages['pressure'].src;
-    } else if (type.toLowerCase().includes('sound')) {
-      return deviceImages['sound'].src;
-    } else if (type.toLowerCase().includes('motion')) {
-      return deviceImages['motion'].src;
-    } else if (type.toLowerCase().includes('door')) {
-      return deviceImages['door'].src;
-    } else if (type.toLowerCase().includes('window')) {
-      return deviceImages['window'].src;
-    } else if (type.toLowerCase().includes('toaster')) {
-      return deviceImages['toaster'].src;
-    } else if (type.toLowerCase().includes('kettle')) {
-      return deviceImages['kettle'].src;
-    } else if (type.toLowerCase().includes('microwave')) {
-      return deviceImages['microwave'].src;
-    } else if (type.toLowerCase().includes('blender')) {
-      return deviceImages['blender'].src;
-    } else if (type.toLowerCase().includes('tv')) {
-      return deviceImages['tv'].src;
-    } else if (type.toLowerCase().includes('cupboard')) {
-      return deviceImages['cupboard'].src;
-    } else if (type.toLowerCase().includes('faucet')) {
-      return deviceImages['faucet'].src;
-    } else if (type.toLowerCase().includes('shower')) {
-      return deviceImages['shower'].src;
-    } else if (type.toLowerCase().includes('seat')) {
-      return deviceImages['seat'].src;
-    } else if (type.toLowerCase().includes('bed')) {
-      return deviceImages['bed'].src;
-    } else {
-      return deviceImages['sensor'].src;
-    }
-  };
-
-  function addDevice() {
-    activeDevice.isActive = true;
-    onDeviceList(deviceList);
-    onCanvasDevice(activeDevice);
-    onDeviceToggle();
-    toggleHandle();
-  };
-
-  function saveUpdateDevice() {
-    const updatedDeviceList = [...deviceList];
-    onDeviceList(updatedDeviceList);
-    onUpdatedDevice(activeDevice);
-    onUpdateDeviceToggle();
-    toggleHandle();
-  };
-
-  function addNewLabel() {
-    if (newLabel && !labelList.includes(newLabel)) {
-      labelList.push(newLabel.toLowerCase());
-      const index = device.entities.findIndex(e => e.id === activeEntity.id)
-      activeDevice.entities[index].label.push(newLabel);
-      setDevice(structuredClone(activeDevice));
-      setInputToggle(false);
-      setActiveEntity(null);
-      setNewLabel("");
-      setSelectLabel(false);
-      setSelectLabelID(null);
-    }
-  }
-
-  function resetLabel() {
-    setInputToggle(false)
-    setActiveEntity(null)
-  }
-
-  function selectToggle(id, activeID) {
-    if (id === activeID) {
-      setSelectLabel(false);
-      setSelectLabelID(null);
-      return;
-    }
-    setSelectLabel(true);
-    setSelectLabelID(id);
-
-  }
-
-  function checkLabel(label, labelList) {
-    if (labelList.includes(label)) {
-      return true;
-    }
-  }
-
-  function addLabel(value, id) {
-    const entity = activeDevice.entities.find(e => e.id === id)
-    entity.label.push(value);
-    setDevice(structuredClone(activeDevice));
-    setSelectLabel(false);
-    setSelectLabelID(null);
-  }
-
-  function removeLabel(value, id) {
-    const entity = activeDevice.entities.find(e => e.id === id)
-    const index = entity.label.indexOf(value);
-    entity.label.splice(index, 1);
-    setDevice(structuredClone(activeDevice))
-  }
-
   return ReactDOM.createPortal(
-    <div className="filter" onClick={() => toggleHandle()}>
+    <div className="filter" onClick={() => toggleHandle(settingsMode, onTogglePopup, setErrorMessage, setActiveValue, setActiveDevice)}>
       <div className="small-frame" onClick={e => e.stopPropagation()}>
         <div className='exit'>
-          <button onClick={() => toggleHandle()}>X</button>
+          <button onClick={() => toggleHandle(settingsMode, onTogglePopup, setErrorMessage, setActiveValue, setActiveDevice)}>X</button>
         </div>
 
         <h2 style={{ alignItems: 'center' }}>
           {device.platform === "thethingsnetwork" && <img style={{ width: 40 }} src={deviceImages['lorawan'].src} className="menu-icon" alt="logo" />}
           {device.platform === "zha" && <img style={{ width: 40 }} src={deviceImages['zigbee'].src} className="menu-icon" alt="logo" />}
-          <input className={activeInput === device.id ? 'input-on' : 'input-off'} onFocus={() => setActiveInput(device.id)} onBlur={() => setActiveInput(null)} type='text' defaultValue={device.name} onChange={(e) => updateDevice('device', device.id, e.target.value)}></input></h2>
+          <input className={activeInput === device.id ? 'input-on' : 'input-off'} onFocus={() => setActiveInput(device.id)} onBlur={() => setActiveInput(null)} type='text' defaultValue={device.name} onChange={(e) => updateDevice('device', device.id, e.target.value, device, activeDevice, setDevice)}></input></h2>
         <div className='popup-content'>
 
           <div className='device-info'><div className='info-tooltip' title='The original name of the sensor. Click on header name above to change the name of the device.'>🛈</div><b>Original Name: </b>{device.original_name}</div>
@@ -192,18 +182,17 @@ function DeviceSettings({ settingsMode, activeDevice, deviceList, onTogglePopup,
           <div className='upper-device-buttons'>
             <div>
               {settingsMode === 'tool' &&
-                <button onClick={() => addDevice()}>Add Device</button>
+                <button onClick={() => addDevice(activeDevice, onDeviceList, deviceList, onCanvasDevice, onDeviceToggle, toggleHandle, settingsMode, onTogglePopup, setErrorMessage, setActiveValue, setActiveDevice)}>Add Device</button>
               }
 
               {settingsMode === 'canvas' &&
-                <button onClick={() => saveUpdateDevice()}>Update Device</button>
+                <button onClick={() => saveUpdateDevice(deviceList, onDeviceList, onUpdatedDevice, activeDevice, onUpdateDeviceToggle, toggleHandle, settingsMode, onTogglePopup, setErrorMessage, setActiveValue, setActiveDevice)}>Update Device</button>
               }
             </div>
             <div>
               <button onClick={() => setHelpToggle(true)}>Help</button>
             </div>
           </div>
-
 
           <div className='sensor-list'>
             <p><b>Sensors:</b></p>
@@ -219,11 +208,11 @@ function DeviceSettings({ settingsMode, activeDevice, deviceList, onTogglePopup,
               <tbody>
                 {device.entities.map((ent) => (
                   <tr key={ent.id}>
-                    <td style={{ width: `${35}%` }}><input style={{ width: `${100}%` }} className={activeInput === ent.id ? 'input-on' : 'input-off'} onFocus={() => setActiveInput(ent.id)} onBlur={() => setActiveInput(null)} type='text' defaultValue={ent.name} onChange={(e) => updateDevice('entity-label', ent.id, e.target.value)}></input></td>
-                    <td style={{ width: `${10}%` }}><input className='checkbox' type="checkbox" defaultChecked={ent.visible} onChange={(e) => updateDevice('entity-visible', ent.id, e.target.checked)} /></td>
+                    <td style={{ width: `${35}%` }}><input style={{ width: `${100}%` }} className={activeInput === ent.id ? 'input-on' : 'input-off'} onFocus={() => setActiveInput(ent.id)} onBlur={() => setActiveInput(null)} type='text' defaultValue={ent.name} onChange={(e) => updateDevice('entity', ent.id, e.target.value, device, activeDevice, setDevice, setInputToggle, setActiveEntity)}></input></td>
+                    <td style={{ width: `${10}%` }}><input className='checkbox' type="checkbox" defaultChecked={ent.visible} onChange={(e) => updateDevice('entity-visible', ent.id, e.target.checked, device, activeDevice, setDevice)} /></td>
                     <td style={{ width: `${20}%` }}>
                       <div className='sensor-display'>
-                        <img src={filterImage(ent.type)} alt='sensor type icon'></img>
+                        <img src={filterImage(ent.type, deviceImages)} alt='sensor type icon'></img>
                         {(ent.type.toLowerCase() !== 'digital' && ent.type.toLowerCase() !== 'binary' && ent.type.toLowerCase() !== 'door' && ent.type.toLowerCase() !== 'window' && ent.type.toLowerCase() !== 'current'
                           && ent.type.toLowerCase() !== 'microwave' && ent.type.toLowerCase() !== 'toaster' && ent.type.toLowerCase() !== 'kettle' && ent.type.toLowerCase() !== 'blender' && ent.type.toLowerCase() !== 'tv'
                           && ent.type.toLowerCase() !== 'cupboard' && ent.type.toLowerCase() !== 'shower' && ent.type.toLowerCase() !== 'faucet' && ent.type.toLowerCase() !== 'flood' && ent.type.toLowerCase() !== 'seat' && ent.type.toLowerCase() !== 'bed' && !ent.type.toLowerCase().includes('status')) && (
@@ -231,7 +220,7 @@ function DeviceSettings({ settingsMode, activeDevice, deviceList, onTogglePopup,
                           )}
 
                         {(ent.type.toLowerCase() === 'digital' || ent.type.toLowerCase() === 'binary' || ent.type.toLowerCase() === 'door' || ent.type.toLowerCase() === 'window' || ent.type.toLowerCase() === 'cupboard') && (
-                          <select key={ent.id} onChange={(e) => updateDevice('type', ent.id, e.target.value)}>
+                          <select key={ent.id} onChange={(e) => updateDevice('type', ent.id, e.target.value, device, activeDevice, setDevice)}>
                             <option value={ent.type}>{ent.type}</option>
                             {ent.type !== 'door' && (
                               <option value='door'>door</option>
@@ -247,7 +236,7 @@ function DeviceSettings({ settingsMode, activeDevice, deviceList, onTogglePopup,
 
                         {(ent.type.toLowerCase() === 'current' || ent.type.toLowerCase() === 'toaster' || ent.type.toLowerCase() === 'kettle' || ent.type.toLowerCase() === 'microwave' || ent.type.toLowerCase() === 'blender'
                           || ent.type.toLowerCase() === 'tv') && (
-                            <select key={ent.id} onChange={(e) => updateDevice('type', ent.id, e.target.value)}>
+                            <select key={ent.id} onChange={(e) => updateDevice('type', ent.id, e.target.value, device, activeDevice, setDevice)}>
                               <option value={ent.type}>{ent.type}</option>
                               {ent.type !== 'kettle' && (
                                 <option value='kettle'>kettle</option>
@@ -271,7 +260,7 @@ function DeviceSettings({ settingsMode, activeDevice, deviceList, onTogglePopup,
                           )}
 
                         {(ent.type.toLowerCase() === 'flood' || ent.type.toLowerCase() === 'shower' || ent.type.toLowerCase() === 'faucet') && (
-                          <select key={ent.id} onChange={(e) => updateDevice('type', ent.id, e.target.value)}>
+                          <select key={ent.id} onChange={(e) => updateDevice('type', ent.id, e.target.value, device, activeDevice, setDevice)}>
                             <option value={ent.type}>{ent.type}</option>
                             {ent.type !== 'shower' && (
                               <option value='shower'>shower</option>
@@ -286,7 +275,7 @@ function DeviceSettings({ settingsMode, activeDevice, deviceList, onTogglePopup,
                         )}
 
                         {(ent.type.toLowerCase().includes('status') || ent.type.toLowerCase() === 'seat' || ent.type.toLowerCase() === 'bed') && (
-                          <select key={ent.id} onChange={(e) => updateDevice('type', ent.id, e.target.value)}>
+                          <select key={ent.id} onChange={(e) => updateDevice('type', ent.id, e.target.value, device, activeDevice, setDevice)}>
                             <option value={ent.type}>{ent.type}</option>
                             {ent.type !== 'seat' && (
                               <option value='seat'>seat</option>
@@ -303,14 +292,14 @@ function DeviceSettings({ settingsMode, activeDevice, deviceList, onTogglePopup,
                     <td style={{ width: `${25}%` }}>
                       <div className='label-view'>
                         <div className='add-label'>
-                          <button title='Add Label' onClick={() => selectToggle(ent.id, selectLabelID)}>+</button>
+                          <button title='Add Label' onClick={() => selectToggle(ent.id, selectLabelID, setSelectLabel, setSelectLabelID)}>+</button>
                         </div>
 
                         {selectLabel && (selectLabelID === ent.id) && (
                           <div className='select-dropdown'>
                             <div>
                               {labelList.map((label) => (
-                                <button onClick={() => addLabel(label, ent.id)} disabled={checkLabel(label, ent.label)}>{label}</button>
+                                <button onClick={() => addLabel(label, ent.id, activeDevice, setDevice, setSelectLabel, setSelectLabelID)} disabled={checkLabel(label, ent.label)}>{label}</button>
                               ))}
                               <button onClick={() => { setInputToggle(true); setActiveEntity(ent) }}>new label...</button>
                             </div>
@@ -322,7 +311,7 @@ function DeviceSettings({ settingsMode, activeDevice, deviceList, onTogglePopup,
                             {text && (
                               <div className='bubble'>
                                 {text}
-                                <button onClick={() => removeLabel(text, ent.id)} title='Remove Label'>x</button>
+                                <button onClick={() => removeLabel(text, ent.id, activeDevice, setDevice)} title='Remove Label'>x</button>
                               </div>
                             )}
                           </div>
@@ -334,16 +323,16 @@ function DeviceSettings({ settingsMode, activeDevice, deviceList, onTogglePopup,
               </tbody>
             </table>
             {inputToggle && (
-              <div className="filter" onClick={() => resetLabel()}>
+              <div className="filter" onClick={() => resetLabel(setInputToggle, setActiveEntity)}>
                 <div className="new-label-frame" onClick={e => e.stopPropagation()}>
                   <div className='exit'>
-                    <button onClick={() => resetLabel()}>X</button>
+                    <button onClick={() => resetLabel(setInputToggle, setActiveEntity)}>X</button>
                   </div>
                   <div className='popup-content'>
                     <h2>Add New Label</h2>
                     <p>Please enter your new label name below.</p>
                     <input type='text' value={newLabel} onChange={(e) => setNewLabel(e.target.value)}></input>
-                    <button onClick={() => addNewLabel()}>Save</button>
+                    <button onClick={() => addNewLabel(newLabel, labelList, device, activeEntity, activeDevice, setDevice, setInputToggle, setActiveEntity, setNewLabel, setSelectLabel, setSelectLabelID)}>Save</button>
                   </div>
                 </div>
               </div>
@@ -374,11 +363,11 @@ function DeviceSettings({ settingsMode, activeDevice, deviceList, onTogglePopup,
           </div>
 
           {settingsMode === 'tool' &&
-            <button onClick={() => addDevice()}>Add Device</button>
+            <button onClick={() => addDevice(activeDevice, onDeviceList, deviceList, onCanvasDevice, onDeviceToggle, toggleHandle, settingsMode, onTogglePopup, setErrorMessage, setActiveValue, setActiveDevice)}>Add Device</button>
           }
 
           {settingsMode === 'canvas' &&
-            <button onClick={() => saveUpdateDevice()}>Update Device</button>
+            <button onClick={() => saveUpdateDevice(deviceList, onDeviceList, onUpdatedDevice, activeDevice, onUpdateDeviceToggle, toggleHandle, settingsMode, onTogglePopup, setErrorMessage, setActiveValue, setActiveDevice)}>Update Device</button>
           }
 
         </div>
