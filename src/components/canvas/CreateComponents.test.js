@@ -1,6 +1,6 @@
-import { filterComponent, createComponent } from "../CreateComponents";
+import { filterComponent, createComponent } from "./CreateComponents";
 import * as fabric from "fabric";
-import { componentImages } from "../../../icons";
+import { componentImages } from "../../icons";
 
 describe('createComponent', () => {
     it('Creating a doorway component directly', () => {

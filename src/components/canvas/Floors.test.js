@@ -1,4 +1,4 @@
-import { AddFloor, SwitchFloor, RemoveFloor } from "../Floors";
+import { AddFloor, SwitchFloor, RemoveFloor } from "./Floors";
 import * as fabric from "fabric";
 
 describe('AddFloor', () => {

@@ -1,6 +1,6 @@
-import { createDevice } from "../CreateDevice";
+import { createDevice } from "./CreateDevice";
 import * as fabric from "fabric";
-import { deviceImages } from "../../../icons";
+import { deviceImages } from "../../icons";
 
 describe('createDevice', () => {
     let mockLoRaWAN = {
