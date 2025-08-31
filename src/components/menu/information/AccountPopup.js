@@ -1,9 +1,235 @@
 import { auth, db } from '../../../firebase';
 import { signOut, deleteUser, sendPasswordResetEmail } from 'firebase/auth';
 import '../../css/Popup.css';
-import { collection, query, where, getDoc, getDocs, doc, deleteDoc, addDoc, or, updateDoc, arrayUnion, arrayRemove, } from 'firebase/firestore';
+import { collection, query, where, getDoc, getDocs, doc, deleteDoc, addDoc, or, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { useState, useEffect } from 'react';
 import { Delete, Copy, Share, Settings } from '../../../icons';
+
+export function togglePopup(value, setStatesObject, setErrorMessage, name, id, data, width, height, floorArray, list, dev, originalDev, label, devRegistry, entRegistry) {
+  const { setNameCopy, setActiveValue, setActiveName, setActiveID, setActiveData, setActiveWidth, setActiveHeight, setActiveFloorArray, setSharedList,
+    setActiveDevice, setActiveOriginalDevice, setActiveLabel, setActiveDeviceRegistry, setActiveEntityRegistry } = setStatesObject;
+  if (value === 'copy') {
+    setNameCopy(`${name} copy`);
+  }
+  if (value === 'delete-account') {
+    setActiveValue(value);
+    return;
+  }
+  if (value === null) {
+    setErrorMessage(null);
+  }
+  setActiveName(name);
+  setActiveValue(value);
+  setActiveID(id);
+  setActiveData(data);
+  setActiveWidth(width);
+  setActiveHeight(height);
+  setActiveFloorArray(floorArray);
+  setSharedList(list);
+  setActiveDevice(dev);
+  setActiveOriginalDevice(originalDev);
+  setActiveLabel(label);
+  setActiveDeviceRegistry(devRegistry);
+  setActiveEntityRegistry(entRegistry);
+}
+
+export async function deleteCanvas(activeID, togglePopup, onCanvasName, onCanvasID, onActive, onRefreshToggle, setErrorMessage, setStatesObject) {
+  try {
+    await deleteDoc(doc(db, "canvases", activeID))
+    togglePopup(null, setStatesObject, setErrorMessage);
+    onCanvasName(null);
+    onCanvasID(null);
+    onActive(false);
+    onRefreshToggle();
+  } catch (error) {
+    setErrorMessage(error.message)
+  }
+};
+
+export async function duplicateCanvas(e, activeName, nameCopy, user, activeData, activeWidth, activeHeight, activeFloorArray, activeDevice,
+  activeOriginalDevice, activeLabel, activeDeviceRegistry, activeEntityRegistry, togglePopup, setStatesObject, setErrorMessage) {
+  e.preventDefault();
+  if (activeName !== nameCopy) {
+    try {
+      await addDoc(collection(db, "canvases"), {
+        owner: user.uid,
+        canvasName: nameCopy,
+        floorplanData: activeData,
+        width: activeWidth,
+        height: activeHeight,
+        floorArray: activeFloorArray,
+        devices: activeDevice,
+        originalDevices: activeOriginalDevice,
+        labelList: activeLabel,
+        deviceRegistry: activeDeviceRegistry,
+        entityRegistry: activeEntityRegistry,
+        shared: [],
+        created: new Date(),
+        updated: new Date()
+      });
+      togglePopup(null, setStatesObject, setErrorMessage);
+    } catch (error) {
+      setErrorMessage(error.message)
+    }
+  } else {
+    setErrorMessage("The name must be different from the original!")
+  }
+};
+
+export async function retrieveFiles(q, setFiles, setLoading) {
+  try {
+    const querySnapshot = await getDocs(q);
+    const canvases = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+    setFiles(canvases)
+  } catch (error) {
+    console.log(error);
+  } finally {
+    setLoading(false);
+  }
+}
+
+export async function GenerateEmailList(sharedList, setEmailList) {
+  const emailArray = [];
+  for (const userid of sharedList) {
+    const docRef = await getDoc(doc(db, "users", userid))
+    const retrievedEmail = docRef.data().email;
+    emailArray.push(retrievedEmail);
+  }
+  setEmailList(emailArray);
+}
+
+export async function changeName(e, activeName, nameCopy, activeID, togglePopup, setStatesObject, setErrorMessage) {
+  e.preventDefault();
+  if (activeName !== nameCopy) {
+    try {
+      await updateDoc(doc(db, "canvases", activeID), {
+        canvasName: nameCopy,
+        updated: new Date()
+      });
+      togglePopup(null, setStatesObject, setErrorMessage);
+    } catch (error) {
+      setErrorMessage(error.message)
+    }
+  }
+};
+
+export async function removeSharedUser(user, setEmailList, emailList, activeID, setErrorMessage) {
+  const retrieveUserID = query(
+    collection(db, "users"),
+    where('email', '==', user),
+  );
+
+  try {
+    const idSnapshot = await getDocs(retrieveUserID);
+    const idResult = idSnapshot.docs[0].data().id;
+    const emailResult = idSnapshot.docs[0].data().email;
+    await updateDoc(doc(db, "canvases", activeID), {
+      shared: arrayRemove(idResult)
+    });
+
+    setEmailList(emailList.filter(email => email !== emailResult))
+
+  } catch (error) {
+    setErrorMessage(error.message)
+  }
+}
+
+export async function shareCanvas(e, shareRequest, setErrorMessage, activeID, setEmailList, emailList) {
+  e.preventDefault();
+
+  const retrieveUserID = query(
+    collection(db, "users"),
+    where('email', '==', shareRequest),
+  );
+
+  try {
+    const idSnapshot = await getDocs(retrieveUserID);
+    if (idSnapshot.empty) {
+      setErrorMessage("This email is not associated with an account")
+      return null;
+    }
+    const idResult = idSnapshot.docs[0].data().id;
+    const emailResult = idSnapshot.docs[0].data().email;
+    await updateDoc(doc(db, "canvases", activeID), {
+      shared: arrayUnion(idResult)
+    });
+
+    setEmailList([...emailList, emailResult])
+
+  } catch (error) {
+    setErrorMessage(error.message)
+    console.log(error);
+  }
+};
+
+export function loadCanvas(canvasID, canvasName, width, height, devices, originalDevices, labels, coreDevice, coreEntity, onCanvasID,
+  onCanvasName, onCanvasWidth, onCanvasHeight, onDeviceList, onOriginalDeviceList, onLabelList, onDeviceRegistry, onEntityRegistry, onActive, onLoadToggle, onClose
+) {
+  onCanvasID(canvasID);
+  onCanvasName(canvasName);
+  onCanvasWidth(width);
+  onCanvasHeight(height);
+  onDeviceList(devices);
+  onOriginalDeviceList(originalDevices);
+  onLabelList(labels);
+  onDeviceRegistry(JSON.parse(coreDevice));
+  onEntityRegistry(JSON.parse(coreEntity));
+  onActive(true);
+  onLoadToggle();
+  onClose();
+}
+
+export function userSignOut(onActive, onClose, setErrorMessage) {
+  signOut(auth).then(() => {
+    onActive(false);
+    onClose();
+  }).catch((error) => {
+    setErrorMessage(error.message);
+  });
+}
+
+export async function deleteAccount(user, q, onActive, onRefreshToggle, togglePopup, onClose, setStatesObject, setErrorMessage) {
+  try {
+    const userid = user.uid;
+    const querySnapshot = await getDocs(q);
+
+    await deleteDoc(doc(db, "users", userid))
+
+    querySnapshot.docs.forEach(async (document) => {
+      if (document.data().owner === userid) {
+        await deleteDoc(doc(db, "canvases", document.id))
+      } else if (document.data().shared.includes(userid)) {
+        await updateDoc(doc(db, "canvases", document.id), {
+          shared: arrayRemove(userid)
+        });
+      }
+    });
+
+    await deleteUser(user)
+
+    onActive(false);
+    onRefreshToggle();
+    togglePopup(null, setStatesObject, setErrorMessage);
+    onClose();
+
+  } catch (error) {
+    setErrorMessage(error.message);
+  }
+}
+
+export function resetPassword(email, setMessage, setErrorMessage) {
+  setMessage("");
+  setErrorMessage("");
+
+  sendPasswordResetEmail(auth, email).then(() => {
+    setMessage("An email has been sent to reset your password. It may take a few minutes, and be sure to check your junk email if you have not received it.")
+  }).catch((error) => {
+    setErrorMessage(error.message);
+  })
+}
 
 function Account({ onClose, onCanvasName, onCanvasID, onCanvasWidth, onCanvasHeight, onActive, onLoadToggle, onRefreshToggle, onDeviceList, onOriginalDeviceList, onLabelList, onDeviceRegistry, onEntityRegistry, user }) {
 
@@ -29,6 +255,23 @@ function Account({ onClose, onCanvasName, onCanvasID, onCanvasWidth, onCanvasHei
   const [errorMessage, setErrorMessage] = useState("");
   const [message, setMessage] = useState("");
 
+  const setStatesObject = {
+    setNameCopy: setNameCopy,
+    setActiveName: setActiveName,
+    setActiveValue: setActiveValue,
+    setActiveID: setActiveID,
+    setActiveData: setActiveData,
+    setActiveWidth: setActiveWidth,
+    setActiveHeight: setActiveHeight,
+    setActiveFloorArray: setActiveFloorArray,
+    setSharedList: setSharedList,
+    setActiveDevice: setActiveDevice,
+    setActiveOriginalDevice: setActiveOriginalDevice,
+    setActiveLabel: setActiveLabel,
+    setActiveDeviceRegistry: setActiveDeviceRegistry,
+    setActiveEntityRegistry: setActiveEntityRegistry
+  }
+
   const q = query(
     collection(db, "canvases"),
     or(
@@ -38,235 +281,16 @@ function Account({ onClose, onCanvasName, onCanvasID, onCanvasWidth, onCanvasHei
   );
 
   useEffect(() => {
-    async function retrieveFiles() {
-      try {
-        const querySnapshot = await getDocs(q);
-        const canvases = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data()
-        }));
-        setFiles(canvases)
-      } catch (error) {
-        console.log(error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    retrieveFiles();
-
+    retrieveFiles(q, setFiles, setLoading)
   }, [q]);
 
   useEffect(() => {
+
     if (sharedList === undefined || sharedList === null || sharedList === "") {
       return;
     };
-
-    async function GenerateEmailList() {
-      const emailArray = [];
-      for (const userid of sharedList) {
-        const docRef = await getDoc(doc(db, "users", userid))
-        const retrievedEmail = docRef.data().email;
-        emailArray.push(retrievedEmail);
-      }
-      setEmailList(emailArray);
-    }
-    GenerateEmailList()
+    GenerateEmailList(sharedList, setEmailList)
   }, [sharedList]);
-
-  async function deleteCanvas() {
-    try {
-      await deleteDoc(doc(db, "canvases", activeID))
-      togglePopup(null);
-      onCanvasName(null);
-      onCanvasID(null);
-      onActive(false);
-      onRefreshToggle();
-    } catch (error) {
-      setErrorMessage(error.message)
-    }
-  };
-
-  async function duplicateCanvas(e) {
-    e.preventDefault();
-    if (activeName !== nameCopy) {
-      try {
-        await addDoc(collection(db, "canvases"), {
-          owner: user.uid,
-          canvasName: nameCopy,
-          floorplanData: activeData,
-          width: activeWidth,
-          height: activeHeight,
-          floorArray: activeFloorArray,
-          devices: activeDevice,
-          originalDevices: activeOriginalDevice,
-          labelList: activeLabel,
-          deviceRegistry: activeDeviceRegistry,
-          entityRegistry: activeEntityRegistry,
-          shared: [],
-          created: new Date(),
-          updated: new Date()
-        });
-        togglePopup(null);
-      } catch (error) {
-        setErrorMessage(error.message)
-      }
-    }
-  };
-
-  async function changeName(e) {
-    e.preventDefault();
-    if (activeName !== nameCopy) {
-      try {
-        await updateDoc(doc(db, "canvases", activeID), {
-          canvasName: nameCopy,
-          updated: new Date()
-        });
-        togglePopup(null);
-      } catch (error) {
-        setErrorMessage(error.message)
-      }
-    }
-  };
-
-  async function shareCanvas(e) {
-    e.preventDefault();
-
-    const retrieveUserID = query(
-      collection(db, "users"),
-      where('email', '==', shareRequest),
-    );
-
-    try {
-      const idSnapshot = await getDocs(retrieveUserID);
-      if (idSnapshot.empty) {
-        setErrorMessage("This email is not associated with an account")
-        return null;
-      }
-      const idResult = idSnapshot.docs[0].data().id;
-      const emailResult = idSnapshot.docs[0].data().email;
-      await updateDoc(doc(db, "canvases", activeID), {
-        shared: arrayUnion(idResult)
-      });
-
-      setEmailList([...emailList, emailResult])
-
-    } catch (error) {
-      setErrorMessage(error.message)
-      console.log(error);
-    }
-  };
-
-  async function removeSharedUser(user) {
-    const retrieveUserID = query(
-      collection(db, "users"),
-      where('email', '==', user),
-    );
-
-    try {
-      const idSnapshot = await getDocs(retrieveUserID);
-      const idResult = idSnapshot.docs[0].data().id;
-      const emailResult = idSnapshot.docs[0].data().email;
-      await updateDoc(doc(db, "canvases", activeID), {
-        shared: arrayRemove(idResult)
-      });
-
-      setEmailList(emailList.filter(email => email !== emailResult))
-
-    } catch (error) {
-      setErrorMessage(error.message)
-    }
-  }
-
-  function loadCanvas(canvasID, canvasName, width, height, devices, originalDevices, labels, coreDevice, coreEntity) {
-    onCanvasID(canvasID);
-    onCanvasName(canvasName);
-    onCanvasWidth(width);
-    onCanvasHeight(height);
-    onDeviceList(devices);
-    onOriginalDeviceList(originalDevices);
-    onLabelList(labels);
-    onDeviceRegistry(JSON.parse(coreDevice));
-    onEntityRegistry(JSON.parse(coreEntity));
-    onActive(true);
-    onLoadToggle();
-    onClose();
-  }
-
-  function togglePopup(value, name, id, data, width, height, floorArray, list, dev, originalDev, label, devRegistry, entRegistry) {
-    if (value === 'copy') {
-      setNameCopy(`${name} copy`);
-    }
-    if (value === 'delete-account') {
-      setActiveValue(value);
-      return;
-    }
-    if (value === null) {
-      setErrorMessage(null);
-    }
-    setActiveName(name);
-    setActiveValue(value);
-    setActiveID(id);
-    setActiveData(data);
-    setActiveWidth(width);
-    setActiveHeight(height);
-    setActiveFloorArray(floorArray);
-    setSharedList(list);
-    setActiveDevice(dev);
-    setActiveOriginalDevice(originalDev);
-    setActiveLabel(label);
-    setActiveDeviceRegistry(devRegistry);
-    setActiveEntityRegistry(entRegistry);
-  }
-
-  function userSignOut() {
-    signOut(auth).then(() => {
-      onActive(false);
-      onClose();
-    }).catch((error) => {
-      setErrorMessage(error.message);
-    });
-  }
-
-  async function deleteAccount() {
-    try {
-      const userid = user.uid;
-      const querySnapshot = await getDocs(q);
-
-      await deleteDoc(doc(db, "users", userid))
-
-      querySnapshot.docs.forEach(async (document) => {
-        if (document.data().owner === userid) {
-          await deleteDoc(doc(db, "canvases", document.id))
-        } else if (document.data().shared.includes(userid)) {
-          await updateDoc(doc(db, "canvases", document.id), {
-            shared: arrayRemove(userid)
-          });
-        }
-      });
-
-      await deleteUser(user)
-
-      onActive(false);
-      onRefreshToggle();
-      togglePopup(null);
-      onClose();
-
-    } catch (error) {
-      setErrorMessage(error.message);
-    }
-  }
-
-  function resetPassword(email) {
-    setMessage("");
-    setErrorMessage("");
-
-    sendPasswordResetEmail(auth, email).then(() => {
-      setMessage("An email has been sent to reset your password. It may take a few minutes, and be sure to check your junk email if you have not received it.")
-    }).catch((error) => {
-      setErrorMessage(error.message);
-    })
-  }
 
   if (loading) return;
 
@@ -282,8 +306,8 @@ function Account({ onClose, onCanvasName, onCanvasID, onCanvasWidth, onCanvasHei
             <h2>Account</h2>
             <p>Welcome to your account!</p>
 
-            <button onClick={() => resetPassword(user.email)}>Change Password</button>
-            <button onClick={userSignOut}>Sign Out</button>
+            <button onClick={() => resetPassword(user.email, setMessage, setErrorMessage)}>Change Password</button>
+            <button onClick={() => userSignOut(onActive, onClose, setErrorMessage)}>Sign Out</button>
             {message && (
               <p style={{ color: 'green' }}>{message}</p>
             )}
@@ -298,12 +322,13 @@ function Account({ onClose, onCanvasName, onCanvasID, onCanvasWidth, onCanvasHei
             {tabMode === 'floorplan' && (
               <ul className='floor-plan-grid'>
                 {files.filter(file => file.owner === user.uid).map((file) => (
-                  <li key={file.id} onClick={() => loadCanvas(file.id, file.canvasName, file.width, file.height, file.devices, file.originalDevices, file.labelList, file.deviceRegistry, file.entityRegistry)}>
+                  <li key={file.id} onClick={() => loadCanvas(file.id, file.canvasName, file.width, file.height, file.devices, file.originalDevices, file.labelList, file.deviceRegistry, file.entityRegistry, onCanvasID,
+                    onCanvasName, onCanvasWidth, onCanvasHeight, onDeviceList, onOriginalDeviceList, onLabelList, onDeviceRegistry, onEntityRegistry, onActive, onLoadToggle, onClose)}>
                     <div className='upper-bar' onClick={e => e.stopPropagation()}>
-                      <img className="round-icon" onClick={() => togglePopup('copy', file.canvasName, file.id, file.floorplanData, file.width, file.height, file.floorArray, file.shared, file.devices, file.originalDevices, file.labelList, file.deviceRegistry, file.entityRegistry)} src={Copy} alt='Copy Button' />
-                      <img className="round-icon" onClick={() => togglePopup('share', file.canvasName, file.id, file.floorplanData, file.width, file.height, file.floorArray, file.shared, file.devices, file.originalDevices, file.labelList, file.deviceRegistry, file.entityRegistry)} src={Share} alt='Share Button' />
-                      <img className="round-icon" onClick={() => togglePopup('delete', file.canvasName, file.id, file.floorplanData, file.width, file.height, file.floorArray, file.shared, file.devices, file.originalDevices, file.labelList, file.deviceRegistry, file.entityRegistry)} src={Delete} alt='Delete Button' />
-                      <img className="round-icon" onClick={() => togglePopup('settings', file.canvasName, file.id, file.floorplanData, file.width, file.height, file.floorArray, file.shared, file.devices, file.originalDevices, file.labelList, file.deviceRegistry, file.entityRegistry)} src={Settings} alt='Settings Button' />
+                      <img className="round-icon" onClick={() => togglePopup('copy', setStatesObject, setErrorMessage, file.canvasName, file.id, file.floorplanData, file.width, file.height, file.floorArray, file.shared, file.devices, file.originalDevices, file.labelList, file.deviceRegistry, file.entityRegistry)} src={Copy} alt='Copy Button' />
+                      <img className="round-icon" onClick={() => togglePopup('share', setStatesObject, setErrorMessage, file.canvasName, file.id, file.floorplanData, file.width, file.height, file.floorArray, file.shared, file.devices, file.originalDevices, file.labelList, file.deviceRegistry, file.entityRegistry)} src={Share} alt='Share Button' />
+                      <img className="round-icon" onClick={() => togglePopup('delete', setStatesObject, setErrorMessage, file.canvasName, file.id, file.floorplanData, file.width, file.height, file.floorArray, file.shared, file.devices, file.originalDevices, file.labelList, file.deviceRegistry, file.entityRegistry)} src={Delete} alt='Delete Button' />
+                      <img className="round-icon" onClick={() => togglePopup('settings', setStatesObject, setErrorMessage, file.canvasName, file.id, file.floorplanData, file.width, file.height, file.floorArray, file.shared, file.devices, file.originalDevices, file.labelList, file.deviceRegistry, file.entityRegistry)} src={Settings} alt='Settings Button' />
                     </div>
                     <p>{file.canvasName}</p>
                   </li>
@@ -313,7 +338,8 @@ function Account({ onClose, onCanvasName, onCanvasID, onCanvasWidth, onCanvasHei
             {tabMode === 'shared' && (
               <ul className='floor-plan-grid'>
                 {files.filter(file => file.owner !== user.uid).map((file) => (
-                  <li key={file.id} onClick={() => loadCanvas(file.id, file.canvasName, file.width, file.height, file.devices, file.originalDevices, file.labelList, file.deviceRegistry, file.entityRegistry)}>
+                  <li key={file.id} onClick={() => loadCanvas(file.id, file.canvasName, file.width, file.height, file.devices, file.originalDevices, file.labelList, file.deviceRegistry, file.entityRegistry, onCanvasID,
+                    onCanvasName, onCanvasWidth, onCanvasHeight, onDeviceList, onOriginalDeviceList, onLabelList, onDeviceRegistry, onEntityRegistry, onActive, onLoadToggle, onClose)}>
                     <p>{file.canvasName}</p>
                   </li>
                 ))}
@@ -324,16 +350,16 @@ function Account({ onClose, onCanvasName, onCanvasID, onCanvasWidth, onCanvasHei
         )}
 
         {activeValue === 'delete' && (
-          <div className="filter" onClick={() => togglePopup(null)}>
+          <div className="filter" onClick={() => togglePopup(null, setStatesObject, setErrorMessage)}>
             <div className="small-frame" onClick={e => e.stopPropagation()}>
               <div className='exit'>
-                <button onClick={() => togglePopup(null)}>X</button>
+                <button onClick={() => togglePopup(null, setStatesObject, setErrorMessage)}>X</button>
               </div>
 
               <h2>Would you like to delete "<i>{activeName}</i>"?</h2>
               <div className='popup-content'>
-                <button onClick={() => deleteCanvas(activeID)}>Yes</button>
-                <button onClick={() => togglePopup(null)}>No</button>
+                <button onClick={() => deleteCanvas(activeID, togglePopup, onCanvasName, onCanvasID, onActive, onRefreshToggle, setErrorMessage)}>Yes</button>
+                <button onClick={() => togglePopup(null, setStatesObject, setErrorMessage)}>No</button>
                 {errorMessage && (
                   <p style={{ color: 'red' }}>{errorMessage}</p>
                 )}
@@ -343,15 +369,16 @@ function Account({ onClose, onCanvasName, onCanvasID, onCanvasWidth, onCanvasHei
         )}
 
         {activeValue === 'copy' && (
-          <div className="filter" onClick={() => togglePopup(null)}>
+          <div className="filter" onClick={() => togglePopup(null, setStatesObject, setErrorMessage)}>
             <div className="small-frame" onClick={e => e.stopPropagation()}>
               <div className='exit'>
-                <button onClick={() => togglePopup(null)}>X</button>
+                <button onClick={() => togglePopup(null, setStatesObject, setErrorMessage)}>X</button>
               </div>
 
               <h2>Copy</h2>
               <div className='popup-content'>
-                <form onSubmit={duplicateCanvas}>
+                <form onSubmit={(e) => duplicateCanvas(e, activeName, nameCopy, user, activeData, activeWidth, activeHeight, activeFloorArray, activeDevice,
+                  activeOriginalDevice, activeLabel, activeDeviceRegistry, activeEntityRegistry, togglePopup, setErrorMessage)}>
                   <input type='text' value={nameCopy} onChange={(e) => setNameCopy(e.target.value)} placeholder='canvas name' />
                   {errorMessage && (
                     <p style={{ color: 'red' }}>{errorMessage}</p>
@@ -364,16 +391,16 @@ function Account({ onClose, onCanvasName, onCanvasID, onCanvasWidth, onCanvasHei
         )}
 
         {activeValue === 'share' && (
-          <div className="filter" onClick={() => togglePopup(null)}>
+          <div className="filter" onClick={() => togglePopup(null, setStatesObject, setErrorMessage)}>
             <div className="small-frame" onClick={e => e.stopPropagation()}>
               <div className='exit'>
-                <button onClick={() => togglePopup(null)}>X</button>
+                <button onClick={() => togglePopup(null, setStatesObject, setErrorMessage)}>X</button>
               </div>
 
               <h2>Share "<i>{activeName}</i>" With a User</h2>
               <div className='popup-content'>
                 Please enter the email of the person you wish to share with.
-                <form onSubmit={shareCanvas}>
+                <form onSubmit={(e) => shareCanvas(e, shareRequest, setErrorMessage, activeID, setEmailList, emailList)}>
                   <input type='text' value={shareRequest} onChange={(e) => setShareRequest(e.target.value)} placeholder='email' />
                   {errorMessage && (
                     <p style={{ color: 'red' }}>{errorMessage}</p>
@@ -386,7 +413,7 @@ function Account({ onClose, onCanvasName, onCanvasID, onCanvasWidth, onCanvasHei
                   {emailList.map((userEmail) => (
                     <div className='user-item' key={userEmail}>
                       {userEmail}
-                      <button onClick={() => removeSharedUser(userEmail)}>Remove</button>
+                      <button onClick={() => removeSharedUser(userEmail, setEmailList, emailList, activeID, setErrorMessage)}>Remove</button>
                     </div>
                   ))}
                 </div>
@@ -396,16 +423,16 @@ function Account({ onClose, onCanvasName, onCanvasID, onCanvasWidth, onCanvasHei
         )}
 
         {activeValue === 'settings' && (
-          <div className="filter" onClick={() => togglePopup(null)}>
+          <div className="filter" onClick={() => togglePopup(null, setStatesObject, setErrorMessage)}>
             <div className="small-frame" onClick={e => e.stopPropagation()}>
               <div className='exit'>
-                <button onClick={() => togglePopup(null)}>X</button>
+                <button onClick={() => togglePopup(null, setStatesObject, setErrorMessage)}>X</button>
               </div>
 
               <h2>"<i>{activeName}</i>" Settings</h2>
               <div className='popup-content'>
                 <p>Enter a new name for "<i>{activeName}</i>"</p>
-                <form onSubmit={changeName}>
+                <form onSubmit={(e) => changeName(e, activeName, nameCopy, activeID, togglePopup, setErrorMessage)}>
                   <input type='text' defaultValue={activeName} onChange={(e) => setNameCopy(e.target.value)} placeholder='canvas name' />
                   {errorMessage && (
                     <p style={{ color: 'red' }}>{errorMessage}</p>
@@ -418,18 +445,18 @@ function Account({ onClose, onCanvasName, onCanvasID, onCanvasWidth, onCanvasHei
         )}
 
         {activeValue === 'delete-account' && (
-          <div className="filter" onClick={() => togglePopup(null)}>
+          <div className="filter" onClick={() => togglePopup(null, setStatesObject, setErrorMessage)}>
             <div className="small-frame" onClick={e => e.stopPropagation()}>
               <div className='exit'>
-                <button onClick={() => togglePopup(null)}>X</button>
+                <button onClick={() => togglePopup(null, setStatesObject, setErrorMessage)}>X</button>
               </div>
 
               <h2>Would you like to delete your account?</h2>
               <b>NOTE:</b> Deleting your account will remove all data associated with your account. This will include any saved floor plans.
               Do you really want to delete your account?
               <div className='popup-content'>
-                <button onClick={() => deleteAccount()}>Yes, delete my account</button>
-                <button onClick={() => togglePopup(null)}>No, do not delete my account</button>
+                <button onClick={() => deleteAccount(user, q, onActive, onRefreshToggle, togglePopup, onClose, setStatesObject, setErrorMessage)}>Yes, delete my account</button>
+                <button onClick={() => togglePopup(null, setStatesObject, setErrorMessage)}>No, do not delete my account</button>
                 {errorMessage && (
                   <p style={{ color: 'red' }}>{errorMessage}</p>
                 )}
