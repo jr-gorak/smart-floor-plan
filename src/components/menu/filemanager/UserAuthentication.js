@@ -5,6 +5,50 @@ import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswor
 import { db } from '../../../firebase';
 import { doc, setDoc } from "firebase/firestore";
 
+export async function createUser(docRef, onClose) {
+    const newUser = docRef.user;
+    await setDoc(doc(db, "users", newUser.uid), {
+        id: newUser.uid,
+        email: newUser.email
+    })
+    onClose();
+}
+
+export async function createAccount(e, pass, passValidate, email, setErrorMessage, onClose) {
+    e.preventDefault();
+    if (pass === passValidate) {
+        try {
+            const docRef = await createUserWithEmailAndPassword(auth, email, pass);
+            await createUser(docRef, onClose)
+        }
+        catch (error) {
+            setErrorMessage(error);
+        }
+    } else {
+        setErrorMessage("Passwords do not match")
+    }
+};
+
+export async function signInAccount(e, pass, email, setErrorMessage, onClose) {
+    e.preventDefault();
+    await signInWithEmailAndPassword(auth, email, pass).then(() => {
+        onClose();
+    }).catch((error) => {
+        setErrorMessage(error.message);
+    })
+};
+
+export async function resetPassword(email, setMessage, setErrorMessage) {
+    setMessage("");
+    setErrorMessage("");
+
+    await sendPasswordResetEmail(auth, email).then(() => {
+        setMessage("An email has been sent to reset your password. It may take a few minutes, and be sure to check your junk email if you have not received it.")
+    }).catch((error) => {
+        setErrorMessage(error.message);
+    })
+}
+
 function UserAuthentication({ onClose }) {
 
     const [frameMode, setFrameMode] = useState("login");
@@ -15,46 +59,6 @@ function UserAuthentication({ onClose }) {
     const [message, setMessage] = useState("");
     const [togglePasswordReset, setTogglePasswordReset] = useState(false);
     const [resetEmail, setResetEmail] = useState("");
-
-    async function createAccount(e) {
-        e.preventDefault();
-        if (pass === passValidate) {
-            try {
-                const docRef = await createUserWithEmailAndPassword(auth, email, pass);
-                const newUser = docRef.user;
-                await setDoc(doc(db, "users", newUser.uid), {
-                    id: newUser.uid,
-                    email: newUser.email
-                })
-                onClose();
-            }
-            catch (error) {
-                setErrorMessage(error);
-            }
-        } else {
-            setErrorMessage("Passwords do not match")
-        }
-    };
-
-    function signInAccount(e) {
-        e.preventDefault();
-        signInWithEmailAndPassword(auth, email, pass).then(() => {
-            onClose();
-        }).catch((error) => {
-            setErrorMessage(error.message);
-        })
-    };
-
-    function resetPassword(email) {
-        setMessage("");
-        setErrorMessage("");
-
-        sendPasswordResetEmail(auth, email).then(() => {
-            setMessage("An email has been sent to reset your password. It may take a few minutes, and be sure to check your junk email if you have not received it.")
-        }).catch((error) => {
-            setErrorMessage(error.message);
-        })
-    }
 
     return (
 
@@ -69,7 +73,7 @@ function UserAuthentication({ onClose }) {
                         <h2>User Login</h2>
                         <div className='popup-content'>
                             <div className='form-container'>
-                                <form onSubmit={signInAccount}>
+                                <form onSubmit={(e) => signInAccount(e, pass, email, setErrorMessage, onClose)}>
 
                                     <label>Email: <input type='email' placeholder='email' value={email} onChange={(e) => setEmail(e.target.value)} required /></label>
 
@@ -88,7 +92,7 @@ function UserAuthentication({ onClose }) {
                                     {togglePasswordReset && (
                                         <div>
                                             <label> Email: <input type='email' placeholder='email' style={{ width: 200 }} value={resetEmail} onChange={(e) => setResetEmail(e.target.value)} /></label>
-                                            <button onClick={() => resetPassword(resetEmail)}>Reset Password</button>
+                                            <button onClick={() => resetPassword(resetEmail, setMessage, setErrorMessage)}>Reset Password</button>
                                         </div>
                                     )
                                     }
@@ -109,7 +113,7 @@ function UserAuthentication({ onClose }) {
                         <h2>Create New Account</h2>
                         <div className='popup-content'>
                             <div className='form-container'>
-                                <form onSubmit={createAccount}>
+                                <form onSubmit={(e) => createAccount(e, pass, passValidate, email, setErrorMessage, onClose)}>
 
                                     <label>Email: <input type='email' placeholder='email' value={email} onChange={(e) => setEmail(e.target.value)} required /> </label>
 
