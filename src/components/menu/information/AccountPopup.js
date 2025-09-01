@@ -6,31 +6,30 @@ import { useState, useEffect } from 'react';
 import { Delete, Copy, Share, Settings } from '../../../icons';
 
 export function togglePopup(value, setStatesObject, setErrorMessage, name, id, data, width, height, floorArray, list, dev, originalDev, label, devRegistry, entRegistry) {
-  const { setNameCopy, setActiveValue, setActiveName, setActiveID, setActiveData, setActiveWidth, setActiveHeight, setActiveFloorArray, setSharedList,
-    setActiveDevice, setActiveOriginalDevice, setActiveLabel, setActiveDeviceRegistry, setActiveEntityRegistry } = setStatesObject;
   if (value === 'copy') {
-    setNameCopy(`${name} copy`);
+    setStatesObject.setNewName(`${name} copy`);
   }
   if (value === 'delete-account') {
-    setActiveValue(value);
+    setStatesObject.setActiveValue(value);
     return;
   }
   if (value === null) {
     setErrorMessage(null);
   }
-  setActiveName(name);
-  setActiveValue(value);
-  setActiveID(id);
-  setActiveData(data);
-  setActiveWidth(width);
-  setActiveHeight(height);
-  setActiveFloorArray(floorArray);
-  setSharedList(list);
-  setActiveDevice(dev);
-  setActiveOriginalDevice(originalDev);
-  setActiveLabel(label);
-  setActiveDeviceRegistry(devRegistry);
-  setActiveEntityRegistry(entRegistry);
+
+  setStatesObject.setActiveName(name ? name : null);
+  setStatesObject.setActiveValue(value ? value : null);
+  setStatesObject.setActiveID(id ? id : null);
+  setStatesObject.setActiveData(data ? data : null);
+  setStatesObject.setActiveWidth(width ? width : null);
+  setStatesObject.setActiveHeight(height ? height : null);
+  setStatesObject.setActiveFloorArray(floorArray ? floorArray : null);
+  setStatesObject.setSharedList(list ? list : null);
+  setStatesObject.setActiveDevice(dev ? dev : null);
+  setStatesObject.setActiveOriginalDevice(originalDev ? originalDev : null);
+  setStatesObject.setActiveLabel(label ? label : null);
+  setStatesObject.setActiveDeviceRegistry(devRegistry ? devRegistry : null);
+  setStatesObject.setActiveEntityRegistry(entRegistry ? entRegistry : null);
 }
 
 export async function deleteCanvas(activeID, togglePopup, onCanvasName, onCanvasID, onActive, onRefreshToggle, setErrorMessage, setStatesObject) {
@@ -46,14 +45,14 @@ export async function deleteCanvas(activeID, togglePopup, onCanvasName, onCanvas
   }
 };
 
-export async function duplicateCanvas(e, activeName, nameCopy, user, activeData, activeWidth, activeHeight, activeFloorArray, activeDevice,
+export async function duplicateCanvas(e, activeName, newName, user, activeData, activeWidth, activeHeight, activeFloorArray, activeDevice,
   activeOriginalDevice, activeLabel, activeDeviceRegistry, activeEntityRegistry, togglePopup, setStatesObject, setErrorMessage) {
   e.preventDefault();
-  if (activeName !== nameCopy) {
+  if (activeName !== newName) {
     try {
       await addDoc(collection(db, "canvases"), {
         owner: user.uid,
-        canvasName: nameCopy,
+        canvasName: newName,
         floorplanData: activeData,
         width: activeWidth,
         height: activeHeight,
@@ -79,6 +78,7 @@ export async function duplicateCanvas(e, activeName, nameCopy, user, activeData,
 export async function retrieveFiles(q, setFiles, setLoading) {
   try {
     const querySnapshot = await getDocs(q);
+
     const canvases = querySnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data()
@@ -101,18 +101,20 @@ export async function GenerateEmailList(sharedList, setEmailList) {
   setEmailList(emailArray);
 }
 
-export async function changeName(e, activeName, nameCopy, activeID, togglePopup, setStatesObject, setErrorMessage) {
+export async function changeName(e, activeName, newName, activeID, togglePopup, setStatesObject, setErrorMessage) {
   e.preventDefault();
-  if (activeName !== nameCopy) {
+  if (activeName !== newName) {
     try {
       await updateDoc(doc(db, "canvases", activeID), {
-        canvasName: nameCopy,
+        canvasName: newName,
         updated: new Date()
       });
       togglePopup(null, setStatesObject, setErrorMessage);
     } catch (error) {
       setErrorMessage(error.message)
     }
+  } else {
+    setErrorMessage("The name must be different from the original!")
   }
 };
 
@@ -182,8 +184,8 @@ export function loadCanvas(canvasID, canvasName, width, height, devices, origina
   onClose();
 }
 
-export function userSignOut(onActive, onClose, setErrorMessage) {
-  signOut(auth).then(() => {
+export async function userSignOut(onActive, onClose, setErrorMessage) {
+  await signOut(auth).then(() => {
     onActive(false);
     onClose();
   }).catch((error) => {
@@ -220,11 +222,11 @@ export async function deleteAccount(user, q, onActive, onRefreshToggle, togglePo
   }
 }
 
-export function resetPassword(email, setMessage, setErrorMessage) {
+export async function resetPassword(email, setMessage, setErrorMessage) {
   setMessage("");
   setErrorMessage("");
 
-  sendPasswordResetEmail(auth, email).then(() => {
+  await sendPasswordResetEmail(auth, email).then(() => {
     setMessage("An email has been sent to reset your password. It may take a few minutes, and be sure to check your junk email if you have not received it.")
   }).catch((error) => {
     setErrorMessage(error.message);
@@ -249,27 +251,15 @@ function Account({ onClose, onCanvasName, onCanvasID, onCanvasWidth, onCanvasHei
   const [activeDeviceRegistry, setActiveDeviceRegistry] = useState(null);
   const [activeEntityRegistry, setActiveEntityRegistry] = useState(null);
   const [emailList, setEmailList] = useState([]);
-  const [nameCopy, setNameCopy] = useState(null);
+  const [newName, setNewName] = useState(null);
   const [shareRequest, setShareRequest] = useState("");
   const [tabMode, setTabMode] = useState('floorplan')
   const [errorMessage, setErrorMessage] = useState("");
   const [message, setMessage] = useState("");
 
   const setStatesObject = {
-    setNameCopy: setNameCopy,
-    setActiveName: setActiveName,
-    setActiveValue: setActiveValue,
-    setActiveID: setActiveID,
-    setActiveData: setActiveData,
-    setActiveWidth: setActiveWidth,
-    setActiveHeight: setActiveHeight,
-    setActiveFloorArray: setActiveFloorArray,
-    setSharedList: setSharedList,
-    setActiveDevice: setActiveDevice,
-    setActiveOriginalDevice: setActiveOriginalDevice,
-    setActiveLabel: setActiveLabel,
-    setActiveDeviceRegistry: setActiveDeviceRegistry,
-    setActiveEntityRegistry: setActiveEntityRegistry
+    setNewName, setActiveName, setActiveValue, setActiveID, setActiveData, setActiveWidth, setActiveHeight, setActiveFloorArray, setSharedList,
+    setActiveDevice, setActiveOriginalDevice, setActiveLabel, setActiveDeviceRegistry, setActiveEntityRegistry
   }
 
   const q = query(
@@ -358,7 +348,7 @@ function Account({ onClose, onCanvasName, onCanvasID, onCanvasWidth, onCanvasHei
 
               <h2>Would you like to delete "<i>{activeName}</i>"?</h2>
               <div className='popup-content'>
-                <button onClick={() => deleteCanvas(activeID, togglePopup, onCanvasName, onCanvasID, onActive, onRefreshToggle, setErrorMessage)}>Yes</button>
+                <button onClick={() => deleteCanvas(activeID, togglePopup, onCanvasName, onCanvasID, onActive, onRefreshToggle, setErrorMessage, setStatesObject)}>Yes</button>
                 <button onClick={() => togglePopup(null, setStatesObject, setErrorMessage)}>No</button>
                 {errorMessage && (
                   <p style={{ color: 'red' }}>{errorMessage}</p>
@@ -377,9 +367,9 @@ function Account({ onClose, onCanvasName, onCanvasID, onCanvasWidth, onCanvasHei
 
               <h2>Copy</h2>
               <div className='popup-content'>
-                <form onSubmit={(e) => duplicateCanvas(e, activeName, nameCopy, user, activeData, activeWidth, activeHeight, activeFloorArray, activeDevice,
-                  activeOriginalDevice, activeLabel, activeDeviceRegistry, activeEntityRegistry, togglePopup, setErrorMessage)}>
-                  <input type='text' value={nameCopy} onChange={(e) => setNameCopy(e.target.value)} placeholder='canvas name' />
+                <form onSubmit={(e) => duplicateCanvas(e, activeName, newName, user, activeData, activeWidth, activeHeight, activeFloorArray, activeDevice,
+                  activeOriginalDevice, activeLabel, activeDeviceRegistry, activeEntityRegistry, togglePopup, setStatesObject, setErrorMessage)}>
+                  <input type='text' value={newName} onChange={(e) => setNewName(e.target.value)} placeholder='canvas name' />
                   {errorMessage && (
                     <p style={{ color: 'red' }}>{errorMessage}</p>
                   )}
@@ -432,8 +422,8 @@ function Account({ onClose, onCanvasName, onCanvasID, onCanvasWidth, onCanvasHei
               <h2>"<i>{activeName}</i>" Settings</h2>
               <div className='popup-content'>
                 <p>Enter a new name for "<i>{activeName}</i>"</p>
-                <form onSubmit={(e) => changeName(e, activeName, nameCopy, activeID, togglePopup, setErrorMessage)}>
-                  <input type='text' defaultValue={activeName} onChange={(e) => setNameCopy(e.target.value)} placeholder='canvas name' />
+                <form onSubmit={(e) => changeName(e, activeName, newName, activeID, togglePopup, setStatesObject, setErrorMessage)}>
+                  <input type='text' defaultValue={activeName} onChange={(e) => setNewName(e.target.value)} placeholder='canvas name' />
                   {errorMessage && (
                     <p style={{ color: 'red' }}>{errorMessage}</p>
                   )}
