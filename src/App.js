@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 import { auth } from './firebase';
+import { Undo, Redo } from './icons';
 import Menu from './components/Menu';
 import './App.css';
 import FabricCanvas from './components/canvas/FabricCanvas';
@@ -39,6 +40,11 @@ function App() {
   const [strokeColor, setStrokeColor] = useState("");
   const [strokeWidth, setStrokeWidth] = useState(null);
   const [moveStack, setMoveStack] = useState(null);
+  const [actionIndex, setActionIndex] = useState(0);
+  const [maxIndex, setMaxIndex] = useState(0)
+  const [floorStates, setFloorStates] = useState([])
+  const [deviceStates, setDeviceStates] = useState([])
+  const [stateToggle, setStateToggle] = useState(false);
 
   const [canvasAction, setCanvasAction] = useState('select');
   const [canvasImageData, setCanvasImageData] = useState(null);
@@ -71,10 +77,15 @@ function App() {
   const retrieveFloorData = (data) => setFloorData(data);
   const retrieveFloorArray = (array) => setFloorArray(array);
   const retrieveMoveStack = (value) => setMoveStack(value);
+  const retrieveActionIndex = (index) => setActionIndex(index);
+  const retrieveMaxIndex = (index) => setMaxIndex(index);
+  const retrieveFloorStates = (state) => setFloorStates(state);
+  const retrieveStateToggle = (state) => setStateToggle(state);
+  const retrieveDeviceStates = (state) => setDeviceStates(state);
 
   const canvasInfo = { canvasWidth, canvasHeight, canvasName, canvasID, drawWidth, entityRegistry, deviceRegistry }
   const canvasData = { deviceList, originalDeviceList, labelList, floorData, canvasImageData, canvasDevice, floorArray, menuObject, objectColor, strokeColor, strokeWidth }
-  const canvasState = { activeCanvas, canvasAction, saveToggle, loadToggle, refreshToggle, deviceToggle, saveResult, handlerToggle, dragMode, moveStack }
+  const canvasState = { activeCanvas, canvasAction, saveToggle, loadToggle, refreshToggle, deviceToggle, saveResult, handlerToggle, dragMode, moveStack, actionIndex, maxIndex, floorStates, stateToggle, deviceStates }
 
   const centerZoom = () => {
     window.scrollTo({
@@ -156,7 +167,7 @@ function App() {
     sessionStorage.setItem('labels', JSON.stringify(labelList))
     sessionStorage.setItem('deviceRegistry', JSON.stringify(deviceRegistry))
     sessionStorage.setItem('entityRegistry', JSON.stringify(entityRegistry))
-    sessionStorage.setItem("floorData", JSON.stringify(floorData));
+    sessionStorage.setItem('floorData', JSON.stringify(floorData));
   }
 
   const retrieveMenuObject = useCallback((obj) => {
@@ -182,6 +193,16 @@ function App() {
     }
   }, { passive: false })
 
+  function stateChanges(type) {
+    if (type === 'undo') {
+      setActionIndex((index) => index - 1)
+      setStateToggle(true);
+    } else if (type === 'redo') {
+      setActionIndex((index) => index + 1)
+      setStateToggle(true);
+    }
+  }
+
   return (
     <div className="App">
 
@@ -196,7 +217,8 @@ function App() {
           <FabricCanvas canvasInfo={canvasInfo} canvasData={canvasData} canvasState={canvasState} onRefreshToggle={() => setRefreshToggle(false)} onDeviceToggle={() => setDeviceToggle(false)}
             user={user} onDeviceList={retrieveDeviceList} onHandlerToggle={(toggle) => setHandlerToggle(toggle)} onFloorData={retrieveFloorData} onFloorArray={retrieveFloorArray}
             onCanvasID={retrieveID} onSaveToggle={() => setSaveToggle(false)} onSaveResult={retrieveSave} onLoadToggle={() => setLoadToggle(false)} onCanvasImageData={retrieveImageData} retrieveMenuObject={retrieveMenuObject}
-            retrieveObjectColor={retrieveObjectColor} retrieveStrokeColor={retrieveStrokeColor} onMoveStack={retrieveMoveStack} retrieveStrokeWidth={retrieveStrokeWidth}
+            retrieveObjectColor={retrieveObjectColor} retrieveStrokeColor={retrieveStrokeColor} onMoveStack={retrieveMoveStack} retrieveStrokeWidth={retrieveStrokeWidth} onActionIndex={retrieveActionIndex} onMaxIndex={retrieveMaxIndex}
+            onFloorStates={retrieveFloorStates} onStateToggle={retrieveStateToggle} onDeviceStates={retrieveDeviceStates}
           />
         </div>
 
@@ -207,6 +229,13 @@ function App() {
           </div>
         </div>
       </div>
+
+      {maxIndex > 0 && (
+        <div className='undo-menu'>
+          <button disabled={actionIndex === 1} onClick={() => stateChanges('undo')}><img src={Undo} className="menu-icon" alt="logo" />undo</button>
+          <button disabled={actionIndex === maxIndex} onClick={() => stateChanges('redo')}><img src={Redo} className="menu-icon" alt="logo" />redo</button>
+        </div>
+      )}
 
       {menuObject && menuObject.classifier !== "mark" && menuObject.classifier !== "text" && (
         <div className='object-menu'>

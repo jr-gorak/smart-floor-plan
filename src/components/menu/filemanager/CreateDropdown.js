@@ -163,8 +163,9 @@ function CreateDropdown({ activeDropdown, onCanvasWidth, onCanvasHeight, onActiv
             <div className='popup-content'><p>Please select an image to upload as the background of the canvas. If you have multiple floors,
               feel free to add a different image per floor.
             </p>
+              <p><b>NOTE:</b> Due to file size restrictions with the database being 1MiB, it is recommended your total image(s) size does not exceed 600KB.</p>
               <div>
-                <p>Upload floor plan:</p>
+                <p><b>Upload floor plan:</b></p>
                 <button onClick={() => AddFloor('up', floorArray, setFloorArray)}>Add Upper Floor</button>
 
                 {floorArray.map((floor) => (

@@ -34,7 +34,7 @@ header {
   background-color: #fffffb;
 }
 
-.object-menu {
+.undo-menu {
   width: 140px;
   height: auto;
   background-color: #fffffb;
@@ -44,6 +44,28 @@ header {
   border-radius: 5px;
   box-shadow: 0 2px 4px #00000033;
   top: 100px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  margin: 0px 0px 10px 0px;
+}
+
+.undo-menu button {
+  width: 80px;
+  padding: 5px;
+}
+
+.object-menu {
+  width: 140px;
+  height: auto;
+  background-color: #fffffb;
+  position: fixed;
+  right: 10px;
+  padding: 10px 10px 10px 10px;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px #00000033;
+  top: 155px;
   display: flex;
   flex-direction: column;
   justify-content: center;

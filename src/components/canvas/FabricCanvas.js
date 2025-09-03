@@ -27,11 +27,11 @@ fabric.FabricObject.prototype.toObject = (function (toObject) {
 
 function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveToggle, onSaveResult, onLoadToggle, onRefreshToggle,
     onDeviceToggle, user, onDeviceList, onHandlerToggle, onFloorData, onFloorArray, onCanvasImageData, retrieveMenuObject, retrieveObjectColor,
-    retrieveStrokeColor, onMoveStack, retrieveStrokeWidth }) {
+    retrieveStrokeColor, onMoveStack, retrieveStrokeWidth, onActionIndex, onMaxIndex, onFloorStates, onStateToggle, onDeviceStates }) {
 
     const { canvasWidth, canvasHeight, canvasName, canvasID, drawWidth, entityRegistry, deviceRegistry } = canvasInfo
     const { deviceList, originalDeviceList, labelList, floorData, canvasImageData, canvasDevice, floorArray, menuObject, objectColor, strokeColor, strokeWidth } = canvasData
-    const { canvasAction, saveToggle, loadToggle, refreshToggle, deviceToggle, dragMode, moveStack } = canvasState
+    const { canvasAction, saveToggle, loadToggle, refreshToggle, deviceToggle, dragMode, moveStack, actionIndex, maxIndex, floorStates, stateToggle, deviceStates } = canvasState
 
     const canvasRef = useRef(null);
     const fabricCanvas = useRef(null);
@@ -164,7 +164,10 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
         }, 0)
         setActiveFloor(floor)
         setActionType(null);
-    }, [activeFloor, canvasHeight, canvasWidth, floorData, onFloorData, viewpointToggle, checkObjects])
+        onActionIndex(0);
+        onMaxIndex(0);
+        onFloorStates([])
+    }, [activeFloor, canvasHeight, canvasWidth, floorData, onFloorData, viewpointToggle, checkObjects, onActionIndex, onMaxIndex, onFloorStates])
 
     const RemoveFloorCallback = useCallback((floor) => {
         RemoveFloor(floor, activeFloor, floorArray, floorData, stachedFloor, onFloorData, onFloorArray, setDeleteWarning, setStachedFloor, setDeleteConfirmation, SwitchFloorCallback, fabricCanvas.current)
@@ -489,9 +492,18 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
             group.on('moving', () => {
                 AssignAreaIDsOnMove(group)
             })
+
+
+            setTimeout(() => {
+                const floorSnapshot = fabricCanvas.current.toJSON();
+                onFloorStates((states) => [...states.slice(0, actionIndex + 1), floorSnapshot].slice(-20))
+                onActionIndex((index) => Math.min((index + 1), 20))
+                onMaxIndex((index) => Math.min((index + 1), 20))
+                onDeviceStates((states) => [...states.slice(0, actionIndex + 1), structuredClone(deviceList)].slice(-20))
+            }, 50)
         }
 
-    }, [deviceToggle, onDeviceToggle, updateDeviceToggle, canvasDevice, canvasWidth, canvasHeight, updatedDevice, AssignAreaIDs, AssignAreaIDsOnMove]);
+    }, [deviceToggle, onDeviceToggle, updateDeviceToggle, canvasDevice, canvasWidth, canvasHeight, updatedDevice, AssignAreaIDs, AssignAreaIDsOnMove, deviceList, onActionIndex, onDeviceStates, onFloorStates, onMaxIndex, actionIndex]);
 
     //Create Components
     useEffect(() => {
@@ -722,17 +734,20 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
             switch (actionType) {
                 case 'line':
                     mouseUpLine(event, fabricCanvas.current, shape, x1, y1);
+                    handleFloorStates();
                     setIsDrawing(false);
                     sessionSave(fabricCanvas.current);
                     break;
                 case 'square':
                     updateFloor();
+                    handleFloorStates();
                     shape.setCoords()
                     setIsDrawing(false);
                     setShape(null);
                     break;
                 case 'circle':
                     updateFloor();
+                    handleFloorStates();
                     shape.setCoords()
                     setIsDrawing(false);
                     setShape(null);
@@ -755,6 +770,7 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
                         setIsDrawing(false);
                         AssignAreaIDs(mark)
                         updateFloor();
+                        handleFloorStates();
                         setRoomLabel(text.text)
                         setActiveRoom(mark);
                     }
@@ -963,6 +979,16 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
                     deleteObject(null, { target: activeObject })
                 }
             }
+
+            if ((e.ctrlKey) && e.key === 'z' && maxIndex > 0 && actionIndex > 1) {
+                onActionIndex((index) => index - 1)
+                onStateToggle(true);
+            }
+
+            if ((e.ctrlKey) && e.key === 'y' && maxIndex > 0 && actionIndex < maxIndex) {
+                onActionIndex((index) => index + 1)
+                onStateToggle(true);
+            }
         };
 
         function updateFloor() {
@@ -971,6 +997,48 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
                 ...files,
                 [activeFloor]: floorSnapshot
             }))
+        }
+
+        function handleFloorStates() {
+            const floorSnapshot = fabricCanvas.current.toJSON();
+
+            if (actionIndex < maxIndex) {
+                onFloorStates(states => {
+                    const previousStates = states.slice(0, actionIndex + 1);
+                    return [...previousStates, floorSnapshot]
+                })
+                onActionIndex((index) => index + 1)
+                onMaxIndex(actionIndex + 1)
+                onDeviceStates(states => {
+                    const previousStates = states.slice(0, actionIndex + 1);
+                    return [...previousStates, structuredClone(deviceList)]
+                })
+            } else {
+                onFloorStates((states) => [...states.slice(0, actionIndex + 1), floorSnapshot].slice(-20))
+                onActionIndex((index) => Math.min((index + 1), 20))
+                onMaxIndex((index) => Math.min((index + 1), 20))
+                onDeviceStates((states) => [...states.slice(0, actionIndex + 1), structuredClone(deviceList)].slice(-20))
+            }
+        }
+
+        if (stateToggle) {
+            const json = floorStates[actionIndex - 1]
+
+            if (json) {
+                fabricCanvas.current.clear();
+                fabricCanvas.current.backgroundColor = "white"
+                fabricCanvas.current.loadFromJSON(json, () => {
+                    requestAnimationFrame(() => {
+                        fabricCanvas.current.renderAll();
+                    });
+                });
+            }
+
+            const deviceState = deviceStates[actionIndex - 1]
+
+            onDeviceList(deviceState)
+
+            onStateToggle(false);
         }
 
         document.removeEventListener('keydown', keyDown);
@@ -984,6 +1052,11 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
         fabricCanvas.current.on('object:modified', updateFloor)
         fabricCanvas.current.on('object:removed', updateFloor)
 
+        //fabricCanvas.current.on('object:added', handleFloorStates);
+        fabricCanvas.current.on('object:modified', handleFloorStates);
+        //fabricCanvas.current.on('object:removed', handleFloorStates);
+
+
 
         return () => {
             document.removeEventListener('keydown', keyDown);
@@ -992,10 +1065,31 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
                 fabricCanvas.current.off('mouse:down', mouseDown);
                 fabricCanvas.current.off('mouse:move', mouseMove);
                 fabricCanvas.current.off('mouse:up', mouseUp);
+                fabricCanvas.current.off('object:added', updateFloor)
+                fabricCanvas.current.off('object:modified', updateFloor)
+                fabricCanvas.current.off('object:removed', updateFloor)
+                //fabricCanvas.current.off('object:added', handleFloorStates);
+                fabricCanvas.current.off('object:modified', handleFloorStates);
+                //fabricCanvas.current.off('object:removed', handleFloorStates);
             }
         }
     }, [floorData, dragMode, tempObject, setTempObject, deviceList, onDeviceList, isDrawing, shape, actionType, canvasAction, x1, y1, originalDeviceList, activeDevice, activeRoom, drawWidth, polygonVertices, updatedRoom, roomLabel,
-        AssignAreaIDs, AssignAreaIDsOnMove, activeFloor, onFloorData]);
+        AssignAreaIDs, AssignAreaIDsOnMove, activeFloor, onFloorData, onActionIndex, onFloorStates, onMaxIndex, actionIndex, floorStates, maxIndex, onStateToggle, stateToggle, onDeviceStates, deviceStates]);
+
+
+    useEffect(() => {
+        if (fabricCanvas) {
+            if (maxIndex === 0 && fabricCanvas.current.objects?.length > 0) {
+                const floorSnapshot = fabricCanvas.current.toJSON();
+                onFloorStates((states) => [...states, floorSnapshot])
+                onActionIndex(1)
+                onMaxIndex(1)
+                onDeviceStates((states) => [...states, structuredClone(deviceList)])
+            }
+        }
+
+
+    }, [onFloorStates, onActionIndex, onMaxIndex, maxIndex, onDeviceStates, deviceList])
 
     //Toggles scroll handler for when a popup is opened
     useEffect(() => {

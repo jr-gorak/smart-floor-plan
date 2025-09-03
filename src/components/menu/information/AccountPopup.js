@@ -335,7 +335,7 @@ function Account({ onClose, onCanvasName, onCanvasID, onCanvasWidth, onCanvasHei
                 ))}
               </ul>
             )}
-            <button onClick={() => togglePopup('delete-account')}>Delete Account</button>
+            <button onClick={() => togglePopup('delete-account', setStatesObject, setErrorMessage)}>Delete Account</button>
           </div>
         )}
 
@@ -442,9 +442,9 @@ function Account({ onClose, onCanvasName, onCanvasID, onCanvasWidth, onCanvasHei
               </div>
 
               <h2>Would you like to delete your account?</h2>
-              <b>NOTE:</b> Deleting your account will remove all data associated with your account. This will include any saved floor plans.
-              Do you really want to delete your account?
               <div className='popup-content'>
+                <p><b>NOTE:</b> Deleting your account will remove all data associated with your account. This will include any saved floor plans.
+                  Do you really want to delete your account?</p>
                 <button onClick={() => deleteAccount(user, q, onActive, onRefreshToggle, togglePopup, onClose, setStatesObject, setErrorMessage)}>Yes, delete my account</button>
                 <button onClick={() => togglePopup(null, setStatesObject, setErrorMessage)}>No, do not delete my account</button>
                 {errorMessage && (

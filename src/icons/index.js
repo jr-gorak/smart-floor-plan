@@ -22,6 +22,8 @@ import Lock from './control-icons/lock.svg';
 import Unlock from './control-icons/lock-open.svg';
 import ArrowFlipX from './control-icons/arrow_range.svg';
 import ArrowFlipY from './control-icons/height.svg';
+import Undo from './control-icons/undo.svg';
+import Redo from './control-icons/redo.svg';
 
 import DoorOpen from './device-icons/door-open.svg';
 import DoorClose from './device-icons/door-closed.svg';
@@ -174,7 +176,7 @@ const deviceImages = {
 export {
     Draw, Sensor, Component, Create, Save, Export, Account, Guide, About, DrawLine, Square, DoorOpen, DoorClose, Upstairs, Downstairs, WindowClosed, WindowOpen, Delete,
     Copy, Share, Move, Settings, Lorawan, Zigbee, Person, Battery, LightOff, LightOn, Co2, Voltage, Humidity, Thermometer, Pressure, Sound, Motion,
-    Door, Bathtub, Bed, Chair, KitchenSink, RoundSink, Sofa, Stairs, Stove, ThreeSofa, Toilet, Window, Map, CircleOutline,
+    Door, Bathtub, Bed, Chair, KitchenSink, RoundSink, Sofa, Stairs, Stove, ThreeSofa, Toilet, Window, Map, CircleOutline, Undo, Redo,
     deleteImg, copyImg, moveImg, cursorImg, settingsImg, lockImg, unlockImg, arrowFlipXImg, arrowFlipYImg, lorawanImg, zigbeeImg, batteryImg, lightoffImg, co2Img, voltageImg, humidityImg, thermometerImg, pressureImg, soundImg, motionImg,
     doorwayImg, doorImg, windowImg, windowClosedImg, personImg, sensorImg, bathtubImg, bedImg, chairImg, kitchensinkImg, roundsinkImg, sofaImg, stairsImg, stoveImg, threesofaImg, toiletImg, componentImages, deviceImages
 };
