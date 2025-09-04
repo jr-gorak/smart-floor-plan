@@ -85,8 +85,8 @@ function Menu({ canvasData, canvasState, canvasInfo, onOpenPopup, onCanvasAction
                     <CreateDropdown activeDropdown={activeDropdown} onActiveDropdown={(value) => setActiveDropdown(value)} onCanvasWidth={onCanvasWidth} onCanvasHeight={onCanvasHeight} onCanvasImageData={onCanvasImageData} onCanvasName={onCanvasName} onCanvasID={onCanvasID} onActive={onActive} onRefreshToggle={onRefreshToggle}
                         onDeviceList={onDeviceList} onOriginalDeviceList={onOriginalDeviceList} onDeviceRegistry={onDeviceRegistry} onEntityRegistry={onEntityRegistry} onFloorData={onFloorData} onFloorArray={onFloorArray} />
                 </div>
-                <button className={saveIndicator} onClick={() => checkSave(user, onOpenPopup, onSaveToggle)}><img src={Save} className="menu-icon" alt="logo" /> Save</button>
-                <div className='dropdown'> <button className={activeDropdown === 'export' ? 'button-on' : 'button-off'} onClick={() => toggleDropdown('export', activeDropdown, setActiveDropdown)}><img src={Export} className="menu-icon" alt="logo" />Export</button>
+                <button className={saveIndicator} disabled={!activeCanvas} onClick={() => checkSave(user, onOpenPopup, onSaveToggle)}><img src={Save} className="menu-icon" alt="logo" /> Save</button>
+                <div className='dropdown'> <button className={activeDropdown === 'export' ? 'button-on' : 'button-off'} disabled={!activeCanvas} onClick={() => toggleDropdown('export', activeDropdown, setActiveDropdown)}><img src={Export} className="menu-icon" alt="logo" />Export</button>
                     <ExportDropdown activeDropdown={activeDropdown} canvasData={canvasData} canvasState={canvasState} canvasInfo={canvasInfo} />
                 </div>
             </div>
