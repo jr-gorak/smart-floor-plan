@@ -1,5 +1,6 @@
 import * as fabric from "fabric";
 
+//Creates the fabric object to go onto the canvas
 export function createComponent(img, type, width, height) {
     var component = new fabric.FabricImage(img, {
         left: width / 2,
@@ -17,6 +18,7 @@ export function createComponent(img, type, width, height) {
     return component;
 }
 
+//Filters by the component type to assign an icon from componentImages
 export function filterComponent(canvas, componentImages, canvasAction, canvasWidth, canvasHeight) {
     if (canvasAction === 'doorway') {
         return canvas.add(createComponent(componentImages['door'], canvasAction, canvasWidth, canvasHeight));

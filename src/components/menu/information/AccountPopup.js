@@ -32,6 +32,7 @@ export function togglePopup(value, setStatesObject, setErrorMessage, name, id, d
   setStatesObject.setActiveEntityRegistry(entRegistry ? entRegistry : null);
 }
 
+//Will delete the canvas after a warning
 export async function deleteCanvas(activeID, togglePopup, onCanvasName, onCanvasID, onActive, onRefreshToggle, setErrorMessage, setStatesObject) {
   try {
     await deleteDoc(doc(db, "canvases", activeID))
@@ -45,6 +46,7 @@ export async function deleteCanvas(activeID, togglePopup, onCanvasName, onCanvas
   }
 };
 
+//Will duplicate the users file (requires a new name)
 export async function duplicateCanvas(e, activeName, newName, user, activeData, activeWidth, activeHeight, activeFloorArray, activeDevice,
   activeOriginalDevice, activeLabel, activeDeviceRegistry, activeEntityRegistry, togglePopup, setStatesObject, setErrorMessage) {
   e.preventDefault();
@@ -75,6 +77,7 @@ export async function duplicateCanvas(e, activeName, newName, user, activeData, 
   }
 };
 
+//Retrives all files that are owned by or shared with the user
 export async function retrieveFiles(q, setFiles, setLoading) {
   try {
     const querySnapshot = await getDocs(q);
@@ -91,6 +94,7 @@ export async function retrieveFiles(q, setFiles, setLoading) {
   }
 }
 
+//Generates the email list containing all users that a specific file is shared with. This will display visually on the page through a map.
 export async function GenerateEmailList(sharedList, setEmailList) {
   const emailArray = [];
   for (const userid of sharedList) {
@@ -101,6 +105,7 @@ export async function GenerateEmailList(sharedList, setEmailList) {
   setEmailList(emailArray);
 }
 
+//Changes the name of a file.
 export async function changeName(e, activeName, newName, activeID, togglePopup, setStatesObject, setErrorMessage) {
   e.preventDefault();
   if (activeName !== newName) {
@@ -118,6 +123,7 @@ export async function changeName(e, activeName, newName, activeID, togglePopup, 
   }
 };
 
+//This removes a user id from the shared property for a file. If removed, they will not be able to access the file anymore.
 export async function removeSharedUser(user, setEmailList, emailList, activeID, setErrorMessage) {
   const retrieveUserID = query(
     collection(db, "users"),
@@ -139,6 +145,7 @@ export async function removeSharedUser(user, setEmailList, emailList, activeID, 
   }
 }
 
+//This adds a user id to the shared property for a file for collaboration.
 export async function shareCanvas(e, shareRequest, setErrorMessage, activeID, setEmailList, emailList) {
   e.preventDefault();
 
@@ -167,6 +174,7 @@ export async function shareCanvas(e, shareRequest, setErrorMessage, activeID, se
   }
 };
 
+//This will load a selected file. It sets all essential canvas states in App.js, which then get passed to FabricCanvas.js for loading and reinitialization.
 export function loadCanvas(canvasID, canvasName, width, height, devices, originalDevices, labels, coreDevice, coreEntity, onCanvasID,
   onCanvasName, onCanvasWidth, onCanvasHeight, onDeviceList, onOriginalDeviceList, onLabelList, onDeviceRegistry, onEntityRegistry, onActive, onLoadToggle, onClose
 ) {
@@ -184,6 +192,7 @@ export function loadCanvas(canvasID, canvasName, width, height, devices, origina
   onClose();
 }
 
+//Signs out a user
 export async function userSignOut(onActive, onClose, setErrorMessage) {
   await signOut(auth).then(() => {
     onActive(false);
@@ -193,6 +202,7 @@ export async function userSignOut(onActive, onClose, setErrorMessage) {
   });
 }
 
+//Will delete a user's account after prompting a warning. If deleted, the user's authentication, user document, and all canvas documents will be removed. They will also be removed from any shared properties.
 export async function deleteAccount(user, q, onActive, onRefreshToggle, togglePopup, onClose, setStatesObject, setErrorMessage) {
   try {
     const userid = user.uid;
@@ -222,6 +232,7 @@ export async function deleteAccount(user, q, onActive, onRefreshToggle, togglePo
   }
 }
 
+//Will send an automatic email to the user for password reset.
 export async function resetPassword(email, setMessage, setErrorMessage) {
   setMessage("");
   setErrorMessage("");

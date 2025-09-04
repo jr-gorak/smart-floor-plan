@@ -5,7 +5,7 @@ import { getFirestore } from "firebase/firestore";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
-// Your web app's Firebase configuration
+// Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyCux9SrWqkFls-jUUW8H8hCH5SN0ZE8MEE",
   authDomain: "smart-floor-planner.firebaseapp.com",

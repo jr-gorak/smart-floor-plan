@@ -3,6 +3,7 @@ import { AddFloor } from '../../canvas/Floors';
 import '../../css/Dropdown.css';
 import '../../css/Popup.css'
 
+//Creating a blank canvas
 export function canvasCreate(height, width, name, setError, onCanvasWidth, onCanvasHeight, onCanvasName, onActive, onCanvasID, onRefreshToggle, setWidth, setHeight,
   setName, setActiveValue, onActiveDropdown, onDeviceList, onOriginalDeviceList, onDeviceRegistry, onEntityRegistry, onFloorData, onFloorArray
 ) {
@@ -34,6 +35,7 @@ export function canvasCreate(height, width, name, setError, onCanvasWidth, onCan
   }
 }
 
+//Creating a canvas from image(s)
 export function canvasImageCreate(name, imageData, setError, onCanvasWidth, onCanvasHeight, onCanvasImageData, onCanvasName, onActive, onCanvasID, onRefreshToggle,
   setActiveValue, onActiveDropdown, setName, setButtonToggle, buttonToggle, onDeviceList, onOriginalDeviceList, onDeviceRegistry, onEntityRegistry, onFloorData, onFloorArray
 ) {
@@ -106,6 +108,7 @@ function CreateDropdown({ activeDropdown, onCanvasWidth, onCanvasHeight, onActiv
     setImageData({})
   }
 
+  //Use effect that tracks imagedata and name state for enabling create canvas button
   useEffect(() => {
     if (imageData !== "{}" && name) {
       setButtonToggle(true);

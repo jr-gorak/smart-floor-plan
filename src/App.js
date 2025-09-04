@@ -14,14 +14,18 @@ import UserAuthentication from './components/menu/filemanager/UserAuthentication
 
 function App() {
 
+  //This will take the currently authenticated user. If no user is logged in, the value will be empty.
   const user = auth.currentUser;
 
+  //These are the collection of use states. As this is App.js, this file holds the global use states that are used in app.js or get passed down
+  //to child components.
   const [zoom, setZoom] = useState(1);
   const [transl, setTransl] = useState(0);
   const [touchDistance, setTouchDistance] = useState(0);
   const [touchToggle, setTouchToggle] = useState(false);
   const [activePopup, setActivePopup] = useState(null);
 
+  //These are states that get set to session storage for refreshing the page. If there is no storage, the value will be default empty unless otherwise stated.
   const [canvasWidth, setCanvasWidth] = useState(() => sessionStorage.getItem('canvasWidth'));
   const [canvasHeight, setCanvasHeight] = useState(() => sessionStorage.getItem('canvasHeight'));
   const [canvasName, setCanvasName] = useState(() => sessionStorage.getItem('canvasName'));
@@ -56,9 +60,11 @@ function App() {
   const [canvasDevice, setCanvasDevice] = useState(false);
   const [handlerToggle, setHandlerToggle] = useState(null);
   const [drawWidth, setDrawWidth] = useState(1)
+
+  //These are used as structures to retrieve state values from child components. For example, calling onHeight(retrieveHeight) in a component call
+  //will make it so when onHeight(value) is called in the child component, the retrieved value will be set to setCanvasHeight.
   const openPopup = (value) => setActivePopup(value);
   const closePopup = () => setActivePopup(null);
-
   const retrieveWidth = (width) => setCanvasWidth(width);
   const retrieveHeight = (height) => setCanvasHeight(height);
   const retrieveAction = (action) => setCanvasAction(action);
@@ -83,10 +89,15 @@ function App() {
   const retrieveStateToggle = (state) => setStateToggle(state);
   const retrieveDeviceStates = (state) => setDeviceStates(state);
 
+  //Objects that will get pushed into child components.
+  //Info: Contains important canvas information
+  //Data: Contains canvas data
+  //State: Contains different toggles, actions, or states for canvas functionality
   const canvasInfo = { canvasWidth, canvasHeight, canvasName, canvasID, drawWidth, entityRegistry, deviceRegistry }
   const canvasData = { deviceList, originalDeviceList, labelList, floorData, canvasImageData, canvasDevice, floorArray, menuObject, objectColor, strokeColor, strokeWidth }
   const canvasState = { activeCanvas, canvasAction, saveToggle, loadToggle, refreshToggle, deviceToggle, saveResult, handlerToggle, dragMode, moveStack, actionIndex, maxIndex, floorStates, stateToggle, deviceStates }
 
+  //Centers the zoom to the center of the page
   const centerZoom = () => {
     window.scrollTo({
       top: (document.documentElement.scrollHeight - window.innerHeight) / 2,
@@ -94,10 +105,12 @@ function App() {
     });
   };
 
+  //Disables default scrolling for custom zoom logic.
   function preventScroll(scrollEvent) {
     scrollEvent.preventDefault();
   }
 
+  //Custom zoom logic. Looks at the case of scroll wheel vs screen touch for desktop vs mobile.
   const zoomScroll = (e) => {
 
     if (handlerToggle) {
@@ -151,11 +164,13 @@ function App() {
     }
   };
 
+  //Sets touch states to default
   function endTouch() {
     setTouchDistance(null);
     setTouchToggle(false);
   }
 
+  //Saves relevant state information to session storage on refresh.
   function sessionSave() {
     sessionStorage.setItem('canvasWidth', canvasWidth)
     sessionStorage.setItem('canvasHeight', canvasHeight)
@@ -170,6 +185,8 @@ function App() {
     sessionStorage.setItem('floorData', JSON.stringify(floorData));
   }
 
+  //Use callbacks for retrieving objects, the object color, stroke color, and strok width. The use callback prevents constant re-rendering
+  //of the use-effect inside FabricCanvas.js.
   const retrieveMenuObject = useCallback((obj) => {
     setMenuObject(obj);
   }, [])
@@ -187,12 +204,15 @@ function App() {
   }, [])
 
   window.addEventListener("beforeunload", sessionSave);
+
+  //Disables default touch zoom to enable custom zoom logic
   document.addEventListener('touchmove', (e) => {
     if (e.touches.length > 1) {
       e.preventDefault();
     }
   }, { passive: false })
 
+  //Handles index change for changing states.
   function stateChanges(type) {
     if (type === 'undo') {
       setActionIndex((index) => index - 1)

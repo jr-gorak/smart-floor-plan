@@ -1,5 +1,6 @@
 import * as fabric from "fabric";
 
+//Adding the visual element of the floor array for interacting with floors
 export function AddFloor(direction, floorArray, onFloorArray) {
     if (direction === 'up') {
         let floorCount = 0;
@@ -27,6 +28,7 @@ export function AddFloor(direction, floorArray, onFloorArray) {
     }
 }
 
+//Logic for switching between floors with use-cases for new floors vs loading existing floors
 export async function SwitchFloor(floor, canvas, onFloorData, activeFloor, canvasRef, canvasWidth, canvasHeight, floorData, setActionType, checkObjects, viewpointToggle) {
 
     const objArray = [];
@@ -84,6 +86,7 @@ export async function SwitchFloor(floor, canvas, onFloorData, activeFloor, canva
 
 }
 
+//Logic for removing visual elements of floor array. Warning logic for floors with existing data. 
 export function RemoveFloor(floor, activeFloor, floorArray, floorData, stachedFloor, onFloorData, onFloorArray, setDeleteWarning, setStachedFloor, setDeleteConfirmation, SwitchFloorCallback, canvas) {
     if (floorData[floor] && floorData[floor].objects.length > 0 && stachedFloor === null) {
         setDeleteWarning(true);

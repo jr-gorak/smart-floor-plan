@@ -18,6 +18,7 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
 
   var zip = new JSZip();
 
+  //Maps floor IDs to text names
   const floorMap = {
     "4B": "Basement Four",
     "3B": "Basement Three",
@@ -30,9 +31,14 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
     "4F": "Floor Four"
   }
 
+  /*
+  Creates a room list and dynamic name map if there is existing floor data. 
+  i.e. Room list: [kitchen, kitchen, true], [living_room, living room, false]
+  Name map takes id as a key and returns the room text for convenience
+  Only rooms that are active will be used to generate dashboards
+  */
   let roomList = [];
   const roomNameMap = {}
-
   if (floorData) {
     for (const key in floorData) {
       const data = floorData[key];
@@ -53,11 +59,13 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
     }
   }
 
+  //Sets a room as active if checked
   function setRoomActive(value, id) {
     const findRoom = roomList.find(room => room.id === id);
     findRoom.active = value;
   }
 
+  //Creates individual room images, called in generateImages
   async function generateRoomImages(canvas) {
 
     let rooms = [];
@@ -80,6 +88,7 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
     })
   }
 
+  //Creates individual floor images. If more than one floor and png only export, will create a zipped folder. If singular floor png, will export the single image.
   async function generateImages(purpose) {
     const dataLength = Object.keys(floorData).length;
     let processedFiles = 0;
@@ -163,13 +172,17 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
     })
   }
 
+  //As script.yaml is a static file, will fetch it from public/files.
   async function fetchScriptYaml() {
     const file = await fetch('/files/scripts.yaml')
     const yamlText = file.text();
     zip.folder('yaml-files').file('scripts.yaml', yamlText);
   }
 
+  //Generates yaml files, core-registry files, lovelace-dashboards file
   async function generateJsonFiles() {
+
+    //Calculates the level number for the floor registry
     function calculateLevel(floor) {
       if (floor.includes("GR")) {
         return 0
@@ -180,6 +193,7 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
       }
     }
 
+    //Generates individual objects for floor registry 
     function generateFloorData() {
       const dataArray = [];
 
@@ -198,6 +212,7 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
       return dataArray;
     }
 
+    //Generates individual objects for area registry
     function generateAreaData() {
       const dataArray = [];
 
@@ -221,6 +236,7 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
       return dataArray;
     }
 
+    //Generates individual objects for label registry
     function generateLabelData() {
       const dataArray = [];
 
@@ -241,6 +257,7 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
       return dataArray;
     }
 
+    //Updates the entity and device registries
     function updateRegistries() {
       for (const device in deviceList) {
         const deviceData = deviceList[device]
@@ -267,6 +284,7 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
       }
     }
 
+    // Generates the configuration.yaml file -- dynamic as the Home Assistant select entity needs a list of floor options for switching between floors
     function generateConfigYaml() {
       const floorYamlArray = [];
       for (const floor in floorArray) {
@@ -313,14 +331,10 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
       return yaml.dump(configObject).replace(/'/g, '')
     }
 
-
-
-
-
+    //Creates each object that will go into customize.yaml.
     function createCustomizeObject(class_type, measurement, sensorArray, customizeObject) {
 
-      console.log(sensorArray)
-
+      //Checking if entity has a unit of measurement or not.
       if (measurement !== 'none') {
         sensorArray.forEach(sensor => {
           customizeObject[sensor.original_name] = {
@@ -341,6 +355,7 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
       return customizeObject
     }
 
+    //Creates the customize.yaml file.
     function generateCustomizeYaml() {
 
       let temperatureSensors = [];
@@ -416,6 +431,7 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
       return yaml.dump(customizeObject).replace(/'/g, '');
     }
 
+    //Creates the floor registy file
     const floorRegistryExport = {
       version: 1,
       minor_version: 2,
@@ -425,6 +441,7 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
       }
     }
 
+    //Creates the area registry file
     const areaRegistryExport = {
       version: 1,
       minor_version: 8,
@@ -434,6 +451,7 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
       }
     }
 
+    //Creates the label registry file
     const labelRegistryExport = {
       version: 1,
       minor_version: 2,
@@ -444,6 +462,7 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
 
     }
 
+    //Creates the lovelace dashboards file. NOTE: This is NOT the dashboard, but rather, adds the main dashboard to the side-bar of Home Assistant.
     const lovelaceDashboards = {
       version: 1,
       minor_version: 1,
@@ -465,6 +484,7 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
 
     const configFile = generateConfigYaml();
     const customizeFile = generateCustomizeYaml();
+
     updateRegistries();
 
     zip.folder('core-registry-files').file('core.floor_registry', JSON.stringify(floorRegistryExport, null, 2));
@@ -477,8 +497,15 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
     zip.folder('yaml-files').file('customize.yaml', customizeFile);
   }
 
+  //Generates the main dashboard
   async function generateDashboard() {
 
+    /*
+     Setting entity arrays which will be used for looping mechanisms for generating different dashboards
+    i.e. Room dashboard for temperature sensors, will loop through the temperaturesensorIDarray for all temperature sensors with the same area_id as the room.
+    Each array will keep a simplified entity object with the device id, id, area id, type of sensor, original name (original entity id), and customized name
+    Home Assistant uses the entity id to refer to entites. For this reason, any time the entity id is needed, the entity.original_name is used.
+    */
     const doorSensorIDArray = [];
     const temperatureSensorIDArray = [];
     const lightSensorIDArray = [];
@@ -524,10 +551,23 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
       }
     }
 
+    /*
+    Object Maps
+    These will map entity types to various desired responses. Pos -> positive state, neg -> negative state. 
+    For example, a positive state for the light will be "light on" whereas the negative state will be "light off".
+    These pos-neg maps are typically used for conditionals.
+      Title: The title of the entity or element
+      Icon: The mdi-icon used for the scenario
+      State: The state the entity must be in to be considered either positive or negative
+      Condition: state vs numeric. States expect strings whereas numeric states expect numbers and typically a "greater than / less than" condition.
+      Pos/Neg Condition: Follow up to condition. If numeric, will use "above" for positives and "below" for negatives.
 
+      Badge: Used for state badge entites (i.e. temperature and humidity)
+      Translation: Used for repositioning overlapping entities by translating object to different top/lefts
 
-    //Object Maps
-
+    This system allows for easy development of new conditional/state-badge elements as all what is needed to generate a new element is to fill out its
+    conditions in the maps. 
+    */
     const posTitleMap = {
       door: 'door opened',
       window: 'window opened',
@@ -700,8 +740,7 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
       7: -15
     }
 
-    //Floorplan Dashboard 
-
+    //Floorplan Dashboard - Generating the door, temperature, and light elements for the main floor plan dashboard.
     function generateDoorEntities(data) {
       const doorElementArray = [];
       for (const entity of doorSensorIDArray) {
@@ -841,8 +880,137 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
       return lightElementArray;
     }
 
-    //Room Dashboard 
+    function generateFloorDashboard() {
+      const floorDashboardArray = []
 
+      const floorSelect = {
+        type: "entities",
+        entities: [
+          "input_select.floor_view_select"
+        ]
+      }
+
+      floorDashboardArray.push(floorSelect)
+
+
+      for (const key in floorData) {
+        const data = floorData[key];
+        const floorDashboard = {
+          type: "conditional",
+          conditions: [
+            {
+              entity: "input_select.floor_view_select",
+              state: floorMap[key]
+            }
+          ],
+          card: {
+            type: "vertical-stack",
+            cards: [
+              {
+                type: "markdown",
+                content: floorMap[key]
+              },
+              {
+                type: "horizontal-stack",
+                cards: [
+                  {
+                    type: "button",
+                    name: "Temperature",
+                    show_name: false,
+                    show_icon: true,
+                    entity: "input_boolean.show_celsius_table",
+                    icon: "mdi:temperature-celsius",
+                    show_state: false,
+                    tap_action: {
+                      action: "call-service",
+                      service: "script.only_celsius_table"
+                    }
+                  },
+                  {
+                    type: "button",
+                    name: "Doors",
+                    show_name: false,
+                    show_icon: true,
+                    entity: "input_boolean.show_doors_table",
+                    icon: "mdi:door",
+                    show_state: false,
+                    tap_action: {
+                      action: "call-service",
+                      service: "script.only_doors_table"
+                    }
+                  },
+                  {
+                    type: "button",
+                    name: "Lamps",
+                    show_name: false,
+                    show_icon: true,
+                    entity: "input_boolean.show_lamps_table",
+                    icon: "mdi:lightbulb",
+                    show_state: false,
+                    tap_action: {
+                      action: "call-service",
+                      service: "script.only_lamps_table"
+                    }
+                  }
+                ]
+              },
+              {
+                type: "grid",
+                columns: 1,
+                cards: [
+                  {
+                    type: "picture-elements",
+                    title: "Doors",
+                    visibility: [
+                      {
+                        condition: null,
+                        entity: "input_boolean.show_doors_table",
+                        state: "on"
+                      }
+                    ],
+                    elements: generateDoorEntities(data),
+                    image: `/local/${canvasName.toLowerCase().replace(/ /g, '_')}_${key}.png`
+                  },
+                  {
+                    type: "picture-elements",
+                    title: "Temperature",
+                    visibility: [
+                      {
+                        condition: null,
+                        entity: "input_boolean.show_celsius_table",
+                        state: "on"
+                      }
+                    ],
+                    elements: generateTemperatureEntities(data),
+                    image: `/local/${canvasName.toLowerCase().replace(/ /g, '_')}_${key}.png`
+                  },
+                  {
+                    type: "picture-elements",
+                    title: "Lights",
+                    visibility: [
+                      {
+                        condition: null,
+                        entity: "input_boolean.show_lamps_table",
+                        state: "on"
+                      }
+                    ],
+                    elements: generateLightEntities(data),
+                    image: `/local/${canvasName.toLowerCase().replace(/ /g, '_')}_${key}.png`
+                  },
+                ]
+              }
+            ]
+          }
+        }
+        floorDashboardArray.push(floorDashboard)
+      }
+      return floorDashboardArray
+    }
+
+    //Room Dashboard = Generates the image summary with icon elements, activity cards, and environment cards.
+
+    //Generates a conditional element for the image summary. Uses the above mapping to condense each element into one function.
+    //type = type of sensor, state = negative or positive state.
     function generateConditionalElement(type, state, entity, left, top) {
       const conditionalElement = {
         type: "conditional",
@@ -870,6 +1038,7 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
       return conditionalElement;
     }
 
+    //Generates a state badge element
     function generateStateBadgeElement(type, entity, left, top) {
       const stateBadgeElement = {
         type: "state-badge",
@@ -883,8 +1052,10 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
       return stateBadgeElement;
     }
 
+    //Function that moves the position of an element and checks its new position
     function checkNewPosition(positionArray, element, left, top) {
 
+      //Checks if the element is within the space of another existing element and makes sure it is within bounds of the image.
       function checkPosition(positionArray, elementLeft, elementTop) {
 
         let flag = false;
@@ -937,6 +1108,7 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
       }
     }
 
+    //Function that checks for overlapping entities. Since conditional elements are translated, it calls checkNewPosition differently depending on conditional vs state-badge.
     function checkElementPositions(elementArray, positionArray) {
       positionArray.forEach(entity => {
         elementArray.forEach(element => {
@@ -944,7 +1116,6 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
             let elementLeft = parseInt(element.elements[0].style.left) + 5
             let elementTop = parseInt(element.elements[0].style.top) + 4
             if (entity.id !== element.elements[0].entity && entity.left === elementLeft && entity.top === elementTop) {
-
               checkNewPosition(positionArray, element, elementLeft, elementTop)
             }
           } else if (element.type === 'state-badge') {
@@ -958,6 +1129,8 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
       })
     }
 
+    //Generates each element that shows on the image summary. If conditional, will call generateConditionalElement twice with a postiive then negative state.
+    //It will also pushed the calculated position of the entity based on it's device and position on the map relevant to the room it is in.
     function generateRoomElements(canvas, room) {
       const elementArray = [];
       const positionArray = [];
@@ -1026,6 +1199,7 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
       return elementArray;
     }
 
+    //Generates Home-Assistant gauge graphs
     function generateGaugeGraph(style, entity) {
       if (style === 'temp') {
         const temperatureGraph = {
@@ -1210,6 +1384,7 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
       }
     }
 
+    //Generates Home Assistant history graphs
     function generateRoomHistoryGraph(type, room) {
       const entityArray = [];
 
@@ -1242,6 +1417,7 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
       return entityArray;
     }
 
+    //Generates appliance activity strings for the markdown card
     function generateApplianceActivity(room) {
 
       const applianceStringArray = [];
@@ -1257,6 +1433,7 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
       return contentString
     }
 
+    //Generates all activity cards for a room
     function generateActivityCards(room) {
       const cardArray = [];
 
@@ -1313,6 +1490,7 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
       return cardArray;
     }
 
+    //Generates all environment cards for a room
     function generateEnvironmentCards(room) {
 
       const temperatureEntities = temperatureSensorIDArray.filter(entity => entity.area_id === room.area_id)
@@ -1357,8 +1535,7 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
       return cardArray
     }
 
-    //Overview
-
+    //Overview Dashboard
     function generateOverviewSummary() {
       const cardArray = [];
 
@@ -1421,6 +1598,7 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
       return cardArray;
     }
 
+    //Generates overview smoke sensors
     function generateSmokeSensors() {
       const entityArray = [];
 
@@ -1435,6 +1613,7 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
       return entityArray;
     }
 
+    //Generates warnings card
     function generateWarnings() {
       const cardArray = [];
 
@@ -1470,6 +1649,7 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
       return cardArray;
     }
 
+    //Generates overview history graphs
     function generateHistoryGraph(type) {
       const entityArray = [];
 
@@ -1503,7 +1683,6 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
     }
 
     //Views (Each tab in the Home Assistant dashboard)
-
     function generateViews() {
       const viewArray = [];
 
@@ -1582,133 +1761,7 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
 
     }
 
-    function generateFloorDashboard() {
-      const floorDashboardArray = []
-
-      const floorSelect = {
-        type: "entities",
-        entities: [
-          "input_select.floor_view_select"
-        ]
-      }
-
-      floorDashboardArray.push(floorSelect)
-
-
-      for (const key in floorData) {
-        const data = floorData[key];
-        const floorDashboard = {
-          type: "conditional",
-          conditions: [
-            {
-              entity: "input_select.floor_view_select",
-              state: floorMap[key]
-            }
-          ],
-          card: {
-            type: "vertical-stack",
-            cards: [
-              {
-                type: "markdown",
-                content: floorMap[key]
-              },
-              {
-                type: "horizontal-stack",
-                cards: [
-                  {
-                    type: "button",
-                    name: "Temperature",
-                    show_name: false,
-                    show_icon: true,
-                    entity: "input_boolean.show_celsius_table",
-                    icon: "mdi:temperature-celsius",
-                    show_state: false,
-                    tap_action: {
-                      action: "call-service",
-                      service: "script.only_celsius_table"
-                    }
-                  },
-                  {
-                    type: "button",
-                    name: "Doors",
-                    show_name: false,
-                    show_icon: true,
-                    entity: "input_boolean.show_doors_table",
-                    icon: "mdi:door",
-                    show_state: false,
-                    tap_action: {
-                      action: "call-service",
-                      service: "script.only_doors_table"
-                    }
-                  },
-                  {
-                    type: "button",
-                    name: "Lamps",
-                    show_name: false,
-                    show_icon: true,
-                    entity: "input_boolean.show_lamps_table",
-                    icon: "mdi:lightbulb",
-                    show_state: false,
-                    tap_action: {
-                      action: "call-service",
-                      service: "script.only_lamps_table"
-                    }
-                  }
-                ]
-              },
-              {
-                type: "grid",
-                columns: 1,
-                cards: [
-                  {
-                    type: "picture-elements",
-                    title: "Doors",
-                    visibility: [
-                      {
-                        condition: null,
-                        entity: "input_boolean.show_doors_table",
-                        state: "on"
-                      }
-                    ],
-                    elements: generateDoorEntities(data),
-                    image: `/local/${canvasName.toLowerCase().replace(/ /g, '_')}_${key}.png`
-                  },
-                  {
-                    type: "picture-elements",
-                    title: "Temperature",
-                    visibility: [
-                      {
-                        condition: null,
-                        entity: "input_boolean.show_celsius_table",
-                        state: "on"
-                      }
-                    ],
-                    elements: generateTemperatureEntities(data),
-                    image: `/local/${canvasName.toLowerCase().replace(/ /g, '_')}_${key}.png`
-                  },
-                  {
-                    type: "picture-elements",
-                    title: "Lights",
-                    visibility: [
-                      {
-                        condition: null,
-                        entity: "input_boolean.show_lamps_table",
-                        state: "on"
-                      }
-                    ],
-                    elements: generateLightEntities(data),
-                    image: `/local/${canvasName.toLowerCase().replace(/ /g, '_')}_${key}.png`
-                  },
-                ]
-              }
-            ]
-          }
-        }
-        floorDashboardArray.push(floorDashboard)
-      }
-      return floorDashboardArray
-    }
-
+    //Generates battery dashboard
     function generateBatteryDashboard() {
       const batteryDashboardArray = []
 
@@ -1755,6 +1808,7 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
       return batteryDashboardArray;
     }
 
+    //Generates the three sections (summary, acitvity, environment) for a room
     function generateRoomSection(canvas, room) {
 
       const sectionArray = []
@@ -1794,6 +1848,11 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
       return sectionArray;
     }
 
+    /*
+      Dashboard object. It will generate views, which will generate the overview, floorplan, and battery dashboards.
+      generateViews will also loop through each active room and generate the corresponding room dashboards. Each room dashboard
+      will generate the three sections.
+    */
     const lovelaceDashboardExport = {
       version: 1,
       minor_verson: 1,
@@ -1807,6 +1866,7 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
     zip.folder('core-registry-files').file('lovelace.smart_home', JSON.stringify(lovelaceDashboardExport, null, 2))
   }
 
+  //The main data export function for home assistant. Will await for each file type to finish, then generate an asynchronous blob that will be saved as the zip fip folder.
   async function exportData() {
 
     await generateImages("home-assistant");

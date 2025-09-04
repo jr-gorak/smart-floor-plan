@@ -5,6 +5,8 @@ import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswor
 import { db } from '../../../firebase';
 import { doc, setDoc } from "firebase/firestore";
 
+
+//Creates a new user document in the users collection
 export async function createUser(docRef, onClose) {
     const newUser = docRef.user;
     await setDoc(doc(db, "users", newUser.uid), {
@@ -14,6 +16,7 @@ export async function createUser(docRef, onClose) {
     onClose();
 }
 
+//Creates a new user with firebase authentication. Will use the user information to call createUser to create the user document.
 export async function createAccount(e, pass, passValidate, email, setErrorMessage, onClose) {
     e.preventDefault();
     if (pass === passValidate) {
@@ -29,6 +32,7 @@ export async function createAccount(e, pass, passValidate, email, setErrorMessag
     }
 };
 
+//Will sign in the user though firebase authentication
 export async function signInAccount(e, pass, email, setErrorMessage, onClose) {
     e.preventDefault();
     await signInWithEmailAndPassword(auth, email, pass).then(() => {
@@ -38,6 +42,7 @@ export async function signInAccount(e, pass, email, setErrorMessage, onClose) {
     })
 };
 
+//Will send the user an email with instructions to reset their password (based on email input).
 export async function resetPassword(email, setMessage, setErrorMessage) {
     setMessage("");
     setErrorMessage("");

@@ -1,3 +1,9 @@
+/*
+This index.js initializes all icons used throughout the application. They are first imported as an svg, then are converted to 
+image elements with the svg set as the source. Then, some are organized into object types (i.e. device images, component images),
+then exported to be used in the different components of the application.
+*/
+
 import Draw from './menu-icons/pencil.svg';
 import Sensor from './menu-icons/sensors.svg';
 import Component from './menu-icons/door.svg';

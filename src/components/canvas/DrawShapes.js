@@ -1,6 +1,15 @@
 import * as fabric from "fabric";
 import { v4 as uuidv4 } from 'uuid';
 
+/*
+Shapes are created based on a mouse-down => mouse-move => mouse-up series of events.
+Mouse down intializes the shape type and initial origin.
+Moving the mouse will set the shape's dimensions form the origin to the cursor
+Mouse up will finalize the shape and set its coordinates to the new size.
+NOTE: Marking rooms uses the drawLine function as creating a polygon is a series of creating lines. There is a check inside 
+drawLine for polygon cases.
+*/
+
 export function mouseDownLine(event, canvas, drawWidth) {
     const pointer = canvas.getPointer(event.e)
 
@@ -20,7 +29,6 @@ export function mouseDownLine(event, canvas, drawWidth) {
         lineY1: pointer.y
     }
 };
-
 
 export function drawLine(event, canvas, shape, isDrawing, x1, y1, polygonVertices) {
     if (isDrawing && shape) {
@@ -46,7 +54,6 @@ export function drawLine(event, canvas, shape, isDrawing, x1, y1, polygonVertice
         return shape;
     };
 };
-
 
 export function mouseUpLine(event, canvas, shape, x1, y1) {
     const pointer = canvas.getPointer(event.e)

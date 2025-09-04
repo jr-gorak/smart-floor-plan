@@ -1,5 +1,6 @@
 import * as fabric from "fabric";
 
+//Creates the individual devices with fabric images, text, and a group.
 export function createDevice(device, width, height, updateDeviceToggle, canvas, deviceImages) {
     let l = width / 2;
     let t = height / 2;
@@ -7,8 +8,8 @@ export function createDevice(device, width, height, updateDeviceToggle, canvas, 
     let sy = 1;
     let area_id = null;
 
+    //If updating the device, will set current location and properties then remove the old device to continue creating the updated version
     if (updateDeviceToggle) {
-
         const oldDevice = canvas.getObjects().find(obj => obj.id === device.id)
         if (oldDevice) {
             l = oldDevice.left;
@@ -20,10 +21,12 @@ export function createDevice(device, width, height, updateDeviceToggle, canvas, 
         }
     }
 
+    //Device icon, entity icons, and text will be pushed into deviceArray to be made into a group that will be added to the canvas.
     const deviceArray = []
     let sensorCounter = 0;
     let angleScaler = 0;
 
+    //Default lorawan image, will change to zigbee if a zigbee device
     let deviceHolder = deviceImages['lorawan'];
 
     if (device.platform === 'zha') {
@@ -46,7 +49,6 @@ export function createDevice(device, width, height, updateDeviceToggle, canvas, 
 
     deviceArray.push(deviceImg);
 
-
     const deviceText = new fabric.FabricText(device.name, {
         fontSize: 12,
         id: null,
@@ -63,12 +65,14 @@ export function createDevice(device, width, height, updateDeviceToggle, canvas, 
 
     deviceArray.push(deviceText);
 
+    //Finds total number of active entities to set up math for the entity ring
     device.entities.forEach(sensor => {
         if (sensor.visible === true) {
             sensorCounter++;
         }
     });
 
+    //Creating the entity ring around the device
     device.entities.forEach(sensor => {
         if (sensor.visible === true) {
             const angle = (2 * Math.PI / sensorCounter) * angleScaler;
@@ -141,6 +145,7 @@ export function createDevice(device, width, height, updateDeviceToggle, canvas, 
         }
     });
 
+    //Grouping the above objects
     const group = new fabric.Group(deviceArray, {
         left: l,
         top: t,
@@ -155,5 +160,4 @@ export function createDevice(device, width, height, updateDeviceToggle, canvas, 
     });
 
     return group;
-
 }

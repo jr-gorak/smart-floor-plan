@@ -14,6 +14,7 @@ import { filterComponent } from "./CreateComponents";
 import { createDevice } from "./CreateDevice";
 import { AddFloor, SwitchFloor, RemoveFloor } from "./Floors";
 
+//Monkeypatch that adds the classifier, id, and area_id properties to fabric objects.
 fabric.FabricObject.prototype.toObject = (function (toObject) {
     return function (propertyArray = []) {
         return {
@@ -59,8 +60,10 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
     const [activeFloor, setActiveFloor] = useState(() => { const stored = sessionStorage.getItem("activeFloor"); return stored ? JSON.parse(stored) : floorArray[0]; });
     const retrieveUpdate = (update) => setUpdatedDevice(update);
 
+    // String that lets the program know from which file the device settings is accessed from
     const settingsMode = 'canvas';
 
+    // Controls the viewpoint menu for hiding rooms, labels, or devices
     const viewpointToggle = useCallback(() => {
         if (hideRooms) {
             fabricCanvas.current.getObjects().forEach(obj => {
@@ -111,6 +114,7 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
         }
     }, [hideDevices, hideLabels, hideRooms])
 
+    // Called on select, checks for locked objects for group-selecting objects and sets the object menu variables
     const checkObjects = useCallback((e) => {
 
         retrieveMenuObject(e.selected[0]);
@@ -143,14 +147,13 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
         selectFlag.current = false;
     }, [retrieveMenuObject, retrieveObjectColor, retrieveStrokeColor, retrieveStrokeWidth])
 
+    // Calls on deselect
     const unSetMenuObject = useCallback(() => {
         retrieveMenuObject(null);
         retrieveObjectColor("");
         retrieveStrokeColor("");
         retrieveStrokeWidth(null);
     }, [retrieveMenuObject, retrieveObjectColor, retrieveStrokeColor, retrieveStrokeWidth])
-
-
 
     const SwitchFloorCallback = useCallback(async (floor) => {
         removeTemporaryObjects();
@@ -242,27 +245,28 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
         }
     }
 
+    //Removes temporary objects on refresh
     function removeTemporaryObjects() {
         const tempObjects = fabricCanvas.current.getObjects().filter(obj => obj.classifier === "temporary")
         tempObjects.forEach(obj => fabricCanvas.current.remove(obj))
     }
 
-    //Save Floor List
+    // Saving Floor List
     useEffect(() => {
         sessionStorage.setItem("floorArray", JSON.stringify(floorArray));
         sessionStorage.setItem("activeFloor", JSON.stringify(activeFloor));
         sessionStorage.setItem("floorData", JSON.stringify(floorData));
     }, [floorArray, activeFloor, floorData])
 
+    // Delete Floor Confirmation
     useEffect(() => {
         if (deleteConfirmation) {
             RemoveFloorCallback(stachedFloor)
         }
     }, [deleteConfirmation, stachedFloor, RemoveFloorCallback])
 
-    //Initialize Canvas
+    // Initialize Canvas
     useEffect(() => {
-
         fabricCanvas.current = new fabric.Canvas(canvasRef.current, {
             width: canvasWidth,
             height: canvasHeight,
@@ -282,7 +286,6 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
             sessionSave(fabricCanvas.current)
         };
 
-
         window.addEventListener("beforeunload", triggerSave);
         window.addEventListener("beforeunload", removeTemporaryObjects)
         fabricCanvas.current.on('selection:created', checkObjects)
@@ -295,7 +298,7 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
         }
     }, [canvasWidth, canvasHeight, refreshToggle, loadToggle, checkObjects, unSetMenuObject]);
 
-    //Canvas File Handling
+    // Canvas File Handling
     useEffect(() => {
         async function saveCanvas(canvas) {
 
@@ -1076,7 +1079,7 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
     }, [floorData, dragMode, tempObject, setTempObject, deviceList, onDeviceList, isDrawing, shape, actionType, canvasAction, x1, y1, originalDeviceList, activeDevice, activeRoom, drawWidth, polygonVertices, updatedRoom, roomLabel,
         AssignAreaIDs, AssignAreaIDsOnMove, activeFloor, onFloorData, onActionIndex, onFloorStates, onMaxIndex, actionIndex, floorStates, maxIndex, onStateToggle, stateToggle, onDeviceStates, deviceStates]);
 
-
+    // Setting Floor and Device States on Load
     useEffect(() => {
         if (fabricCanvas) {
             if (maxIndex === 0 && fabricCanvas.current.objects?.length > 0) {
@@ -1087,8 +1090,6 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
                 onDeviceStates((states) => [...states, structuredClone(deviceList)])
             }
         }
-
-
     }, [onFloorStates, onActionIndex, onMaxIndex, maxIndex, onDeviceStates, deviceList])
 
     //Toggles scroll handler for when a popup is opened
@@ -1101,44 +1102,38 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
         viewpointToggle();
     }, [viewpointToggle]);
 
+    //Object Menu renders
     useEffect(() => {
-
         if (menuObject && objectColor === "default") {
             menuObject.fill = null;
             menuObject.dirty = true;
             fabricCanvas.current.renderAll();
         }
-
         if (menuObject && objectColor !== "default") {
             menuObject.fill = objectColor;
             menuObject.dirty = true;
             fabricCanvas.current.renderAll();
         }
-
         if (menuObject && strokeColor) {
             menuObject.stroke = strokeColor;
             menuObject.dirty = true;
             fabricCanvas.current.renderAll();
         }
-
         if (menuObject && moveStack === "up") {
             fabricCanvas.current.bringObjectForward(menuObject);
             fabricCanvas.current.renderAll();
             onMoveStack(null);
         }
-
         if (menuObject && strokeWidth) {
             menuObject.strokeWidth = strokeWidth;
             menuObject.dirty = true;
             fabricCanvas.current.renderAll();
         }
-
         if (menuObject && moveStack === "down") {
             fabricCanvas.current.sendObjectBackwards(menuObject);
             fabricCanvas.current.renderAll();
             onMoveStack(null);
         }
-
     }, [menuObject, objectColor, strokeColor, moveStack, onMoveStack, strokeWidth])
 
     return (
@@ -1191,7 +1186,6 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
             </div>
 
             <div>
-
                 {togglePopup && (
                     <DeviceSettings settingsMode={settingsMode} activeDevice={activeDevice} deviceList={deviceList} onTogglePopup={() => setTogglePopup(false)} onUpdateDeviceToggle={() => setUpdateDeviceToggle(true)} onDeviceList={onDeviceList} onUpdatedDevice={retrieveUpdate} labelList={labelList}></DeviceSettings>
                 )
@@ -1205,8 +1199,6 @@ function FabricCanvas({ canvasInfo, canvasData, canvasState, onCanvasID, onSaveT
                     <DeleteWarning onDeleteWarning={() => setDeleteWarning(false)} onDeleteConfirmation={() => setDeleteConfirmation(true)} onStachedFloor={() => setStachedFloor(null)} />
                 )}
             </div>
-
-
         </div>
     )
 };
