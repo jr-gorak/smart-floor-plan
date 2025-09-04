@@ -44,41 +44,6 @@ const mock_device_01 = {
     }]
 };
 
-/*
-
-const mock_core_device = {
-    version: 1,
-    minor_version: 9,
-    key: "core.device_registry",
-    data: {
-        devices: [
-            { id: "123", name: "mock_device_01", name_by_user: "Lounge Temperature", identifiers: [["thethingsnetwork", "aber-shl_lw-elsys-ems-02"]] },
-            { id: "456", name: "mock_device_01", name_by_user: null, identifiers: [["zha", "aber-shl_lw-elsys-ems-02"]] },
-            { id: "789", name: "mock_device_01", name_by_user: null, identifiers: [["random_value", "aber-shl_lw-elsys-ems-02"]] }
-        ]
-    }
-}
-
-const mock_core_entity = {
-    version: 1,
-    minor_version: 17,
-    key: "core.entity_registry",
-    data: {
-        entities: [
-            { id: "abc", device_id: "123", name: "Temperature Sensor", entity_id: "sensor.mock_sensor_01", platform: "thethingsnetwork", original_name: "Temperature" },
-            { id: "def", device_id: "123", name: null, entity_id: "sensor.mock_sensor_02", platform: "thethingsnetwork", original_name: "Humidity" },
-            { id: "ghi", device_id: "456", name: null, entity_id: "binary_sensor.mock_sensor_03", platform: "zha", original_name: null }
-        ]
-    }
-}
-
-
-const mockDevice = new File([JSON.stringify(mock_core_device)], "core.device_registry", { type: "application/json" });
-
-const mockEntity = new File([JSON.stringify(mock_core_entity)], "core.entity_registry", { type: "application/json" });
-    */
-
-
 
 describe('togglePopup', () => {
 
@@ -139,38 +104,6 @@ describe('generateLabel', () => {
         expect(result).toBe("")
     })
 })
-
-/* Come back later- file mocking is hard!
-describe('generateSensors', () => {
-
-    it('performs a function', async () => {
-
-        const coreDeviceFile = mockDevice;
-        const coreEntityFile = mockEntity;
-
-        await generateSensors(coreDeviceFile, onDeviceRegistry, setDevices, coreEntityFile, onEntityRegistry, setEntities, locationWords, activityWords, environmentWords)
-        jest.runAllTimers();
-        expect(onDeviceRegistry).toHaveBeenCalledWith();
-
-
-    })
-})
-    
-
-describe('checkDevice', () => {
-
-    it('performs a function', () => {
-
-    })
-})
-
-describe('checkEntity', () => {
-
-    it('performs a function', () => {
-
-    })
-})
-    */
 
 describe('combineObjects', () => {
 

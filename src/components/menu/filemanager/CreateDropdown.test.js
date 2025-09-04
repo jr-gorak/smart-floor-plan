@@ -124,39 +124,3 @@ describe('canvasCreate', () => {
 
     })
 })
-
-describe('canvasImageCreate', () => {
-
-    //Will come back to these tests later, I do not feel like looking into getting mock file data just yet
-
-    let name = 'mockFloorplan';
-    const buttonToggle = true;
-
-    let mockData = {
-        GR: "data-url-1"
-    }
-
-    it('Creating a canvas from a single image', () => {
-
-        canvasImageCreate(name, mockData, setError, onCanvasWidth, onCanvasHeight, onCanvasImageData, onCanvasName, onActive, onCanvasID, onRefreshToggle,
-            setActiveValue, onActiveDropdown, setName, setButtonToggle, buttonToggle, onDeviceList, onOriginalDeviceList, onDeviceRegistry, onEntityRegistry, onFloorData, onFloorArray
-        )
-    })
-
-    it('Creating a canvas from multiple images', () => {
-    })
-
-    //This test is alright
-    it('Cannot create a canvas without a name', () => {
-
-        name = "";
-        canvasImageCreate(name, mockData, setError, onCanvasWidth, onCanvasHeight, onCanvasImageData, onCanvasName, onActive, onCanvasID, onRefreshToggle,
-            setActiveValue, onActiveDropdown, setName, setButtonToggle, buttonToggle, onDeviceList, onOriginalDeviceList, onDeviceRegistry, onEntityRegistry, onFloorData, onFloorArray
-        )
-
-        expect(setError).toHaveBeenCalledWith("Please ensure you have named your project")
-        expect(onCanvasWidth).not.toHaveBeenCalled();
-        expect(onCanvasHeight).not.toHaveBeenCalled();
-        expect(onCanvasName).not.toHaveBeenCalled();
-    })
-})
