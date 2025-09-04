@@ -10,7 +10,7 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 In order to use the repository, it is necessary to have node and react installed. The original IDE for development was Visual Studio Code.
 The exact libraries used can be found below.
 
-## Steps:
+### Steps:
 1. Clone the repository
 2. Run <i>npm install</i> which should install dependencies found inside package.json. If this does not work, please refer to the libraries below and install them through npm.
 3. Firebase- The existing api key is in place. If you wish to connect your own, see the Firebase section below.
