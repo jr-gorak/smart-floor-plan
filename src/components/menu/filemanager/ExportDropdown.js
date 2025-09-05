@@ -1732,7 +1732,9 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
 
         roomList.filter(room => room.active === true).forEach(room => {
           const findObj = data.objects.find(obj => obj.classifier === 'mark' && obj.area_id === room.id)
-          rooms.push(findObj);
+          if (findObj) {
+            rooms.push(findObj);
+          }
         })
 
         rooms.forEach(obj => {
@@ -1744,7 +1746,9 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
               max_columns: 3,
               sections: generateRoomSection(data, obj)
             }
-            viewArray.push(roomView);
+            if (roomView) {
+              viewArray.push(roomView);
+            }
           }
         })
       }
