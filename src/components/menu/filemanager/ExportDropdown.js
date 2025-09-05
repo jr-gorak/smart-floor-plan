@@ -71,8 +71,11 @@ function ExportDropdown({ canvasData, canvasState, canvasInfo, activeDropdown })
     let rooms = [];
 
     roomList.filter(room => room.active === true).forEach(room => {
-      const findObj = canvas.getObjects().find(obj => obj.classifier === 'mark' && obj.area_id === room.id)
-      rooms.push(findObj);
+      const findObj = canvas.objects.find(obj => obj.classifier === 'mark' && obj.area_id === room.id)
+      if (findObj) {
+        rooms.push(findObj);
+      }
+
     })
 
     rooms.forEach(room => {

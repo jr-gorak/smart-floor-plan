@@ -199,7 +199,7 @@ function DeviceSettings({ settingsMode, activeDevice, deviceList, onTogglePopup,
             <table>
               <thead>
                 <tr>
-                  <th><div className='sensor-header'><div className='info-tooltip' title='Click on the name of a sensor to edit it.'>🛈</div><p>Name</p></div></th>
+                  <th><div className='sensor-header'><div className='info-tooltip' title='Click on the name of a sensor to edit it. It is highly recommended you name relevant sensors to the area they are in.'>🛈</div><p>Name</p></div></th>
                   <th><div className='sensor-header'><div className='info-tooltip' title='Click on the checkbox for the sensors you wish to use for the device.'>🛈</div><p>Active</p></div></th>
                   <th><div className='sensor-header'><div className='info-tooltip' title='The type of sensor, for binary based readings you can specify their purpose.'>🛈</div><p>Type</p></div></th>
                   <th><div className='sensor-header'><div className='info-tooltip' title='Select a label type for tracking data. Location: timeline of where an individual has been. Activity: measures an activity an individual is performing. Environment: measures the environment of the room'>🛈</div><p>Labels</p></div></th>
@@ -352,6 +352,9 @@ function DeviceSettings({ settingsMode, activeDevice, deviceList, onTogglePopup,
                     <p><b>Platform: </b> Platform where device is hosted.</p>
                     <p><b>Area ID: </b> Location where device is placed on the floor plan.</p>
                     <p><b>Sensor Name: </b>Name for a sensor, or entity, of a device. <u>Double click the name to change</u></p>
+                    <b>NOTE: It is highly recommended to name each sensor as the names will display in the dashboard. For example, if you place a
+                      binary or digital sensor for a door in the kitchen, call that binary sensor entity "Kitchen Door". Temperature sensor in the lounge, "Lounge Temperature".
+                    </b>
                     <p><b>Active: </b> Only sensors marked as active will be used for dashboard generation on export.</p>
                     <p><b>Type: </b> The type of data the sensor collects.</p>
                     <p><b>Label: </b> Labels which can be used for further customization in Home Assistant. <u>Location</u> tracks the location of individuals.
